@@ -799,7 +799,7 @@ function actionButtons(r){
       <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد جهت تأیید سرپرست فنی</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
   }
-  if(currentIsAdmin&&r.status==="admin_review"){
+  if(currentIsAdmin&&r.status==="admin_review"&&r.by!==currentUser){
     html+=`<div class="comment-box"><label>یادداشت سرپرست فنی</label><textarea id="act-note" placeholder="توضیح تأیید یا دلیل رد درخواست…"></textarea></div>
     <div class="actions"><button class="btn btn-success" onclick="doAction('admin_approve')">✅ تأیید و ارجاع به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('admin_reject')">❌ رد درخواست</button></div>`;
   }
@@ -902,12 +902,12 @@ async function submitNewRequest(send){
   const now=new Date().toLocaleDateString('fa-IR');
   const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
   const payload={
-    status:send?"admin_review":"draft",prio:document.getElementById("nf-prio").value,
+    status:send?(currentIsAdmin?"submitted":"admin_review"):"draft",prio:document.getElementById("nf-prio").value,
     title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
     unit:document.getElementById("nf-unit").value||"عدد",
     qty:parseInt(document.getElementById("nf-qty").value)||1,
     equip:document.getElementById("nf-equip").value,date:now,
-    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"}]
+    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"},{...(send?{action:currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی",note:"",ts,icon:"📤"}:{})}]
   };
   const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:send});
   if(error){alert("ثبت درخواست انجام نشد: "+error.message);return;}
