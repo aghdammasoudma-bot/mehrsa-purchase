@@ -7,10 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="درخواست خرید">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>سامانه درخواست خرید واحد فنی</title>
+<meta name="apple-mobile-web-app-title" content="عملیات فنی مهرسا">
+
+
+<title>سامانه مدیریت عملیات فنی مهرسا</title>
 <style>
 :root{
   --ink:#0A1628;--navy:#0D2147;--blue:#1A3A6B;--steel:#2F5FAC;
@@ -247,9 +247,7 @@ button:active{transform:translateY(1px)}
 .role-btn-title{font-size:14px;line-height:1.6}
 .role-btn-sub{font-size:11px;color:#C1DADD;line-height:1.7}
 .fab{width:58px;height:58px;bottom:calc(22px + env(safe-area-inset-bottom,0));left:20px;background:linear-gradient(135deg,#176B73,#218A88);box-shadow:0 8px 24px rgba(23,107,115,.3)}
-.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}
-.drawer-handle{background:#C8D5DB}
-input,select,textarea{border-radius:10px}
+.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}.drawer-handle{background:#C8D5DB}input,select,textarea{border-radius:10px}
 @media(min-width:640px){.role-screen{justify-content:center;padding-top:28px;padding-bottom:28px}.role-screen #auth-box{margin:14px auto 18px!important}.role-btn{padding:13px 17px}}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
@@ -260,38 +258,15 @@ input,select,textarea{border-radius:10px}
 
 <!-- ROLE SCREEN -->
 <div class="role-screen" id="role-screen">
-  <h2>⚙️ سامانه درخواست خرید</h2>
-  <p>واحد فنی — برنامه‌ریز — بازرگانی<br>نقش خود را انتخاب کنید</p>
+  <h2>⚙️ سامانه مدیریت عملیات فنی مهرسا</h2>
+  <p>ورود به سامانه با حساب کاربری اختصاصی</p>
   <div id="auth-box" style="width:min(420px,92vw);margin:12px auto 18px;text-align:right;background:rgba(255,255,255,.08);padding:14px;border-radius:12px">
-    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">ایمیل سازمانی</label>
-    <input id="auth-email" type="email" autocomplete="username" placeholder="name@company.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">شناسه ورود</label>
+    <input id="auth-email" type="text" autocomplete="username" placeholder="شناسه کاربری" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
     <label style="display:block;color:#fff;font-size:12px;margin:6px 0">رمز عبور</label>
-    <input id="auth-password" type="password" autocomplete="current-password" placeholder="حداقل ۸ کاراکتر" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
-    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="cloudLogin()">ورود</button><button class="btn btn-ghost" style="flex:1;color:#fff;border-color:#789" onclick="cloudSignup()">ساخت حساب</button></div>
-    <div id="auth-msg" style="color:#ffd48a;font-size:11px;margin-top:8px;line-height:1.7">برای همگام‌سازی، ابتدا با حساب کاربری وارد شوید.</div>
-  </div>
-  <div id="role-options" style="display:none">
-  <button class="role-btn" onclick="setRole('tech','مسعود هاشمی','سرپرست فنی')">
-    <div class="role-btn-title">🔧 سرپرست / تیم فنی</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری — مشاهده همه</div>
-  </button>
-  <button class="role-btn" onclick="setRole('tech','رضا دژآلود','تکنسین برق')">
-    <div class="role-btn-title">⚡ رضا دژآلود — برق</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری درخواست‌های خود</div>
-  </button>
-  <button class="role-btn" onclick="setRole('tech','حمید رنجبر','تکنسین تاسیسات')">
-    <div class="role-btn-title">🏭 حمید رنجبر — تاسیسات</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری درخواست‌های خود</div>
-  </button>
-  <button class="role-btn" onclick="setRole('planner','برنامه‌ریز','برنامه‌ریز')">
-    <div class="role-btn-title">📅 برنامه‌ریز</div>
-    <div class="role-btn-sub">بررسی درخواست‌های فنی — تأیید / رد — ارسال به بازرگانی</div>
-  </button>
-  <button class="role-btn" onclick="setRole('procurement','بازرگانی','کارشناس بازرگانی')">
-    <div class="role-btn-title">🛒 بازرگانی</div>
-    <div class="role-btn-sub">استعلام — سفارش — پیگیری تحویل</div>
-  </button>
-  <button class="role-btn" onclick="cloudLogout()"><div class="role-btn-title">خروج از حساب</div></button>
+    <input id="auth-password" type="password" autocomplete="current-password" placeholder="رمز عبور اختصاصی" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <button class="btn btn-primary" style="width:100%" onclick="cloudLogin()">ورود به سامانه</button>
+    <div id="auth-msg" style="color:#ffd48a;font-size:11px;margin-top:8px;line-height:1.7">هر کاربر فقط به سطح دسترسی تعریف‌شده برای حساب خودش وارد می‌شود.</div>
   </div>
 </div>
 
@@ -301,7 +276,7 @@ input,select,textarea{border-radius:10px}
     <div class="top h1" id="top-name" style="font-size:14px;font-weight:700;color:#fff"></div>
     <div class="top-sub" id="top-role"></div>
   </div>
-  <button class="role-tag" onclick="showRoleScreen()">تغییر نقش ↩</button>
+  <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
 </div>
 
 <!-- PIPELINE TABS -->
@@ -315,12 +290,13 @@ input,select,textarea{border-radius:10px}
   <div class="pipe-step" data-view="done" onclick="switchView('done')">
     ✅ تکمیل شده
   </div>
+  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 مأموریت‌های فنی</div>
 </div>
 
 <!-- CONTENT -->
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
-  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div>
+  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div>
 </div>
 
 <!-- FAB -->
@@ -426,8 +402,7 @@ const SEED=[
   {id:"PR-006",status:"planner_rejected",prio:"🟡 متوسط",title:"مخزن گازوئیل ۱۰۰۰۰ لیتری",
    desc:"نصب مخزن ذخیره گازوئیل برای بویلرها",unit:"دستگاه",qty:1,
    equip:"STB-01 دیگ بخار",by:"حمید رنجبر",role:"tech",date:"1405/07/12",
-   justification:"تأمین سوخت پایدار",plannerNote:"طرح نیاز به بازبینی مکان استقرار دارد — برگشت برای اصلاح",
-   timeline:[
+   justification:"تأمین سوخت پایدار",plannerNote:"طرح نیاز به بازبینی مکان استقرار دارد — برگشت برای اصلاح",   timeline:[
      {role:"tech",by:"حمید رنجبر",action:"ثبت درخواست",note:"",ts:"1405/07/12 ۱۰:۰۰",icon:"📝"},
      {role:"tech",by:"حمید رنجبر",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/12 ۱۰:۰۵",icon:"📤"},
      {role:"planner",by:"برنامه‌ریز",action:"رد شد — برگشت به فنی",note:"طرح نیاز به بازبینی مکان استقرار دارد",ts:"1405/07/14 ۱۱:۳۰",icon:"❌"}
@@ -441,52 +416,101 @@ let requests=[], db=null, drawerData=null;
 // ════ SUPABASE CLOUD DB ════
 const SUPABASE_URL="https://jpzgtbafrpjjbtwqwzlr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Y_mc64kSyCr8bKpZNmUE8Q_uFbOI5m8";
-const cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let cloudUser=null, syncing=false;
+let cloud=null;
+function authBusy(busy){
+ const btn=document.querySelector('#auth-box button');
+ if(btn){btn.disabled=busy;btn.textContent=busy?'در حال ورود…':'ورود به سامانه';}
+}
+function loadScript(src){
+ return new Promise((resolve,reject)=>{
+  const tag=document.createElement('script');tag.src=src;tag.async=true;
+  tag.onload=resolve;tag.onerror=()=>reject(new Error('بارگذاری کتابخانه اتصال ناموفق بود.'));
+  document.head.appendChild(tag);
+ });
+}
+async function ensureCloud(){
+ if(cloud)return cloud;
+ if(!window.supabase){
+  try{await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');}
+  catch(e){await loadScript('https://unpkg.com/@supabase/supabase-js@2');}
+ }
+ if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال به سرور بارگذاری نشد. اینترنت یا دسترسی به CDN را بررسی کنید.');
+ cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+ return cloud;
+}
+window.addEventListener('error',e=>{
+ const m=e.message||'خطای ناشناخته جاوااسکریپت';
+ const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اجرای سامانه: '+m;
+});
+window.addEventListener('unhandledrejection',e=>{
+ const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اتصال: '+(e.reason?.message||String(e.reason));
+});
+let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
-function showRoles(){const ro=document.getElementById('role-options');if(ro)ro.style.display=cloudUser?'block':'none';}
+async function loadUserProfile(){
+  if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
+  const {data,error}=await cloud.from('user_profiles')
+    .select('username,full_name,role,is_active')
+    .eq('user_id',cloudUser.id).maybeSingle();
+  if(error) throw new Error('خطا در دریافت پروفایل: '+error.message);
+  if(!data) throw new Error('برای این حساب پروفایل سازمانی تعریف نشده است.');
+  if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');  profileRole=data.role;
+  currentIsAdmin=data.role==='admin';
+  currentRole=data.role==='maintenance'?'tech':data.role;
+  currentUser=data.full_name;
+  currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
+  setRole(currentRole,currentUser,currentTitle);
+}
 async function cloudLogin(){
- const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
- if(!email||!password){authMessage('ایمیل و رمز عبور را وارد کنید.');return;}
- authMessage('در حال ورود…');const {data,error}=await cloud.auth.signInWithPassword({email,password});
- if(error){authMessage('ورود ناموفق: '+error.message);return;}cloudUser=data.user;showRoles();authMessage('ورود موفق بود. نقش کاری را انتخاب کنید.');await initDB();
+ const login=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
+ if(!login||!password){authMessage('شناسه کاربری و رمز عبور را وارد کنید.');return;}
+ authBusy(true);authMessage('در حال اتصال به سامانه…');
+ try{
+  await ensureCloud();
+  const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+  const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
+  authMessage('در حال بررسی اطلاعات ورود…');
+  const {data,error}=await cloud.auth.signInWithPassword({email,password});
+  if(error)throw new Error('ورود ناموفق: '+(error.message||'شناسه یا رمز عبور صحیح نیست.'));
+  cloudUser=data.user;
+  await loadUserProfile();await initDB();authMessage('ورود موفق بود.');
+ }catch(e){
+  authMessage('ورود انجام نشد: '+(e.message||String(e)));
+  if(cloud?.auth){try{await cloud.auth.signOut();}catch(_){}}
+  cloudUser=null;currentRole='';currentUser='';showRoleScreen();
+ }finally{authBusy(false);}
 }
-async function cloudSignup(){
- const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
- if(!email||password.length<8){authMessage('ایمیل معتبر و رمز حداقل ۸ کاراکتری وارد کنید.');return;}
- authMessage('در حال ساخت حساب…');const {data,error}=await cloud.auth.signUp({email,password});
- if(error){authMessage('ساخت حساب ناموفق: '+error.message);return;}
- if(data.session){cloudUser=data.user;showRoles();authMessage('حساب ساخته شد؛ نقش کاری را انتخاب کنید.');await initDB();}
- else authMessage('حساب ثبت شد. ایمیل تأیید را بررسی کنید؛ سپس وارد شوید.');
+async function cloudLogout(){
+ await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
+ showRoleScreen();authMessage('از حساب خارج شدید.');
 }
-async function cloudLogout(){await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';try{localStorage.removeItem('pr_role')}catch(e){}showRoleScreen();showRoles();authMessage('از حساب خارج شدید.');}
+async function refreshRequests(){
+  if(!cloudUser){requests=[];return;}
+  const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
+  if(error) throw new Error('خطا در دریافت درخواست‌ها: '+error.message);
+  requests=(data||[]).map(x=>x.payload);
+  if(currentRole) renderAll();
+}
 async function initDB(){
- if(!cloudUser){requests=[];return;}
- const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
- if(error){authMessage('خطای دیتابیس: '+error.message+' — ابتدا SQL همراه بسته را در SQL Editor اجرا کنید.');requests=SEED;return;}
- if(data&&data.length){requests=data.map(x=>x.payload);}
- else {requests=SEED;await saveDB();}
- if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');if(!error&&data){requests=data.map(x=>x.payload);if(currentRole)renderAll();}},12000);}
+  if(!cloudUser){requests=[];return;}
+  await refreshRequests();
+  await loadWorkOrders();
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();await loadWorkOrders();}catch(e){console.error(e);}},12000);}
 }
 async function saveDB(){
- if(!cloudUser){alert('ابتدا وارد حساب کاربری شوید.');return;}
- const rows=requests.map(r=>({id:r.id,payload:r,updated_at:new Date().toISOString()}));
- const {error}=await cloud.from('pr_requests').upsert(rows,{onConflict:'id'});
- if(error){alert('ذخیره ابری انجام نشد: '+error.message);throw error;}
- try{localStorage.setItem('pr_reqs',JSON.stringify(requests));}catch(e){}
+  throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
 }
 
 // ════ ROLE ════
-function setRole(role, user, title){
-  currentRole=role; currentUser=user; currentTitle=title;
-  try{localStorage.setItem("pr_role",JSON.stringify({role,user,title}));}catch(e){}
+function setRole(role,user,title){
+  currentRole=role;currentUser=user;currentTitle=title;
   document.getElementById("role-screen").style.display="none";
   document.getElementById("topbar").style.display="flex";
   document.getElementById("pipeline-bar").style.display="flex";
   document.getElementById("main-content").style.display="block";
   document.getElementById("top-name").textContent=user;
   document.getElementById("top-role").textContent=title;
-  document.getElementById("fab").style.display=(role==="tech")?"flex":"none";
+  document.getElementById("fab").style.display=(role==="tech"||role==="admin"||profileRole==="maintenance")?"flex":"none";
   renderAll();
 }
 function showRoleScreen(){
@@ -498,12 +522,11 @@ function showRoleScreen(){
 }
 
 function inboxItems(){
-  if(currentRole==="tech"){
-    return requests.filter(r=>{
-      if(currentUser==="مسعود هاشمی") return r.status==="draft"||r.status==="planner_rejected";
-      return r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected");
-    });
-  }
+  if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
+  if(currentIsAdmin) return requests.filter(r=>
+    ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+  if(currentRole==="tech") return requests.filter(r=>
+    r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected"));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
   if(currentRole==="procurement") return requests.filter(r=>
     ["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
@@ -512,12 +535,14 @@ function inboxItems(){
 
 function switchView(v){
   currentView=v;
+  document.getElementById("req-list").style.display=v==="work"?"none":"block";
+  document.getElementById("work-orders").style.display=v==="work"?"block":"none";
+  if(v==="work") loadWorkOrders();
   document.querySelectorAll(".pipe-step").forEach(el=>{
     el.classList.toggle("active",el.dataset.view===v);
   });
   renderList();
 }
-
 function renderAll(){
   renderKPIs();
   renderList();
@@ -530,8 +555,7 @@ function renderKPIs(){
   const total=requests.length;
   const inbox=inboxItems().length;
   const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status)).length;
-  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;
-  document.getElementById("dashboard-kpis").innerHTML=`
+  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;  document.getElementById("dashboard-kpis").innerHTML=`
     <div class="kpi-row">
       <div class="kpi"><div class="kpi-n" style="color:var(--steel)">${total}</div><div class="kpi-l">کل درخواست‌ها</div></div>
       <div class="kpi"><div class="kpi-n" style="color:var(--red)">${inbox}</div><div class="kpi-l">نیاز به اقدام</div></div>
@@ -541,13 +565,12 @@ function renderKPIs(){
 }
 
 function renderList(){
+  if(currentView==="work") return;
   let list;
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else{
-    list=currentRole==="tech"&&currentUser!=="مسعود هاشمی"
-      ?requests.filter(r=>r.by===currentUser)
-      :requests;
+    list=requests;
   }
 
   if(!list.length){
@@ -568,7 +591,8 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
-  const needsAction=(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&(currentUser==="مسعود هاشمی"||r.by===currentUser))
+  const needsAction=(currentIsAdmin&&["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
+    ||(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&r.by===currentUser)
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
   return `
@@ -637,7 +661,6 @@ function requestDetail(r){
     </div>
 
     <div style="margin-bottom:12px">${statusBadge(r.status)}</div>
-
     <div style="overflow-x:auto">
       <div class="flow">${flowHtml}</div>
     </div>
@@ -650,8 +673,7 @@ function requestDetail(r){
         ${r.equip&&r.equip!=="—"?`<span>⚙️ ${r.equip}</span>`:""}
         ${r.supplier?`<span>🏭 ${r.supplier}</span>`:""}
         ${r.orderNo?`<span>📋 ${r.orderNo}</span>`:""}
-      </div>
-      ${r.plannerNote?`<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--amber)">📅 برنامه‌ریز: ${r.plannerNote}</div>`:""}
+      </div>      ${r.plannerNote?`<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--amber)">📅 برنامه‌ریز: ${r.plannerNote}</div>`:""}
     </div>
 
     <div class="stitle">تاریخچه تغییرات</div>
@@ -661,152 +683,66 @@ function requestDetail(r){
 }
 
 function actionButtons(r){
-  const now=()=>new Date().toLocaleDateString('fa-IR')+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
-
-  if(currentRole==="tech"){
+  let html="";
+  if((currentRole==="tech"||currentIsAdmin)&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
     if(r.status==="draft"){
-      return `
-        <div class="comment-box"><label>یادداشت (اختیاری)</label>
-        <textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button>
-          <button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button>
-        </div>`;
+      html+=`<div class="comment-box"><label>یادداشت (اختیاری)</label><textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
+    }else{
+      html+=`<div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">❌ این درخواست توسط برنامه‌ریز رد شده است.<br><strong>دلیل:</strong> ${r.plannerNote||"—"}</div>
+      <div class="comment-box"><label>اصلاحات انجام شده</label><textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
-    if(r.status==="planner_rejected"){
-      return `
-        <div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">
-          ❌ این درخواست توسط برنامه‌ریز رد شده است.<br>
-          <strong>دلیل:</strong> ${r.plannerNote||"—"}
-        </div>
-        <div class="comment-box"><label>اصلاحات انجام شده</label>
-        <textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button>
-          <button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button>
-        </div>`;
-    }
-    return "";
   }
-
-  if(currentRole==="planner"&&r.status==="submitted"){
-    return `
-      <div class="comment-box"><label>یادداشت برنامه‌ریز</label>
-      <textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
-      <div class="actions">
-        <button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button>
-        <button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button>
-      </div>`;
+  if((currentRole==="planner"||currentIsAdmin)&&r.status==="submitted"){
+    html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
+    <div class="actions"><button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button><button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button></div>`;
   }
-
-  if(currentRole==="procurement"){
+  if(currentRole==="procurement"||currentIsAdmin){
     if(r.status==="planner_approved"){
-      return `
-        <div class="comment-box"><label>نام تأمین‌کننده</label>
-        <input id="act-supplier" placeholder="نام شرکت تأمین‌کننده">
-        <label style="margin-top:8px">یادداشت استعلام</label>
-        <textarea id="act-note" placeholder="از چند تأمین‌کننده استعلام گرفته شد؟"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('inquiry')">🔍 شروع استعلام قیمت</button>
-        </div>`;
-    }
-    if(r.status==="procurement_inquiry"){
-      return `
-        <div class="comment-box"><label>شماره سفارش</label>
-        <input id="act-order" placeholder="مثال: ORD-4460">
-        <label style="margin-top:8px">تأمین‌کننده نهایی</label>
-        <input id="act-supplier" placeholder="نام شرکت" value="${r.supplier||''}">
-        <label style="margin-top:8px">یادداشت</label>
-        <textarea id="act-note" placeholder="شرایط سفارش، قیمت توافقی…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-success" onclick="doAction('order')">📦 ثبت سفارش</button>
-        </div>`;
-    }
-    if(r.status==="procurement_ordered"){
-      return `
-        <div class="comment-box"><label>اطلاعات حمل</label>
-        <input id="act-note" placeholder="شماره بارنامه، نام راننده…"></div>
-        <div class="actions">
-          <button class="btn btn-amber" onclick="doAction('ship')">🚚 ارسال شد — در راه است</button>
-        </div>`;
-    }
-    if(r.status==="in_transit"){
-      return `
-        <div class="comment-box"><label>یادداشت تحویل</label>
-        <textarea id="act-note" placeholder="وضعیت کالای تحویلی، نقص احتمالی…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-success" onclick="doAction('deliver')">✅ تحویل به انبار — بسته شود</button>
-        </div>`;
-    }
-    if(r.status==="delivered"){
-      return `<div class="actions"><button class="btn btn-ghost" onclick="doAction('close')">🔒 بستن درخواست</button></div>`;
+      html+=`<div class="comment-box"><label>نام تأمین‌کننده</label><input id="act-supplier" placeholder="نام شرکت تأمین‌کننده"><label style="margin-top:8px">یادداشت استعلام</label><textarea id="act-note" placeholder="از چند تأمین‌کننده استعلام گرفته شد؟"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('inquiry')">🔍 شروع استعلام قیمت</button></div>`;
+    }else if(r.status==="procurement_inquiry"){
+      html+=`<div class="comment-box"><label>شماره سفارش</label><input id="act-order" placeholder="مثال: ORD-4460"><label style="margin-top:8px">تأمین‌کننده نهایی</label><input id="act-supplier" placeholder="نام شرکت" value="${r.supplier||''}"><label style="margin-top:8px">یادداشت</label><textarea id="act-note" placeholder="شرایط سفارش، قیمت توافقی…"></textarea></div>
+      <div class="actions"><button class="btn btn-success" onclick="doAction('order')">📦 ثبت سفارش</button></div>`;
+    }else if(r.status==="procurement_ordered"){
+      html+=`<div class="comment-box"><label>اطلاعات حمل</label><input id="act-note" placeholder="شماره بارنامه، نام راننده…"></div>
+      <div class="actions"><button class="btn btn-amber" onclick="doAction('ship')">🚚 ارسال شد — در راه است</button></div>`;
+    }else if(r.status==="in_transit"){
+      html+=`<div class="comment-box"><label>یادداشت تحویل</label><textarea id="act-note" placeholder="وضعیت کالای تحویلی، نقص احتمالی…"></textarea></div>
+      <div class="actions"><button class="btn btn-success" onclick="doAction('deliver')">✅ تحویل به انبار</button></div>`;
+    }else if(r.status==="delivered"){
+      html+=`<div class="actions"><button class="btn btn-ghost" onclick="doAction('close')">🔒 بستن درخواست</button></div>`;
     }
   }
-  return "";
+  if(currentIsAdmin&&r.status!=="closed"){
+    html+=`<div class="actions" style="border-top:1px solid var(--line);padding-top:12px;margin-top:14px"><button class="btn btn-danger btn-sm" onclick="doDelete()">حذف مدیریتی درخواست</button></div>`;
+  }
+  return html;
 }
 
 async function doAction(type){
   const r=drawerData;
   if(!r) return;
-  const idx=requests.findIndex(x=>x.id===r.id);
-  if(idx<0) return;
-  const now=new Date().toLocaleDateString('fa-IR')+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
   const note=document.getElementById("act-note")?.value.trim()||"";
   const supplier=document.getElementById("act-supplier")?.value.trim()||"";
   const orderNo=document.getElementById("act-order")?.value.trim()||"";
-
-  const ev=(action,icon,extra={})=>({role:currentRole,by:currentUser,action,note,ts:now,icon,...extra});
-
-  if(type==="submit"){
-    requests[idx].status="submitted";
-    requests[idx].timeline.push(ev("ارسال به برنامه‌ریز","📤"));
-  } else if(type==="resubmit"){
-    requests[idx].status="submitted";
-    requests[idx].plannerNote="";
-    requests[idx].timeline.push(ev("ارسال مجدد پس از اصلاح","📤"));
-  } else if(type==="cancel"){
-    if(!confirm("آیا مطمئن هستید؟")) return;
-    requests.splice(idx,1);
-  } else if(type==="approve"){
-    if(!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
-    requests[idx].status="planner_approved";
-    requests[idx].plannerNote=note;
-    requests[idx].timeline.push(ev("تأیید — ارسال به بازرگانی","✅"));
-  } else if(type==="reject"){
-    if(!note){alert("لطفاً دلیل رد را بنویسید");return;}
-    requests[idx].status="planner_rejected";
-    requests[idx].plannerNote=note;
-    requests[idx].timeline.push(ev("رد شد — برگشت به فنی","❌"));
-  } else if(type==="inquiry"){
-    if(supplier) requests[idx].supplier=supplier;
-    requests[idx].status="procurement_inquiry";
-    requests[idx].timeline.push(ev("شروع استعلام قیمت","🔍"));
-  } else if(type==="order"){
-    if(supplier) requests[idx].supplier=supplier;
-    if(orderNo) requests[idx].orderNo=orderNo;
-    requests[idx].status="procurement_ordered";
-    requests[idx].timeline.push(ev(`سفارش ثبت شد${orderNo?" — "+orderNo:""}${supplier?" از "+supplier:""}","📦`));
-  } else if(type==="ship"){
-    requests[idx].status="in_transit";
-    requests[idx].timeline.push(ev("ارسال از تأمین‌کننده — در راه","🚚"));
-  } else if(type==="deliver"){
-    requests[idx].status="delivered";
-    requests[idx].timeline.push(ev("تحویل به انبار","✅"));
-  } else if(type==="close"){
-    requests[idx].status="closed";
-    requests[idx].timeline.push(ev("درخواست بسته شد","🔒"));
-  }
-
-  await saveDB();
+  if(type==="cancel"&&!confirm("آیا مطمئن هستید؟")) return;
+  if(type==="approve"&&!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
+  if(type==="reject"&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
+  const actionMap={submit:"submit",resubmit:"resubmit",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
+  const {error}=await cloud.rpc(type==="cancel"?"delete_purchase_request":"transition_purchase_request",type==="cancel"?{p_request_id:r.id}:{p_request_id:r.id,p_action:actionMap[type],p_note:note,p_supplier:supplier,p_order_no:orderNo});
+  if(error){alert("عملیات انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
 
 async function doDelete(){
-  if(!confirm("این درخواست حذف شود؟")) return;
-  const idx=requests.findIndex(x=>x.id===drawerData.id);
-  if(idx>=0) requests.splice(idx,1);
-  await saveDB();
+  if(!drawerData||!confirm("این درخواست حذف شود؟")) return;
+  const {error}=await cloud.rpc("delete_purchase_request",{p_request_id:drawerData.id});
+  if(error){alert("حذف انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
@@ -856,26 +792,57 @@ async function submitNewRequest(send){
   if(send&&!just){alert("توجیه فنی الزامی است");return;}
   const now=new Date().toLocaleDateString('fa-IR');
   const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
-  const n=requests.length+1;
-  const id=`PR-${String(n+100).slice(1)}`;
-  const r={
-    id,status:send?"submitted":"draft",
-    prio:document.getElementById("nf-prio").value,
-    title,desc:document.getElementById("nf-desc").value.trim(),
-    justification:just,
+  const payload={
+    status:send?"submitted":"draft",prio:document.getElementById("nf-prio").value,
+    title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
     unit:document.getElementById("nf-unit").value||"عدد",
     qty:parseInt(document.getElementById("nf-qty").value)||1,
-    equip:document.getElementById("nf-equip").value,
-    by:currentUser,role:currentRole,date:now,
-    timeline:[{role:currentRole,by:currentUser,action:"ثبت درخواست",note:"",ts,icon:"📝"}]
+    equip:document.getElementById("nf-equip").value,date:now,
+    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"}]
   };
-  if(send) r.timeline.push({role:currentRole,by:currentUser,action:"ارسال به برنامه‌ریز",note:"",ts,icon:"📤"});
-  requests.push(r);
-  await saveDB();
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:send});
+  if(error){alert("ثبت درخواست انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
 window.submitNewRequest=submitNewRequest;
+
+
+async function loadWorkOrders(){
+  if(!cloudUser)return;
+  const box=document.getElementById("work-orders"); if(!box)return;
+  const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
+  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن مأموریت‌های فنی، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
+  const admin=currentIsAdmin;
+  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
+    '<div class="stitle">مأموریت‌های فنی</div>'+
+    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>'):""} </div></div>`).join(""):'<div class="empty">مأموریتی ثبت نشده است.</div>');
+}
+function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function newWorkOrder(){
+ if(!currentIsAdmin)return;
+ const title=prompt("عنوان مأموریت فنی:"); if(!title)return;
+ const description=prompt("شرح و اقدام مورد انتظار:"); if(!description)return;
+ const assigned_username=prompt("مسئول را وارد کنید: reza یا hamid","reza");
+ if(!["reza","hamid"].includes((assigned_username||"").trim().toLowerCase())){alert("فقط reza یا hamid مجاز است.");return;}
+ const due_date=prompt("مهلت انجام (YYYY-MM-DD)، اختیاری:")||null;
+ const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username:assigned_username.trim().toLowerCase(),due_date});
+ if(error){alert("ثبت مأموریت ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+async function updateWork(id,status){
+ const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
+ const next=prompt("وضعیت را وارد کنید: in_progress یا completed",status==="assigned"?"in_progress":"completed");
+ if(!["in_progress","completed"].includes(next)){alert("وضعیت نامعتبر است.");return;}
+ const {error}=await cloud.from("technical_work_orders").update({status:next,report,updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+async function approveWork(id){
+ if(!currentIsAdmin)return;
+ const {error}=await cloud.from("technical_work_orders").update({status:"approved",updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
 
 // ════ DRAWER ════
 function openDrawer(){document.getElementById("overlay").classList.add("open");}
@@ -891,16 +858,15 @@ document.getElementById("drawer").addEventListener("click",e=>e.stopPropagation(
 
 // ════ BOOT ════
 (async()=>{
+  try{await ensureCloud();}catch(e){authMessage(e.message);return;}
   const {data}=await cloud.auth.getSession();cloudUser=data.session?.user||null;
-  cloud.auth.onAuthStateChange((_event,session)=>{cloudUser=session?.user||null;showRoles();if(!cloudUser)showRoleScreen();});
-  showRoles();
-  if(cloudUser){authMessage('وارد حساب هستید؛ نقش کاری را انتخاب کنید.');await initDB();}
+  cloud.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT'){cloudUser=null;currentRole='';currentUser='';currentIsAdmin=false;showRoleScreen();}
+  });
+  if(cloudUser){
+    try{await loadUserProfile();await initDB();authMessage('نشست قبلی بازیابی شد.');}
+    catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;showRoleScreen();}
+  }
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed', err)));
-}
-</script>
-</body>
-</html>
