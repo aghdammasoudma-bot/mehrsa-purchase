@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0D2147">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="درخواست خرید">
+<title>سامانه درخواست خرید واحد فنی</title>
+<style>
+:root{
+  --ink:#0A1628;--navy:#0D2147;--blue:#1A3A6B;--steel:#2F5FAC;
+  --sky:#4A8FD4;--pale:#EBF3FC;--line:#D3E3F5;
+  --bg:#F0F4FA;--card:#FFF;--text:#0A1628;--sub:#5A6E8A;
+  --green:#15693A;--green-bg:#E3F5EC;--green-mid:#52B47A;
+  --amber:#92600A;--amber-bg:#FEF3CD;
+  --red:#B01C1C;--red-bg:#FDECEA;
+  --orange:#C04C10;--orange-bg:#FFF0E6;
+  --purple:#5C1F9A;--purple-bg:#F0E9FC;
+  --grey:#6B7A90;--grey-bg:#EEF1F6;
+  --shadow:0 2px 16px rgba(13,33,71,.09);
+  --r:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0C1522;--card:#131F33;--text:#D8E8F8;--sub:#6E8BAD;
+  --line:#1C2E48;--pale:#182D4A;--ink:#D8E8F8;--navy:#1B3460;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;padding-bottom:calc(20px + env(safe-area-inset-bottom,0))}
+button{cursor:pointer;font-family:inherit;border:none}
+
+/* ─── TOP BAR ─── */
+.top{background:var(--navy);padding:0 16px;height:54px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+  padding-top:env(safe-area-inset-top,0)}
+.top h1{font-size:14px;font-weight:700;color:#fff}
+.top-sub{font-size:10px;color:#7AAAD8;margin-top:1px}
+.role-tag{background:rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;
+  color:#fff;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.2)}
+
+/* ─── PIPELINE STRIP ─── */
+.pipeline{background:var(--blue);display:flex;overflow-x:auto;scrollbar-width:none;
+  padding:0 8px;gap:0;border-bottom:2px solid rgba(255,255,255,.06)}
+.pipeline::-webkit-scrollbar{display:none}
+.pipe-step{flex:none;padding:10px 14px;text-align:center;position:relative;color:rgba(255,255,255,.5);
+  font-size:10px;font-weight:700;white-space:nowrap;min-width:80px;cursor:pointer}
+.pipe-step.active{color:#fff;border-bottom:2px solid var(--sky)}
+.pipe-count{background:var(--steel);color:#fff;border-radius:10px;padding:1px 7px;
+  font-size:10px;margin-right:4px;vertical-align:middle}
+.pipe-count.alert{background:var(--red)}
+
+/* ─── CONTENT ─── */
+.content{padding:14px;max-width:820px;margin:0 auto}
+
+/* ─── SECTION TITLE ─── */
+.stitle{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.6px;
+  text-transform:uppercase;margin:16px 0 8px;padding-right:2px}
+
+/* ─── REQUEST CARD ─── */
+.req-card{background:var(--card);border-radius:var(--r);border:1px solid var(--line);
+  box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden;cursor:pointer;
+  transition:transform .12s,box-shadow .12s}
+.req-card:active{transform:scale(.99)}
+.req-card-top{padding:13px 15px 10px;border-bottom:1px solid var(--line)}
+.req-card-id{font-size:10px;color:var(--sub);font-weight:700;font-variant-numeric:tabular-nums}
+.req-card-title{font-size:14px;font-weight:700;margin:4px 0 8px;line-height:1.3}
+.req-card-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.req-card-bot{padding:9px 15px;display:flex;justify-content:space-between;align-items:center;
+  background:var(--pale)}
+.req-card-bot-left{font-size:11px;color:var(--sub)}
+.urgent-stripe{border-right:4px solid var(--red)}
+
+/* ─── BADGES ─── */
+.b{display:inline-block;border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:700}
+.b-green{background:var(--green-bg);color:var(--green)}
+.b-amber{background:var(--amber-bg);color:var(--amber)}
+.b-red{background:var(--red-bg);color:var(--red)}
+.b-orange{background:var(--orange-bg);color:var(--orange)}
+.b-purple{background:var(--purple-bg);color:var(--purple)}
+.b-blue{background:var(--pale);color:var(--steel)}
+.b-grey{background:var(--grey-bg);color:var(--grey)}
+.b-navy{background:var(--navy);color:#fff}
+
+/* ─── ACTION BUTTONS ─── */
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border-radius:9px;padding:9px 18px;font-size:13px;font-weight:700}
+.btn-primary{background:var(--steel);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+.btn-amber{background:#F59E0B;color:#fff}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn:active{opacity:.82}
+
+/* ─── MODAL ─── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
+  display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.drawer{background:var(--card);border-radius:20px 20px 0 0;width:100%;
+  max-width:640px;max-height:94vh;overflow-y:auto;
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom,0))}
+@media(min-width:640px){.overlay{align-items:center}.drawer{border-radius:16px;max-height:88vh}}
+.drawer-handle{width:40px;height:4px;background:var(--line);border-radius:2px;
+  margin:0 auto 16px}
+.close-btn{float:left;background:none;border:none;font-size:20px;color:var(--sub);padding:0}
+
+/* ─── FORM ─── */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 13px;border:1.5px solid var(--line);
+  border-radius:9px;background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--steel)}
+.field textarea{min-height:72px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:400px){.frow{grid-template-columns:1fr}}
+
+/* ─── TIMELINE ─── */
+.tl{margin:14px 0}
+.tl-item{display:flex;gap:12px;padding-bottom:14px;position:relative}
+.tl-item::before{content:'';position:absolute;right:17px;top:28px;
+  bottom:0;width:2px;background:var(--line)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  border:2px solid var(--line);background:var(--card)}
+.tl-body{flex:1}
+.tl-meta{font-size:10.5px;color:var(--sub);margin-bottom:3px}
+.tl-text{font-size:13px;font-weight:600}
+.tl-note{font-size:12px;color:var(--sub);margin-top:3px;
+  border-right:3px solid var(--line);padding-right:8px}
+
+/* ─── STATUS PROGRESS ─── */
+.flow{display:flex;overflow-x:auto;gap:0;margin:14px 0;scrollbar-width:none;padding-bottom:4px}
+.flow::-webkit-scrollbar{display:none}
+.flow-step{flex:none;text-align:center;padding:8px 10px;min-width:88px;position:relative}
+.flow-step::after{content:'‹';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
+  font-size:18px;color:var(--line)}
+.flow-step:last-child::after{display:none}
+.flow-icon{font-size:18px;margin-bottom:4px}
+.flow-lbl{font-size:9px;color:var(--sub);font-weight:700;line-height:1.2}
+.flow-step.done .flow-icon{filter:none}
+.flow-step.current{background:var(--pale);border-radius:10px}
+.flow-step.current .flow-lbl{color:var(--steel);font-weight:800}
+.flow-step:not(.done):not(.current){opacity:.35}
+
+/* ─── KPI ROW ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+@media(max-width:480px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 11px;text-align:center;box-shadow:var(--shadow)}
+.kpi-n{font-size:26px;font-weight:800}
+.kpi-l{font-size:10px;color:var(--sub);margin-top:3px}
+
+/* ─── ROLE SELECTOR ─── */
+.role-screen{position:fixed;inset:0;background:var(--navy);z-index:500;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:12px}
+.role-screen h2{color:#fff;font-size:20px;margin-bottom:8px;text-align:center}
+.role-screen p{color:#7AAAD8;font-size:13px;text-align:center;margin-bottom:16px}
+.role-btn{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);
+  border-radius:14px;padding:16px 20px;width:100%;max-width:340px;color:#fff;
+  text-align:right;transition:background .15s}
+.role-btn:active{background:rgba(255,255,255,.15)}
+.role-btn-title{font-size:15px;font-weight:700}
+.role-btn-sub{font-size:11px;color:#7AAAD8;margin-top:3px}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:40px 20px;color:var(--sub)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+
+/* ─── FAB ─── */
+.fab{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom,0));
+  left:18px;width:54px;height:54px;border-radius:50%;background:var(--steel);
+  color:#fff;font-size:26px;box-shadow:0 4px 22px rgba(47,95,172,.5);z-index:100;
+  display:flex;align-items:center;justify-content:center}
+
+/* ─── CHIP ─── */
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--pale);
+  color:var(--blue);border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:700}
+.dot{width:7px;height:7px;border-radius:50%}
+
+/* ─── COMMENT BOX ─── */
+.comment-box{background:var(--bg);border-radius:9px;padding:12px;margin-top:10px}
+.comment-box label{font-size:11px;font-weight:700;color:var(--sub);display:block;margin-bottom:6px}
+.comment-box textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;
+  padding:8px 11px;font-size:13px;background:var(--card);color:var(--text);
+  min-height:60px;resize:vertical;outline:none}
+.comment-box textarea:focus{border-color:var(--steel)}
+
+
+/* ─── PROFESSIONAL UI REFRESH ─── */
+:root{
+ --ink:#142235;--navy:#10243A;--blue:#193A59;--steel:#176B73;--sky:#45B8B0;
+ --pale:#E8F4F3;--line:#D8E3E8;--bg:#F3F6F8;--card:#FFFFFF;--text:#172B3A;--sub:#647887;
+ --green:#16734A;--green-bg:#E4F5EC;--amber:#8A5A08;--amber-bg:#FFF3D6;
+ --red:#B4232D;--red-bg:#FCEBED;--orange:#B64A17;--orange-bg:#FFF0E7;
+ --purple:#6941A5;--purple-bg:#F1EBFA;--grey:#637282;--grey-bg:#EDF1F4;
+ --shadow:0 8px 28px rgba(19,45,63,.07);--r:16px;
+}
+body{background:var(--bg);letter-spacing:0;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}
+button{transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+button:active{transform:translateY(1px)}
+.top{height:auto;min-height:72px;padding:12px 18px;background:linear-gradient(115deg,#10243A 0%,#19455A 100%);box-shadow:0 5px 22px rgba(16,36,58,.15)}
+.top h1,.top .h1{font-size:16px!important;letter-spacing:-.2px}
+.top-sub{font-size:11px;color:#B4D9DC;margin-top:3px}
+.role-tag{padding:8px 13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);font-size:11px}
+.pipeline{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 4px 14px rgba(19,45,63,.035);padding:0 10px;gap:4px}
+.pipe-step{color:#758895;padding:14px 15px;font-size:12px;min-width:auto;border-bottom:3px solid transparent}
+.pipe-step.active{color:var(--steel);border-bottom-color:var(--sky)}
+.pipe-count{background:#DCECEB;color:#18565A;border-radius:9px;padding:2px 7px}
+.pipe-count.alert{background:#FBE3E4;color:#A21F2B}
+.content{max-width:960px;padding:22px 18px 100px}
+.stitle{font-size:11px;letter-spacing:.35px;color:#627785;margin:22px 0 10px;font-weight:800}
+.req-card{border-radius:16px;border:1px solid #E1E9ED;box-shadow:0 4px 16px rgba(19,45,63,.045);margin-bottom:13px;transition:box-shadow .2s,border-color .2s}
+.req-card:hover{box-shadow:0 9px 25px rgba(19,45,63,.09);border-color:#C6D9DE}
+.req-card-top{padding:17px 18px 13px;border-bottom:1px solid #EDF1F3}
+.req-card-title{font-size:15px;line-height:1.6;margin:6px 0 10px;color:#172B3A}
+.req-card-id{font-size:11px;color:#718592}
+.req-card-bot{padding:12px 18px;background:#F6F9FA}
+.b{padding:4px 10px;font-size:11px;line-height:1.5}
+.btn{border-radius:10px;padding:10px 17px;font-size:12px;box-shadow:none}
+.btn-primary{background:linear-gradient(135deg,#176B73,#218A88);box-shadow:0 4px 10px rgba(23,107,115,.15)}
+.btn-primary:hover{box-shadow:0 6px 16px rgba(23,107,115,.22)}
+.btn-success{background:#19734D}.btn-ghost{border-color:#D5E0E5;background:#fff}
+.kpi{border-radius:16px;padding:16px 13px;border-color:#E1E9ED;box-shadow:0 4px 15px rgba(19,45,63,.045);text-align:right;position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:#45B8B0}
+.kpi-n{font-size:28px;color:#173C4A;line-height:1.2}
+.kpi-l{font-size:11px;margin-top:7px;color:#6A7E8B}
+.role-screen{justify-content:flex-start;overflow:auto;gap:12px;padding:clamp(24px,6vh,64px) 20px calc(28px + env(safe-area-inset-bottom,0));background:radial-gradient(ellipse at 15% 0%,rgba(69,184,176,.2),transparent 40%),linear-gradient(145deg,#10243A 0%,#173F54 58%,#15565C 100%)}
+.role-screen:before{content:"MT";font-size:12px;font-weight:900;letter-spacing:3px;color:#C9F0EC;border:1px solid rgba(201,240,236,.3);border-radius:12px;padding:9px 13px;margin-bottom:4px;background:rgba(255,255,255,.05)}
+.role-screen h2{font-size:24px;line-height:1.4;letter-spacing:-.4px;margin-bottom:0}
+.role-screen p{font-size:13px;color:#C1DADD;line-height:1.9;margin-bottom:8px}
+#auth-box{background:#fff!important;border:1px solid rgba(255,255,255,.25);border-radius:20px!important;padding:22px!important;box-shadow:0 18px 55px rgba(0,0,0,.2);color:#172B3A}
+#auth-box label{color:#415967!important;font-size:12px!important;font-weight:700}
+#auth-email,#auth-password{background:#F8FAFB!important;border:1px solid #D6E2E7!important;border-radius:11px!important;padding:13px!important;color:#172B3A!important;outline:none}
+#auth-email:focus,#auth-password:focus{border-color:#218A88!important;box-shadow:0 0 0 3px rgba(69,184,176,.15)}
+#auth-msg{color:#687D88!important;font-size:11px!important}
+#auth-box .btn-ghost{color:#176B73!important;border-color:#C9DCDD!important}
+.role-btn{max-width:420px;border:1px solid rgba(255,255,255,.18);border-radius:15px;padding:15px 17px;background:rgba(255,255,255,.075);backdrop-filter:blur(8px)}
+.role-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(117,222,213,.5)}
+.role-btn-title{font-size:14px;line-height:1.6}
+.role-btn-sub{font-size:11px;color:#C1DADD;line-height:1.7}
+.fab{width:58px;height:58px;bottom:calc(22px + env(safe-area-inset-bottom,0));left:20px;background:linear-gradient(135deg,#176B73,#218A88);box-shadow:0 8px 24px rgba(23,107,115,.3)}
+.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}.drawer-handle{background:#C8D5DB}input,select,textarea{border-radius:10px}
+@media(min-width:640px){.role-screen{justify-content:center;padding-top:28px;padding-bottom:28px}.role-screen #auth-box{margin:14px auto 18px!important}.role-btn{padding:13px 17px}}
+@media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+
+<!-- ROLE SCREEN -->
+<div class="role-screen" id="role-screen">
+  <h2>⚙️ سامانه درخواست خرید</h2>
+  <p>ورود به سامانه با حساب کاربری اختصاصی</p>
+  <div id="auth-box" style="width:min(420px,92vw);margin:12px auto 18px;text-align:right;background:rgba(255,255,255,.08);padding:14px;border-radius:12px">
+    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">شناسه ورود</label>
+    <input id="auth-email" type="text" autocomplete="username" placeholder="شناسه کاربری" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">رمز عبور</label>
+    <input id="auth-password" type="password" autocomplete="current-password" placeholder="رمز عبور اختصاصی" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <button class="btn btn-primary" style="width:100%" onclick="cloudLogin()">ورود به سامانه</button>
+    <div id="auth-msg" style="color:#ffd48a;font-size:11px;margin-top:8px;line-height:1.7">هر کاربر فقط به سطح دسترسی تعریف‌شده برای حساب خودش وارد می‌شود.</div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="top" id="topbar" style="display:none">
+  <div>
+    <div class="top h1" id="top-name" style="font-size:14px;font-weight:700;color:#fff"></div>
+    <div class="top-sub" id="top-role"></div>
+  </div>
+  <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
+</div>
+
+<!-- PIPELINE TABS -->
+<div class="pipeline" id="pipeline-bar" style="display:none">
+  <div class="pipe-step active" data-view="inbox" onclick="switchView('inbox')">
+    📥 صندوق ورودی <span class="pipe-count alert" id="cnt-inbox">0</span>
+  </div>
+  <div class="pipe-step" data-view="all" onclick="switchView('all')">
+    📋 همه درخواست‌ها
+  </div>
+  <div class="pipe-step" data-view="done" onclick="switchView('done')">
+    ✅ تکمیل شده
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="main-content" style="display:none">
+  <div id="dashboard-kpis"></div>
+  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" style="display:none" onclick="openNewRequest()">＋</button>
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay">
+  <div class="drawer" id="drawer">
+    <div class="drawer-handle"></div>
+    <button class="close-btn" onclick="closeDrawer()">✕</button>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ════ CONFIG ════
+const FLOW=[
+  {key:"draft",label:"پیش‌نویس",icon:"📝",role:"tech"},
+  {key:"submitted",label:"ارسال به\nبرنامه‌ریز",icon:"📤",role:"tech"},
+  {key:"planner_review",label:"بررسی\nبرنامه‌ریز",icon:"📅",role:"planner"},
+  {key:"planner_approved",label:"تأیید\nبرنامه‌ریز",icon:"✅",role:"planner"},
+  {key:"procurement_inquiry",label:"استعلام\nقیمت",icon:"🔍",role:"procurement"},
+  {key:"procurement_ordered",label:"سفارش\nداده شده",icon:"📦",role:"procurement"},
+  {key:"in_transit",label:"در راه",icon:"🚚",role:"procurement"},
+  {key:"delivered",label:"تحویل\nشده",icon:"✅",role:"procurement"},
+  {key:"closed",label:"بسته\nشده",icon:"🔒",role:"all"}
+];
+const REJECT_KEY="planner_rejected";
+const FLOW_ORDER=FLOW.map(f=>f.key);
+
+const PRIO_MAP={"🔴 فوری":"b-red","🟠 بالا":"b-orange","🟡 متوسط":"b-amber","🟢 پایین":"b-green"};
+const STATUS_LABEL={
+  "draft":"پیش‌نویس","submitted":"ارسال شده به برنامه‌ریز",
+  "planner_review":"در بررسی برنامه‌ریز","planner_approved":"تأیید شده — در انتظار بازرگانی",
+  "planner_rejected":"رد شده توسط برنامه‌ریز",
+  "procurement_inquiry":"استعلام قیمت","procurement_ordered":"سفارش داده شده",
+  "in_transit":"در راه","delivered":"تحویل داده شده","closed":"بسته شده"
+};
+const STATUS_BADGE={
+  "draft":"b-grey","submitted":"b-blue","planner_review":"b-amber",
+  "planner_approved":"b-blue","planner_rejected":"b-red",
+  "procurement_inquiry":"b-purple","procurement_ordered":"b-orange",
+  "in_transit":"b-green","delivered":"b-green","closed":"b-grey"
+};
+const EQ=["—","RAC-01 راکتور ۱","RAC-02 راکتور ۲","MIX-01 میکسر ۱","MIX-02 میکسر ۲",
+  "TK-01 مخزن دفنی ۱","TK-02 مخزن دفنی ۲","BOI-01 بویلر روغن داغ ۱","BOI-02 بویلر روغن داغ ۲",
+  "CT-01 کولینگ تاور","STB-01 دیگ بخار","FBP-01 پرس بلوک فوم","GRN-01 آسیاب فوم","SAW-01 اره دایم"];
+
+const SEED=[
+  {id:"PR-001",status:"planner_review",prio:"🔴 فوری",title:"ستون راکتور ۱ (ساخت یا خرید)",
+   desc:"ستون راکتور ۱ نیاز به تعویض دارد. مشخصات فنی آماده شده.",unit:"عدد",qty:1,
+   equip:"RAC-01 راکتور ۱",by:"مسعود هاشمی",role:"tech",date:"1405/07/05",
+   justification:"توقف تولید در صورت عدم تأمین",
+   timeline:[
+     {role:"tech",by:"مسعود هاشمی",action:"ثبت درخواست",note:"",ts:"1405/07/05 ۰۹:۱۲",icon:"📝"},
+     {role:"tech",by:"مسعود هاشمی",action:"ارسال به برنامه‌ریز",note:"فوری است — تولید وابسته",ts:"1405/07/05 ۰۹:۱۵",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"دریافت و شروع بررسی",note:"",ts:"1405/07/06 ۱۰:۳۰",icon:"📅"}
+   ]},
+  {id:"PR-002",status:"procurement_inquiry",prio:"🟠 بالا",title:"برج خنک‌کننده ۲۰۰ تن",
+   desc:"ظرفیت سرمایش فعلی کافی نیست. نیاز به تأمین برج جدید.",unit:"دستگاه",qty:1,
+   equip:"CT-01 کولینگ تاور",by:"رضا دژآلود",role:"tech",date:"1405/07/02",
+   justification:"عدم خنک‌کاری کافی در فصل گرما",plannerNote:"اولویت قبل از فصل گرما",
+   timeline:[
+     {role:"tech",by:"رضا دژآلود",action:"ثبت درخواست",note:"",ts:"1405/07/02 ۰۸:۴۵",icon:"📝"},
+     {role:"tech",by:"رضا دژآلود",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/02 ۰۸:۴۸",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"تأیید — ارسال به بازرگانی",note:"اولویت قبل از فصل گرما — موعد پیشنهادی ۱۴۰۵/۰۹/۰۱",ts:"1405/07/03 ۱۱:۰۰",icon:"✅"},
+     {role:"procurement",by:"بازرگانی",action:"شروع استعلام قیمت",note:"از ۳ تأمین‌کننده استعلام گرفته شد",ts:"1405/07/04 ۰۹:۲۰",icon:"🔍"}
+   ]},
+  {id:"PR-003",status:"procurement_ordered",prio:"🟠 بالا",title:"شیرآلات صنعتی راکتورها",
+   desc:"اصلاح و جایگزینی شیرهای معیوب در مجموعه راکتورها",unit:"عدد",qty:12,
+   equip:"RAC-01 راکتور ۱",by:"رضا دژآلود",role:"tech",date:"1405/07/08",
+   justification:"نشتی و کارکرد نامناسب",supplier:"شرکت آرین صنعت",orderNo:"ORD-4451",
+   timeline:[
+     {role:"tech",by:"رضا دژآلود",action:"ثبت درخواست",note:"",ts:"1405/07/08 ۰۹:۰۰",icon:"📝"},
+     {role:"tech",by:"رضا دژآلود",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/08 ۰۹:۰۵",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"تأیید — ارسال به بازرگانی",note:"",ts:"1405/07/09 ۱۰:۰۰",icon:"✅"},
+     {role:"procurement",by:"بازرگانی",action:"استعلام قیمت",note:"",ts:"1405/07/10 ۰۸:۳۰",icon:"🔍"},
+     {role:"procurement",by:"بازرگانی",action:"سفارش ثبت شد",note:"آرین صنعت — شماره سفارش ORD-4451",ts:"1405/07/12 ۱۰:۱۵",icon:"📦"}
+   ]},
+  {id:"PR-004",status:"in_transit",prio:"🟠 بالا",title:"تیغه آسیاب فوم",
+   desc:"تیغه‌های آسیاب فرسوده شده‌اند",unit:"عدد",qty:2,
+   equip:"GRN-01 آسیاب فوم",by:"حمید رنجبر",role:"tech",date:"1405/07/10",
+   justification:"کاهش کیفیت آسیاب",supplier:"صنعت ماشین پارس",orderNo:"ORD-4452",
+   timeline:[
+     {role:"tech",by:"حمید رنجبر",action:"ثبت درخواست",note:"",ts:"1405/07/10 ۱۱:۰۰",icon:"📝"},
+     {role:"tech",by:"حمید رنجبر",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/10 ۱۱:۰۳",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"تأیید — ارسال به بازرگانی",note:"",ts:"1405/07/11 ۰۹:۰۰",icon:"✅"},
+     {role:"procurement",by:"بازرگانی",action:"استعلام و سفارش",note:"",ts:"1405/07/13 ۱۰:۰۰",icon:"📦"},
+     {role:"procurement",by:"بازرگانی",action:"تأیید ارسال توسط تأمین‌کننده",note:"بارنامه: TRK-۸۸۲۱",ts:"1405/07/16 ۱۴:۰۰",icon:"🚚"}
+   ]},
+  {id:"PR-005",status:"delivered",prio:"🟢 پایین",title:"لامپ LED صنعتی ۵۰W",
+   desc:"نصب روشنایی کانکس انبار",unit:"عدد",qty:20,
+   equip:"—",by:"رضا دژآلود",role:"tech",date:"1405/07/18",
+   justification:"روشنایی ناکافی",supplier:"برق نور ایران",orderNo:"ORD-4448",
+   timeline:[
+     {role:"tech",by:"رضا دژآلود",action:"ثبت درخواست",note:"",ts:"1405/07/18 ۱۰:۰۰",icon:"📝"},
+     {role:"tech",by:"رضا دژآلود",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/18 ۱۰:۰۲",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"تأیید",note:"",ts:"1405/07/19 ۰۹:۳۰",icon:"✅"},
+     {role:"procurement",by:"بازرگانی",action:"استعلام، سفارش و دریافت",note:"",ts:"1405/07/21 ۱۱:۰۰",icon:"📦"},
+     {role:"procurement",by:"بازرگانی",action:"تحویل به انبار",note:"تکمیل شد",ts:"1405/07/22 ۰۹:۰۰",icon:"✅"}
+   ]},
+  {id:"PR-006",status:"planner_rejected",prio:"🟡 متوسط",title:"مخزن گازوئیل ۱۰۰۰۰ لیتری",
+   desc:"نصب مخزن ذخیره گازوئیل برای بویلرها",unit:"دستگاه",qty:1,
+   equip:"STB-01 دیگ بخار",by:"حمید رنجبر",role:"tech",date:"1405/07/12",
+   justification:"تأمین سوخت پایدار",plannerNote:"طرح نیاز به بازبینی مکان استقرار دارد — برگشت برای اصلاح",   timeline:[
+     {role:"tech",by:"حمید رنجبر",action:"ثبت درخواست",note:"",ts:"1405/07/12 ۱۰:۰۰",icon:"📝"},
+     {role:"tech",by:"حمید رنجبر",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/12 ۱۰:۰۵",icon:"📤"},
+     {role:"planner",by:"برنامه‌ریز",action:"رد شد — برگشت به فنی",note:"طرح نیاز به بازبینی مکان استقرار دارد",ts:"1405/07/14 ۱۱:۳۰",icon:"❌"}
+   ]}
+];
+
+// ════ STATE ════
+let currentRole='', currentUser='', currentTitle='', currentView='inbox';
+let requests=[], db=null, drawerData=null;
+
+// ════ SUPABASE CLOUD DB ════
+const SUPABASE_URL="https://jpzgtbafrpjjbtwqwzlr.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Y_mc64kSyCr8bKpZNmUE8Q_uFbOI5m8";
+const cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
+function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
+async function loadUserProfile(){
+  if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
+  const {data,error}=await cloud.from('user_profiles')
+    .select('username,full_name,role,is_active')
+    .eq('user_id',cloudUser.id).maybeSingle();
+  if(error) throw new Error('خطا در دریافت پروفایل: '+error.message);
+  if(!data) throw new Error('برای این حساب پروفایل سازمانی تعریف نشده است.');
+  if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');  profileRole=data.role;
+  currentIsAdmin=data.role==='admin';
+  currentRole=(data.role==='admin'||data.role==='maintenance')?'tech':data.role;
+  currentUser=data.full_name;
+  currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
+  setRole(currentRole,currentUser,currentTitle);
+}
+async function cloudLogin(){
+ const login=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
+ if(!login||!password){authMessage('شناسه کاربری و رمز عبور را وارد کنید.');return;}
+ const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+ const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
+ authMessage('در حال بررسی اطلاعات ورود…');
+ const {data,error}=await cloud.auth.signInWithPassword({email,password});
+ if(error){authMessage('ورود ناموفق: شناسه یا رمز عبور صحیح نیست.');return;}
+ cloudUser=data.user;
+ try{await loadUserProfile();await initDB();authMessage('ورود موفق بود.');}
+ catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';showRoleScreen();}
+}
+async function cloudLogout(){
+ await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
+ showRoleScreen();authMessage('از حساب خارج شدید.');
+}
+async function refreshRequests(){
+  if(!cloudUser){requests=[];return;}
+  const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
+  if(error) throw new Error('خطا در دریافت درخواست‌ها: '+error.message);
+  requests=(data||[]).map(x=>x.payload);
+  if(currentRole) renderAll();
+}
+async function initDB(){
+  if(!cloudUser){requests=[];return;}
+  await refreshRequests();
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();}catch(e){console.error(e);}},12000);}
+}
+async function saveDB(){
+  throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
+}
+
+// ════ ROLE ════
+function setRole(role,user,title){
+  currentRole=role;currentUser=user;currentTitle=title;
+  document.getElementById("role-screen").style.display="none";
+  document.getElementById("topbar").style.display="flex";
+  document.getElementById("pipeline-bar").style.display="flex";
+  document.getElementById("main-content").style.display="block";
+  document.getElementById("top-name").textContent=user;
+  document.getElementById("top-role").textContent=title;
+  document.getElementById("fab").style.display=(role==="tech"||profileRole==="maintenance")?"flex":"none";
+  renderAll();
+}
+function showRoleScreen(){
+  document.getElementById("role-screen").style.display="flex";
+  document.getElementById("topbar").style.display="none";
+  document.getElementById("pipeline-bar").style.display="none";
+  document.getElementById("main-content").style.display="none";
+  document.getElementById("fab").style.display="none";
+}
+
+function inboxItems(){
+  if(currentRole==="tech"){
+    return requests.filter(r=>{
+      if(currentIsAdmin) return r.status==="draft"||r.status==="planner_rejected";
+      return r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected");
+    });
+  }
+  if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
+  if(currentRole==="procurement") return requests.filter(r=>
+    ["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
+  return [];
+}
+
+function switchView(v){
+  currentView=v;
+  document.querySelectorAll(".pipe-step").forEach(el=>{
+    el.classList.toggle("active",el.dataset.view===v);
+  });
+  renderList();
+}
+function renderAll(){
+  renderKPIs();
+  renderList();
+  const cnt=inboxItems().length;
+  document.getElementById("cnt-inbox").textContent=cnt;
+  document.getElementById("cnt-inbox").className="pipe-count"+(cnt>0?" alert":"");
+}
+
+function renderKPIs(){
+  const total=requests.length;
+  const inbox=inboxItems().length;
+  const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status)).length;
+  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;  document.getElementById("dashboard-kpis").innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-n" style="color:var(--steel)">${total}</div><div class="kpi-l">کل درخواست‌ها</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:var(--red)">${inbox}</div><div class="kpi-l">نیاز به اقدام</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:var(--amber)">${inprog}</div><div class="kpi-l">در جریان</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:var(--green)">${done}</div><div class="kpi-l">تکمیل شده</div></div>
+    </div>`;
+}
+
+function renderList(){
+  let list;
+  if(currentView==="inbox") list=inboxItems();
+  else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
+  else{
+    list=currentRole==="tech"&&!currentIsAdmin
+      ?requests.filter(r=>r.by===currentUser)
+      :requests;
+  }
+
+  if(!list.length){
+    document.getElementById("req-list").innerHTML=`
+      <div class="empty"><div class="empty-icon">${currentView==="inbox"?"🎉":"📋"}</div>
+      <div>${currentView==="inbox"?"صندوق ورودی خالی است — همه چیز روی روال!":"درخواستی یافت نشد"}</div></div>`;
+    return;
+  }
+
+  const label={"inbox":"نیاز به اقدام شما","all":"همه درخواست‌ها","done":"تکمیل شده"};
+  document.getElementById("req-list").innerHTML=`
+    <div class="stitle">${label[currentView]||""}</div>
+    ${list.map(r=>reqCard(r)).join("")}`;
+}
+
+function statusLabel(s){return STATUS_LABEL[s]||s}
+function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${statusLabel(s)}</span>`}
+
+function reqCard(r){
+  const isUrgent=r.prio==="🔴 فوری";
+  const needsAction=(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser))
+    ||(currentRole==="planner"&&r.status==="submitted")
+    ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
+  return `
+    <div class="req-card${isUrgent?" urgent-stripe":""}" onclick="openRequest('${r.id}')">
+      <div class="req-card-top">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <span class="req-card-id">${r.id}</span>
+            ${needsAction?`<span class="b b-red" style="font-size:9px;margin-right:6px">نیاز به اقدام</span>`:""}
+          </div>
+          <span class="b ${PRIO_MAP[r.prio]||'b-grey'}">${r.prio}</span>
+        </div>
+        <div class="req-card-title">${r.title}</div>
+        <div class="req-card-meta">
+          ${statusBadge(r.status)}
+          ${r.equip&&r.equip!=="—"?`<span class="b b-blue">${r.equip.split(" ")[0]}</span>`:""}
+          <span class="chip"><span class="dot" style="background:var(--sky)"></span>${r.by}</span>
+        </div>
+      </div>
+      <div class="req-card-bot">
+        <span class="req-card-bot-left">📅 ${r.date} &nbsp;·&nbsp; ${r.qty} ${r.unit}</span>
+        ${r.supplier?`<span style="font-size:11px;color:var(--sub)">🏭 ${r.supplier}</span>`:""}
+      </div>
+    </div>`;
+}
+
+// ════ OPEN REQUEST DETAIL ════
+function openRequest(id){
+  const r=requests.find(x=>x.id===id);
+  if(!r) return;
+  drawerData=r;
+  document.getElementById("drawer-content").innerHTML=requestDetail(r);
+  openDrawer();
+}
+
+function requestDetail(r){
+  const fi=FLOW_ORDER.indexOf(r.status);
+  const flowHtml=FLOW.map((f,i)=>{
+    const done=i<fi;
+    const cur=f.key===r.status;
+    return `<div class="flow-step${done?" done":""}${cur?" current":""}">
+      <div class="flow-icon">${f.icon}</div>
+      <div class="flow-lbl">${f.label}</div>
+    </div>`;
+  }).join("");
+
+  const tlHtml=r.timeline?r.timeline.map(t=>`
+    <div class="tl-item">
+      <div class="tl-dot">${t.icon||"📌"}</div>
+      <div class="tl-body">
+        <div class="tl-meta">${t.ts} — <strong>${t.by}</strong></div>
+        <div class="tl-text">${t.action}</div>
+        ${t.note?`<div class="tl-note">${t.note}</div>`:""}
+      </div>
+    </div>`).join(""):"";
+
+  const actions=actionButtons(r);
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;color:var(--sub);font-weight:700">${r.id}</div>
+        <div style="font-size:17px;font-weight:800;margin-top:3px;line-height:1.3">${r.title}</div>
+      </div>
+      <span class="b ${PRIO_MAP[r.prio]||'b-grey'}">${r.prio}</span>
+    </div>
+
+    <div style="margin-bottom:12px">${statusBadge(r.status)}</div>
+    <div style="overflow-x:auto">
+      <div class="flow">${flowHtml}</div>
+    </div>
+
+    <div style="background:var(--pale);border-radius:10px;padding:13px;margin:12px 0;font-size:13px">
+      <div style="margin-bottom:6px"><strong>شرح:</strong> ${r.desc}</div>
+      <div style="margin-bottom:4px"><strong>توجیه:</strong> ${r.justification||"—"}</div>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--sub)">
+        <span>📦 ${r.qty} ${r.unit}</span>
+        ${r.equip&&r.equip!=="—"?`<span>⚙️ ${r.equip}</span>`:""}
+        ${r.supplier?`<span>🏭 ${r.supplier}</span>`:""}
+        ${r.orderNo?`<span>📋 ${r.orderNo}</span>`:""}
+      </div>      ${r.plannerNote?`<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--amber)">📅 برنامه‌ریز: ${r.plannerNote}</div>`:""}
+    </div>
+
+    <div class="stitle">تاریخچه تغییرات</div>
+    <div class="tl">${tlHtml}</div>
+
+    ${actions}`;
+}
+
+function actionButtons(r){
+  const now=()=>new Date().toLocaleDateString('fa-IR')+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
+
+  if(currentRole==="tech"){
+    if(r.status==="draft"){
+      return `
+        <div class="comment-box"><label>یادداشت (اختیاری)</label>
+        <textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button>
+          <button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button>
+        </div>`;
+    }
+    if(r.status==="planner_rejected"){
+      return `
+        <div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">
+          ❌ این درخواست توسط برنامه‌ریز رد شده است.<br>
+          <strong>دلیل:</strong> ${r.plannerNote||"—"}
+        </div>
+        <div class="comment-box"><label>اصلاحات انجام شده</label>
+        <textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button>
+          <button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button>
+        </div>`;
+    }
+    return "";
+  }
+
+  if(currentRole==="planner"&&r.status==="submitted"){
+    return `
+      <div class="comment-box"><label>یادداشت برنامه‌ریز</label>
+      <textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
+      <div class="actions">
+        <button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button>
+        <button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button>
+      </div>`;
+  }
+
+  if(currentRole==="procurement"){
+    if(r.status==="planner_approved"){
+      return `
+        <div class="comment-box"><label>نام تأمین‌کننده</label>
+        <input id="act-supplier" placeholder="نام شرکت تأمین‌کننده">
+        <label style="margin-top:8px">یادداشت استعلام</label>
+        <textarea id="act-note" placeholder="از چند تأمین‌کننده استعلام گرفته شد؟"></textarea></div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="doAction('inquiry')">🔍 شروع استعلام قیمت</button>
+        </div>`;
+    }
+    if(r.status==="procurement_inquiry"){
+      return `
+        <div class="comment-box"><label>شماره سفارش</label>
+        <input id="act-order" placeholder="مثال: ORD-4460">
+        <label style="margin-top:8px">تأمین‌کننده نهایی</label>
+        <input id="act-supplier" placeholder="نام شرکت" value="${r.supplier||''}">
+        <label style="margin-top:8px">یادداشت</label>
+        <textarea id="act-note" placeholder="شرایط سفارش، قیمت توافقی…"></textarea></div>
+        <div class="actions">
+          <button class="btn btn-success" onclick="doAction('order')">📦 ثبت سفارش</button>
+        </div>`;
+    }
+    if(r.status==="procurement_ordered"){
+      return `
+        <div class="comment-box"><label>اطلاعات حمل</label>
+        <input id="act-note" placeholder="شماره بارنامه، نام راننده…"></div>
+        <div class="actions">
+          <button class="btn btn-amber" onclick="doAction('ship')">🚚 ارسال شد — در راه است</button>
+        </div>`;
+    }
+    if(r.status==="in_transit"){
+      return `
+        <div class="comment-box"><label>یادداشت تحویل</label>
+        <textarea id="act-note" placeholder="وضعیت کالای تحویلی، نقص احتمالی…"></textarea></div>
+        <div class="actions">
+          <button class="btn btn-success" onclick="doAction('deliver')">✅ تحویل به انبار — بسته شود</button>
+        </div>`;
+    }
+    if(r.status==="delivered"){
+      return `<div class="actions"><button class="btn btn-ghost" onclick="doAction('close')">🔒 بستن درخواست</button></div>`;
+    }
+  }
+  return "";
+}
+
+async function doAction(type){
+  const r=drawerData;
+  if(!r) return;
+  const note=document.getElementById("act-note")?.value.trim()||"";
+  const supplier=document.getElementById("act-supplier")?.value.trim()||"";
+  const orderNo=document.getElementById("act-order")?.value.trim()||"";
+  if(type==="cancel"&&!confirm("آیا مطمئن هستید؟")) return;
+  if(type==="approve"&&!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
+  if(type==="reject"&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
+  const actionMap={submit:"submit",resubmit:"resubmit",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
+  const {error}=await cloud.rpc(type==="cancel"?"delete_purchase_request":"transition_purchase_request",type==="cancel"?{p_request_id:r.id}:{p_request_id:r.id,p_action:actionMap[type],p_note:note,p_supplier:supplier,p_order_no:orderNo});
+  if(error){alert("عملیات انجام نشد: "+error.message);return;}
+  await refreshRequests();
+  closeDrawer();
+  renderAll();
+}
+
+async function doDelete(){
+  if(!drawerData||!confirm("این درخواست حذف شود؟")) return;
+  const {error}=await cloud.rpc("delete_purchase_request",{p_request_id:drawerData.id});
+  if(error){alert("حذف انجام نشد: "+error.message);return;}
+  await refreshRequests();
+  closeDrawer();
+  renderAll();
+}
+window.doAction=doAction; window.doDelete=doDelete;
+
+// ════ NEW REQUEST ════
+function openNewRequest(){
+  document.getElementById("drawer-content").innerHTML=newRequestForm();
+  openDrawer();
+}
+
+function newRequestForm(){
+  const eqOpts=EQ.map(e=>`<option>${e}</option>`).join("");
+  return `
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:16px">➕ درخواست خرید جدید</h2>
+    <div class="field"><label>عنوان درخواست *</label>
+    <input id="nf-title" placeholder="مثال: تعویض پمپ سانتریفیوژ"></div>
+    <div class="field"><label>شرح کامل</label>
+    <textarea id="nf-desc" placeholder="توضیح دقیق کالا یا خدمت مورد نیاز…"></textarea></div>
+    <div class="field"><label>توجیه فنی *</label>
+    <textarea id="nf-just" placeholder="چرا این کالا لازم است؟ چه مشکلی دارد؟"></textarea></div>
+    <div class="frow">
+      <div class="field"><label>تجهیز مرتبط</label>
+      <select id="nf-equip">${eqOpts}</select></div>
+      <div class="field"><label>اولویت *</label>
+      <select id="nf-prio">
+        <option>🔴 فوری</option><option>🟠 بالا</option>
+        <option selected>🟡 متوسط</option><option>🟢 پایین</option>
+      </select></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>واحد اندازه‌گیری</label>
+      <input id="nf-unit" placeholder="عدد / متر / لیتر / ست…"></div>
+      <div class="field"><label>تعداد</label>
+      <input id="nf-qty" type="number" value="1" min="1"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="submitNewRequest(false)">💾 ذخیره پیش‌نویس</button>
+      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ارسال به برنامه‌ریز</button>
+    </div>`;
+}
+
+async function submitNewRequest(send){
+  const title=document.getElementById("nf-title")?.value.trim();
+  const just=document.getElementById("nf-just")?.value.trim();
+  if(!title){alert("عنوان الزامی است");return;}
+  if(send&&!just){alert("توجیه فنی الزامی است");return;}
+  const now=new Date().toLocaleDateString('fa-IR');
+  const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
+  const payload={
+    status:send?"submitted":"draft",prio:document.getElementById("nf-prio").value,
+    title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
+    unit:document.getElementById("nf-unit").value||"عدد",
+    qty:parseInt(document.getElementById("nf-qty").value)||1,
+    equip:document.getElementById("nf-equip").value,date:now,
+    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"}]
+  };
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:send});
+  if(error){alert("ثبت درخواست انجام نشد: "+error.message);return;}
+  await refreshRequests();
+  closeDrawer();
+  renderAll();
+}
+window.submitNewRequest=submitNewRequest;
+
+// ════ DRAWER ════
+function openDrawer(){document.getElementById("overlay").classList.add("open");}
+function closeDrawer(){document.getElementById("overlay").classList.remove("open");drawerData=null;}
+window.openRequest=openRequest;
+window.openNewRequest=openNewRequest;
+window.switchView=switchView;
+
+document.getElementById("overlay").addEventListener("click",e=>{
+  if(e.target===document.getElementById("overlay")) closeDrawer();
+});
+document.getElementById("drawer").addEventListener("click",e=>e.stopPropagation());
+
+// ════ BOOT ════
+(async()=>{
+  const {data}=await cloud.auth.getSession();cloudUser=data.session?.user||null;
+  cloud.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT'){cloudUser=null;currentRole='';currentUser='';currentIsAdmin=false;showRoleScreen();}
+  });
+  if(cloudUser){
+    try{await loadUserProfile();await initDB();authMessage('نشست قبلی بازیابی شد.');}
+    catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;showRoleScreen();}
+  }
+})();
+</script>
+<script>
