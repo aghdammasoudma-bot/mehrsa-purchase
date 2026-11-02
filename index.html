@@ -837,12 +837,12 @@ async function updateWork(id,status){
  const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
  const next=prompt("وضعیت را وارد کنید: in_progress یا completed",status==="assigned"?"in_progress":"completed");
  if(!["in_progress","completed"].includes(next)){alert("وضعیت نامعتبر است.");return;}
- const {error}=await cloud.from("technical_work_orders").update({status:next,report,updated_at:new Date().toISOString()}).eq("id",id);
+ const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
  if(error){alert("ثبت گزارش ناموفق: "+error.message);return;} await loadWorkOrders();
 }
 async function approveWork(id){
  if(!currentIsAdmin)return;
- const {error}=await cloud.from("technical_work_orders").update({status:"approved",updated_at:new Date().toISOString()}).eq("id",id);
+ const {error}=await cloud.rpc("approve_work_order",{p_id:id});
  if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;} await loadWorkOrders();
 }
 window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
