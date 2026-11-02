@@ -811,20 +811,49 @@ window.submitNewRequest=submitNewRequest;
 
 
 async function loadWorkOrders(){
-  if(!cloudUser)return;
-  const box=document.getElementById("work-orders"); if(!box)return;
-  const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
-  if(error){box.innerHTML='<div class="empty">بارگذاری مأموریت‌ها ناموفق بود: '+escapeHtml(error.message)+'</div>';return;}
-  const admin=currentIsAdmin;
-  const visible=(data||[]).filter(w=>admin||w.assigned_username===currentUsername);
-  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
-    '<div class="stitle">مأموریت‌های فنی</div>'+
-    (visible.length?visible.map(w=>{
-      const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
-      const canUpdate=!admin&&w.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(w.status);
-      const canApprove=admin&&w.status==="completed";
-      return `<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${escapeHtml(w.assigned_username)}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${labels[w.status]||escapeHtml(w.status)}</span>${w.due_date?'<span class="chip">مهلت: '+escapeHtml(w.due_date)+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${canApprove?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':canUpdate?'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>':''}</div></div>`;
-    }).join(""):'<div class="empty">مأموریتی برای نمایش وجود ندارد.</div>');
+ if(!cloudUser)return;
+ const box=document.getElementById("work-orders");if(!box)return;
+ const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
+ if(error){box.innerHTML='<div class="empty">بارگذاری مأموریت‌ها ناموفق بود: '+escapeHtml(error.message)+'</div>';return;}
+ const visible=(data||[]).filter(w=>currentIsAdmin||w.assigned_username===currentUsername);
+ const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+ box.innerHTML=(currentIsAdmin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
+ '<div class="stitle">مأموریت‌های فنی</div>'+
+ (visible.length?visible.map(w=>`<div class="req-card" style="cursor:pointer" onclick="openWorkDetail(${w.id})">
+ <div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${escapeHtml(w.assigned_username)}</span>
+ <div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div>
+ <div class="req-card-meta"><span class="b b-blue">${labels[w.status]||escapeHtml(w.status)}</span>${w.due_date?'<span class="chip">مهلت: '+escapeHtml(w.due_date)+'</span>':''}</div></div>
+ <div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span><b style="color:var(--steel)">مشاهده جزئیات و ثبت گزارش ←</b></div></div>`).join(""):'<div class="empty">مأموریتی برای نمایش وجود ندارد.</div>');
+}
+async function openWorkDetail(id){
+ const {data,error}=await cloud.from("technical_work_orders").select("*").eq("id",id).single();
+ if(error||!data){alert("دریافت جزئیات مأموریت ناموفق بود.");return;}
+ const admin=currentIsAdmin, canEdit=!admin&&data.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(data.status), canApprove=admin&&data.status==="completed";
+ const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+ const box=document.getElementById("work-orders");
+ box.innerHTML=`<section class="req-card" style="padding:22px">
+ <div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span class="req-card-id">مأموریت-${data.id} · مسئول: ${escapeHtml(data.assigned_username)}</span><button class="btn btn-sm" onclick="loadWorkOrders()">بازگشت</button></div>
+ <h2 style="font-size:20px;margin:16px 0 8px">${escapeHtml(data.title)}</h2><p style="line-height:2">${escapeHtml(data.description)}</p>
+ <div class="req-card-meta" style="margin:14px 0"><span class="b b-blue">${labels[data.status]||escapeHtml(data.status)}</span>${data.due_date?'<span class="chip">مهلت: '+escapeHtml(data.due_date)+'</span>':''}</div>
+ <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+ <h3 style="font-size:15px;margin-bottom:8px">گزارش ثبت‌شده</h3><div style="white-space:pre-wrap;line-height:2;background:var(--bg);padding:14px;border-radius:9px">${escapeHtml(data.report||"هنوز گزارشی ثبت نشده است.")}</div>
+ ${canEdit?`<label style="display:block;font-weight:700;margin:20px 0 8px" for="work-report">گزارش اقدامات انجام‌شده</label>
+ <textarea id="work-report" style="width:100%;min-height:150px;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;line-height:1.9" placeholder="شرح اقدامات، قطعات تعویض‌شده، نتیجه تست و موارد باقی‌مانده را وارد کنید...">${escapeHtml(data.report||"")}</textarea>
+ <label style="display:block;font-weight:700;margin:16px 0 8px" for="work-status">وضعیت مأموریت</label>
+ <select id="work-status" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit">
+ <option value="in_progress" ${["assigned","in_progress"].includes(data.status)?"selected":""}>در حال انجام</option><option value="completed">انجام‌شده — ارسال برای تأیید مدیر</option><option value="needs_material" ${data.status==="needs_material"?"selected":""}>نیازمند تأمین متریال</option></select>
+ <button class="btn btn-primary" style="margin-top:16px" onclick="saveWorkDetail(${data.id})">ثبت گزارش و وضعیت</button>`:''}
+ ${canApprove?'<button class="btn btn-success" style="margin-top:18px" onclick="approveWork('+data.id+')">تأیید نهایی مأموریت</button>':''}
+ ${!canEdit&&!canApprove?'<p class="chip" style="display:inline-block;margin-top:18px">این مأموریت در وضعیت فعلی قابل ویرایش نیست.</p>':''}
+ </section>`;
+}
+async function saveWorkDetail(id){
+ const report=document.getElementById("work-report").value.trim(), status=document.getElementById("work-status").value;
+ if(!report){alert("لطفاً گزارش اقدامات را وارد کنید.");return;}
+ if(status==="completed"&&report.length<10){alert("گزارش برای ارسال به تأیید مدیر کافی نیست.");return;}
+ const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:status,p_report:report});
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;}
+ await openWorkDetail(id);
 }
 function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function newWorkOrder(){
@@ -859,7 +888,7 @@ async function approveWork(id){
  if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;}
  await loadWorkOrders();
 }
-window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
+window.newWorkOrder=newWorkOrder;window.openWorkDetail=openWorkDetail;window.saveWorkDetail=saveWorkDetail;window.approveWork=approveWork;
 
 // ════ DRAWER ════
 function openDrawer(){document.getElementById("overlay").classList.add("open");}
