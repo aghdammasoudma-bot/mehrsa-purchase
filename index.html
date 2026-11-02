@@ -485,6 +485,7 @@ function showRoleScreen(){
 }
 
 function inboxItems(){
+  if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
   if(currentIsAdmin) return requests.filter(r=>
     ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
   if(currentRole==="tech") return requests.filter(r=>
@@ -528,9 +529,7 @@ function renderList(){
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else{
-    list=currentRole==="tech"
-      ?requests.filter(r=>r.by===currentUser)
-      :requests;
+    list=requests;
   }
 
   if(!list.length){
