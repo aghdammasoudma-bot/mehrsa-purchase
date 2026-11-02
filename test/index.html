@@ -290,12 +290,13 @@ button:active{transform:translateY(1px)}
   <div class="pipe-step" data-view="done" onclick="switchView('done')">
     ✅ تکمیل شده
   </div>
+  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 دستورکار فنی</div>
 </div>
 
 <!-- CONTENT -->
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
-  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div>
+  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div>
 </div>
 
 <!-- FAB -->
@@ -458,7 +459,8 @@ async function refreshRequests(){
 async function initDB(){
   if(!cloudUser){requests=[];return;}
   await refreshRequests();
-  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();}catch(e){console.error(e);}},12000);}
+  await loadWorkOrders();
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();await loadWorkOrders();}catch(e){console.error(e);}},12000);}
 }
 async function saveDB(){
   throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
@@ -485,6 +487,7 @@ function showRoleScreen(){
 }
 
 function inboxItems(){
+  if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
   if(currentIsAdmin) return requests.filter(r=>
     ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
   if(currentRole==="tech") return requests.filter(r=>
@@ -497,6 +500,9 @@ function inboxItems(){
 
 function switchView(v){
   currentView=v;
+  document.getElementById("req-list").style.display=v==="work"?"none":"block";
+  document.getElementById("work-orders").style.display=v==="work"?"block":"none";
+  if(v==="work") loadWorkOrders();
   document.querySelectorAll(".pipe-step").forEach(el=>{
     el.classList.toggle("active",el.dataset.view===v);
   });
@@ -524,13 +530,12 @@ function renderKPIs(){
 }
 
 function renderList(){
+  if(currentView==="work") return;
   let list;
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else{
-    list=currentRole==="tech"
-      ?requests.filter(r=>r.by===currentUser)
-      :requests;
+    list=requests;
   }
 
   if(!list.length){
@@ -767,6 +772,42 @@ async function submitNewRequest(send){
   renderAll();
 }
 window.submitNewRequest=submitNewRequest;
+
+
+async function loadWorkOrders(){
+  if(!cloudUser)return;
+  const box=document.getElementById("work-orders"); if(!box)return;
+  const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
+  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن دستورکارها، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
+  const admin=currentIsAdmin;
+  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ ارجاع دستورکار جدید</button></div>':'')+
+    '<div class="stitle">دستورکارهای فنی</div>'+
+    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">WO-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت پیشرفت</button>'):""} </div></div>`).join(""):'<div class="empty">دستورکاری ثبت نشده است.</div>'));
+}
+function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function newWorkOrder(){
+ if(!currentIsAdmin)return;
+ const title=prompt("عنوان دستورکار:"); if(!title)return;
+ const description=prompt("شرح و اقدام مورد انتظار:"); if(!description)return;
+ const assigned_username=prompt("مسئول را وارد کنید: reza یا hamid","reza");
+ if(!["reza","hamid"].includes((assigned_username||"").trim().toLowerCase())){alert("فقط reza یا hamid مجاز است.");return;}
+ const due_date=prompt("مهلت انجام (YYYY-MM-DD)، اختیاری:")||null;
+ const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username:assigned_username.trim().toLowerCase(),due_date});
+ if(error){alert("ثبت دستورکار ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+async function updateWork(id,status){
+ const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
+ const next=prompt("وضعیت را وارد کنید: in_progress یا completed",status==="assigned"?"in_progress":"completed");
+ if(!["in_progress","completed"].includes(next)){alert("وضعیت نامعتبر است.");return;}
+ const {error}=await cloud.from("technical_work_orders").update({status:next,report,updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+async function approveWork(id){
+ if(!currentIsAdmin)return;
+ const {error}=await cloud.from("technical_work_orders").update({status:"approved",updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;} await loadWorkOrders();
+}
+window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
 
 // ════ DRAWER ════
 function openDrawer(){document.getElementById("overlay").classList.add("open");}
