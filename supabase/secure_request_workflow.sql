@@ -202,16 +202,22 @@ drop policy if exists "authenticated users can update requests" on public.pr_req
 drop policy if exists "authenticated users can delete requests" on public.pr_requests;
 drop policy if exists "authenticated users can read requests" on public.pr_requests;
 
-create policy "authenticated profiles can read requests"
+create policy "role scoped request reads"
 on public.pr_requests for select to authenticated
-using (exists (
-  select 1 from public.user_profiles
-  where user_id=auth.uid() and is_active=true
-));
+using (
+  exists (
+    select 1 from public.user_profiles u
+    where u.user_id=auth.uid()
+      and u.is_active=true
+      and (
+        u.role in ('admin','planner','procurement')
+        or (u.role in ('tech','maintenance') and pr_requests.created_by=auth.uid())
+      )
+  )
+);
 
 revoke insert, update, delete on public.pr_requests from anon, authenticated;
 grant select on public.pr_requests to authenticated;
-grant usage, select on sequence public.pr_request_number_seq to authenticated;
 
 revoke all on function public.create_purchase_request(jsonb, boolean) from public;
 revoke all on function public.transition_purchase_request(text,text,text,text,text) from public;
