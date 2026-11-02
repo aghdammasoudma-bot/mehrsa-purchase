@@ -416,7 +416,35 @@ let requests=[], db=null, drawerData=null;
 // ════ SUPABASE CLOUD DB ════
 const SUPABASE_URL="https://jpzgtbafrpjjbtwqwzlr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Y_mc64kSyCr8bKpZNmUE8Q_uFbOI5m8";
-const cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let cloud=null;
+function authBusy(busy){
+ const btn=document.querySelector('#auth-box button');
+ if(btn){btn.disabled=busy;btn.textContent=busy?'در حال ورود…':'ورود به سامانه';}
+}
+function loadScript(src){
+ return new Promise((resolve,reject)=>{
+  const tag=document.createElement('script');tag.src=src;tag.async=true;
+  tag.onload=resolve;tag.onerror=()=>reject(new Error('بارگذاری کتابخانه اتصال ناموفق بود.'));
+  document.head.appendChild(tag);
+ });
+}
+async function ensureCloud(){
+ if(cloud)return cloud;
+ if(!window.supabase){
+  try{await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');}
+  catch(e){await loadScript('https://unpkg.com/@supabase/supabase-js@2');}
+ }
+ if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال به سرور بارگذاری نشد. اینترنت یا دسترسی به CDN را بررسی کنید.');
+ cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+ return cloud;
+}
+window.addEventListener('error',e=>{
+ const m=e.message||'خطای ناشناخته جاوااسکریپت';
+ const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اجرای سامانه: '+m;
+});
+window.addEventListener('unhandledrejection',e=>{
+ const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اتصال: '+(e.reason?.message||String(e.reason));
+});
 let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
 async function loadUserProfile(){
@@ -436,14 +464,21 @@ async function loadUserProfile(){
 async function cloudLogin(){
  const login=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
  if(!login||!password){authMessage('شناسه کاربری و رمز عبور را وارد کنید.');return;}
- const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
- const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
- authMessage('در حال بررسی اطلاعات ورود…');
- const {data,error}=await cloud.auth.signInWithPassword({email,password});
- if(error){authMessage('ورود ناموفق: شناسه یا رمز عبور صحیح نیست.');return;}
- cloudUser=data.user;
- try{await loadUserProfile();await initDB();authMessage('ورود موفق بود.');}
- catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';showRoleScreen();}
+ authBusy(true);authMessage('در حال اتصال به سامانه…');
+ try{
+  await ensureCloud();
+  const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+  const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
+  authMessage('در حال بررسی اطلاعات ورود…');
+  const {data,error}=await cloud.auth.signInWithPassword({email,password});
+  if(error)throw new Error('ورود ناموفق: '+(error.message||'شناسه یا رمز عبور صحیح نیست.'));
+  cloudUser=data.user;
+  await loadUserProfile();await initDB();authMessage('ورود موفق بود.');
+ }catch(e){
+  authMessage('ورود انجام نشد: '+(e.message||String(e)));
+  if(cloud?.auth){try{await cloud.auth.signOut();}catch(_){}}
+  cloudUser=null;currentRole='';currentUser='';showRoleScreen();
+ }finally{authBusy(false);}
 }
 async function cloudLogout(){
  await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
@@ -823,6 +858,7 @@ document.getElementById("drawer").addEventListener("click",e=>e.stopPropagation(
 
 // ════ BOOT ════
 (async()=>{
+  try{await ensureCloud();}catch(e){authMessage(e.message);return;}
   const {data}=await cloud.auth.getSession();cloudUser=data.session?.user||null;
   cloud.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_OUT'){cloudUser=null;currentRole='';currentUser='';currentIsAdmin=false;showRoleScreen();}
