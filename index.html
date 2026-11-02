@@ -833,13 +833,47 @@ async function newWorkOrder(){
  const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username:assigned_username.trim().toLowerCase(),due_date});
  if(error){alert("ثبت مأموریت ناموفق: "+error.message);return;} await loadWorkOrders();
 }
-async function updateWork(id,status){
- const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
- const next=prompt("وضعیت را وارد کنید: in_progress یا completed",status==="assigned"?"in_progress":"completed");
- if(!["in_progress","completed"].includes(next)){alert("وضعیت نامعتبر است.");return;}
- const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
- if(error){alert("ثبت گزارش ناموفق: "+error.message);return;} await loadWorkOrders();
+function openWorkReportCard(id,status){
+ const old=document.getElementById("work-report-modal"); if(old)old.remove();
+ const initial=status==="assigned"?"in_progress":status;
+ const modal=document.createElement("div");
+ modal.id="work-report-modal";
+ modal.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.58);display:flex;align-items:center;justify-content:center;padding:18px";
+ modal.innerHTML=`
+ <div style="width:min(100%,460px);background:var(--card,#fff);color:var(--text,#1f2937);border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);direction:rtl">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+   <div style="font-size:17px;font-weight:800">ثبت گزارش مأموریت فنی</div>
+   <button type="button" class="btn btn-ghost btn-sm" id="wr-close">✕</button>
+  </div>
+  <div class="field"><label for="wr-report">گزارش پیشرفت / نتیجه اجرا</label><textarea id="wr-report" rows="5" placeholder="اقدامات انجام‌شده، وضعیت فعلی و موارد باقی‌مانده را وارد کنید..." style="width:100%;min-height:120px"></textarea></div>
+  <div class="field"><label for="wr-status">وضعیت مأموریت</label>
+   <select id="wr-status" style="width:100%">
+    <option value="in_progress" ${initial==="in_progress"?"selected":""}>در حال انجام</option>
+    <option value="completed" ${initial==="completed"?"selected":""}>انجام‌شده؛ آماده تأیید مدیر</option>
+   </select>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:18px">
+   <button type="button" class="btn btn-primary" id="wr-save" style="flex:1">ثبت گزارش</button>
+   <button type="button" class="btn btn-ghost" id="wr-cancel">انصراف</button>
+  </div>
+ </div>`;
+ document.body.appendChild(modal);
+ const close=()=>modal.remove();
+ modal.querySelector("#wr-close").onclick=close;
+ modal.querySelector("#wr-cancel").onclick=close;
+ modal.addEventListener("click",e=>{if(e.target===modal)close();});
+ modal.querySelector("#wr-save").onclick=async()=>{
+  const report=modal.querySelector("#wr-report").value.trim();
+  const next=modal.querySelector("#wr-status").value;
+  if(!report){alert("لطفاً گزارش اجرا را وارد کنید.");return;}
+  const btn=modal.querySelector("#wr-save");btn.disabled=true;btn.textContent="در حال ثبت...";
+  const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
+  if(error){alert("ثبت گزارش ناموفق: "+error.message);btn.disabled=false;btn.textContent="ثبت گزارش";return;}
+  close();await loadWorkOrders();
+ };
 }
+async function updateWork(id,status){openWorkReportCard(id,status);}
+
 async function approveWork(id){
  if(!currentIsAdmin)return;
  const {error}=await cloud.rpc("approve_work_order",{p_id:id});
