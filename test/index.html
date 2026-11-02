@@ -513,7 +513,7 @@ window.addEventListener('error',e=>{
 window.addEventListener('unhandledrejection',e=>{
  const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اتصال: '+(e.reason?.message||String(e.reason));
 });
-let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
+let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='', workDetailOpen=false;
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
 async function loadUserProfile(){
   if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
@@ -564,7 +564,7 @@ async function initDB(){
   if(!cloudUser){requests=[];return;}
   await refreshRequests();
   await loadWorkOrders();
-  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();await loadWorkOrders();}catch(e){console.error(e);}},12000);}
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();if(!workDetailOpen)await loadWorkOrders();}catch(e){console.error(e);}},12000);}
 }
 async function saveDB(){
   throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
@@ -896,11 +896,12 @@ async function loadWorkOrders(){
 async function openWorkDetail(id){
  const {data,error}=await cloud.from("technical_work_orders").select("*").eq("id",id).single();
  if(error||!data){alert("دریافت جزئیات مأموریت ناموفق بود.");return;}
+ workDetailOpen=true;
  const admin=currentIsAdmin, canEdit=!admin&&data.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(data.status), canApprove=admin&&data.status==="completed";
  const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
  const box=document.getElementById("work-orders");
  box.innerHTML=`<section class="req-card" style="padding:22px">
- <div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span class="req-card-id">مأموریت-${data.id} · مسئول: ${escapeHtml(data.assigned_username)}</span><button class="btn btn-sm" onclick="loadWorkOrders()">بازگشت</button></div>
+ <div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span class="req-card-id">مأموریت-${data.id} · مسئول: ${escapeHtml(data.assigned_username)}</span><button class="btn btn-sm" onclick="backToWorkOrders()">بازگشت</button></div>
  <h2 style="font-size:20px;margin:16px 0 8px">${escapeHtml(data.title)}</h2><p style="line-height:2">${escapeHtml(data.description)}</p>
  <div class="req-card-meta" style="margin:14px 0"><span class="b b-blue">${labels[data.status]||escapeHtml(data.status)}</span>${data.due_date?'<span class="chip">مهلت: '+escapeHtml(data.due_date)+'</span>':''}</div>
  <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
@@ -915,6 +916,7 @@ async function openWorkDetail(id){
  ${!canEdit&&!canApprove?'<p class="chip" style="display:inline-block;margin-top:18px">این مأموریت در وضعیت فعلی قابل ویرایش نیست.</p>':''}
  </section>`;
 }
+async function backToWorkOrders(){workDetailOpen=false;await loadWorkOrders();}
 async function saveWorkDetail(id){
  const report=document.getElementById("work-report").value.trim(), status=document.getElementById("work-status").value;
  if(!report){alert("لطفاً گزارش اقدامات را وارد کنید.");return;}
@@ -992,7 +994,7 @@ async function approveWork(id){
  if(!confirm("تکمیل این مأموریت تأیید نهایی شود؟"))return;
  const {error}=await cloud.rpc("approve_work_order",{p_id:id});
  if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;}
- await loadWorkOrders();
+ workDetailOpen=false;await loadWorkOrders();
 }
 window.newWorkOrder=newWorkOrder;window.openWorkDetail=openWorkDetail;window.saveWorkDetail=saveWorkDetail;window.approveWork=approveWork;
 
