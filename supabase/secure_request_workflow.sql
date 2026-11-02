@@ -202,6 +202,8 @@ drop policy if exists "authenticated users can update requests" on public.pr_req
 drop policy if exists "authenticated users can delete requests" on public.pr_requests;
 drop policy if exists "authenticated users can read requests" on public.pr_requests;
 
+drop policy if exists "role scoped request reads" on public.pr_requests;
+
 create policy "role scoped request reads"
 on public.pr_requests for select to authenticated
 using (
