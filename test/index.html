@@ -435,14 +435,14 @@ const FLOW_ORDER=FLOW.map(f=>f.key);
 
 const PRIO_MAP={"🔴 فوری":"b-red","🟠 بالا":"b-orange","🟡 متوسط":"b-amber","🟢 پایین":"b-green"};
 const STATUS_LABEL={
-  "draft":"پیش‌نویس","submitted":"ارسال شده به برنامه‌ریز",
+  "draft":"پیش‌نویس","admin_review":"در انتظار تأیید سرپرست فنی","admin_rejected":"رد شده توسط سرپرست فنی","submitted":"ارسال شده به برنامه‌ریز",
   "planner_review":"در بررسی برنامه‌ریز","planner_approved":"تأیید شده — در انتظار بازرگانی",
   "planner_rejected":"رد شده توسط برنامه‌ریز",
   "procurement_inquiry":"استعلام قیمت","procurement_ordered":"سفارش داده شده",
   "in_transit":"در راه","delivered":"تحویل داده شده","closed":"بسته شده"
 };
 const STATUS_BADGE={
-  "draft":"b-grey","submitted":"b-blue","planner_review":"b-amber",
+  "draft":"b-grey","admin_review":"b-amber","admin_rejected":"b-red","submitted":"b-blue","planner_review":"b-amber",
   "planner_approved":"b-blue","planner_rejected":"b-red",
   "procurement_inquiry":"b-purple","procurement_ordered":"b-orange",
   "in_transit":"b-green","delivered":"b-green","closed":"b-grey"
@@ -628,11 +628,10 @@ function showRoleScreen(){
 }
 
 function inboxItems(){
-  if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
   if(currentIsAdmin) return requests.filter(r=>
-    ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
-  if(currentRole==="tech") return requests.filter(r=>
-    r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected"));
+    ["admin_review","admin_rejected","draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+  if(currentRole==="tech"||currentRole==="maintenance") return requests.filter(r=>
+    r.by===currentUser&&["draft","admin_rejected","planner_rejected"].includes(r.status));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
   if(currentRole==="procurement") return requests.filter(r=>
     ["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
@@ -698,7 +697,7 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
   const needsAction=(currentIsAdmin&&["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
-    ||(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&r.by===currentUser)
+    ||((currentRole==="tech"||currentRole==="maintenance")&&["draft","admin_rejected","planner_rejected"].includes(r.status)&&r.by===currentUser)
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
   return `
@@ -790,15 +789,19 @@ function requestDetail(r){
 
 function actionButtons(r){
   let html="";
-  if((currentRole==="tech"||currentIsAdmin)&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
+  if((currentRole==="tech"||currentRole==="maintenance"||currentIsAdmin)&&(r.status==="draft"||r.status==="admin_rejected"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
     if(r.status==="draft"){
       html+=`<div class="comment-box"><label>یادداشت (اختیاری)</label><textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال جهت تأیید سرپرست فنی</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
     }else{
       html+=`<div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">❌ این درخواست توسط برنامه‌ریز رد شده است.<br><strong>دلیل:</strong> ${r.plannerNote||"—"}</div>
       <div class="comment-box"><label>اصلاحات انجام شده</label><textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد جهت تأیید سرپرست فنی</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
+  }
+  if(currentIsAdmin&&r.status==="admin_review"){
+    html+=`<div class="comment-box"><label>یادداشت سرپرست فنی</label><textarea id="act-note" placeholder="توضیح تأیید یا دلیل رد درخواست…"></textarea></div>
+    <div class="actions"><button class="btn btn-success" onclick="doAction('admin_approve')">✅ تأیید و ارجاع به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('admin_reject')">❌ رد درخواست</button></div>`;
   }
   if((currentRole==="planner"||currentIsAdmin)&&r.status==="submitted"){
     html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
@@ -835,8 +838,8 @@ async function doAction(type){
   const orderNo=document.getElementById("act-order")?.value.trim()||"";
   if(type==="cancel"&&!confirm("آیا مطمئن هستید؟")) return;
   if(type==="approve"&&!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
-  if(type==="reject"&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
-  const actionMap={submit:"submit",resubmit:"resubmit",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
+  if((type==="reject"||type==="admin_reject")&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
+  const actionMap={submit:"submit",resubmit:"resubmit",admin_approve:"admin_approve",admin_reject:"admin_reject",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
   const {error}=await cloud.rpc(type==="cancel"?"delete_purchase_request":"transition_purchase_request",type==="cancel"?{p_request_id:r.id}:{p_request_id:r.id,p_action:actionMap[type],p_note:note,p_supplier:supplier,p_order_no:orderNo});
   if(error){alert("عملیات انجام نشد: "+error.message);return;}
   await refreshRequests();
@@ -887,7 +890,7 @@ function newRequestForm(){
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="submitNewRequest(false)">💾 ذخیره پیش‌نویس</button>
-      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ارسال به برنامه‌ریز</button>
+      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ارسال جهت تأیید سرپرست فنی</button>
     </div>`;
 }
 
@@ -899,7 +902,7 @@ async function submitNewRequest(send){
   const now=new Date().toLocaleDateString('fa-IR');
   const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
   const payload={
-    status:send?"submitted":"draft",prio:document.getElementById("nf-prio").value,
+    status:send?"admin_review":"draft",prio:document.getElementById("nf-prio").value,
     title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
     unit:document.getElementById("nf-unit").value||"عدد",
     qty:parseInt(document.getElementById("nf-qty").value)||1,
