@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="درخواست خرید">
 
 
-<title>سامانه درخواست خرید واحد فنی</title>
+<title>سامانه مدیریت عملیات فنی مهرسا</title>
 <style>
 :root{
   --ink:#0A1628;--navy:#0D2147;--blue:#1A3A6B;--steel:#2F5FAC;
@@ -258,7 +258,7 @@ button:active{transform:translateY(1px)}
 
 <!-- ROLE SCREEN -->
 <div class="role-screen" id="role-screen">
-  <h2>⚙️ سامانه درخواست خرید</h2>
+  <h2>⚙️ سامانه مدیریت عملیات فنی مهرسا</h2>
   <p>ورود به سامانه با حساب کاربری اختصاصی</p>
   <div id="auth-box" style="width:min(420px,92vw);margin:12px auto 18px;text-align:right;background:rgba(255,255,255,.08);padding:14px;border-radius:12px">
     <label style="display:block;color:#fff;font-size:12px;margin:6px 0">شناسه ورود</label>
@@ -290,7 +290,7 @@ button:active{transform:translateY(1px)}
   <div class="pipe-step" data-view="done" onclick="switchView('done')">
     ✅ تکمیل شده
   </div>
-  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 دستورکار فنی</div>
+  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 مأموریت‌های فنی</div>
 </div>
 
 <!-- CONTENT -->
@@ -813,22 +813,22 @@ async function loadWorkOrders(){
   if(!cloudUser)return;
   const box=document.getElementById("work-orders"); if(!box)return;
   const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
-  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن دستورکارها، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
+  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن مأموریت‌های فنی، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
   const admin=currentIsAdmin;
-  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ ارجاع دستورکار جدید</button></div>':'')+
-    '<div class="stitle">دستورکارهای فنی</div>'+
-    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">WO-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت پیشرفت</button>'):""} </div></div>`).join(""):'<div class="empty">دستورکاری ثبت نشده است.</div>');
+  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
+    '<div class="stitle">مأموریت‌های فنی</div>'+
+    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>'):""} </div></div>`).join(""):'<div class="empty">مأموریتی ثبت نشده است.</div>');
 }
 function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function newWorkOrder(){
  if(!currentIsAdmin)return;
- const title=prompt("عنوان دستورکار:"); if(!title)return;
+ const title=prompt("عنوان مأموریت فنی:"); if(!title)return;
  const description=prompt("شرح و اقدام مورد انتظار:"); if(!description)return;
  const assigned_username=prompt("مسئول را وارد کنید: reza یا hamid","reza");
  if(!["reza","hamid"].includes((assigned_username||"").trim().toLowerCase())){alert("فقط reza یا hamid مجاز است.");return;}
  const due_date=prompt("مهلت انجام (YYYY-MM-DD)، اختیاری:")||null;
  const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username:assigned_username.trim().toLowerCase(),due_date});
- if(error){alert("ثبت دستورکار ناموفق: "+error.message);return;} await loadWorkOrders();
+ if(error){alert("ثبت مأموریت ناموفق: "+error.message);return;} await loadWorkOrders();
 }
 async function updateWork(id,status){
  const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
