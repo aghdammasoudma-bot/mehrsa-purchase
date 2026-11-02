@@ -410,7 +410,7 @@ const SEED=[
 ];
 
 // ════ STATE ════
-let currentRole='', currentUser='', currentTitle='', currentView='inbox';
+let currentRole='', currentUser='', currentUsername='', currentTitle='', currentView='inbox';
 let requests=[], db=null, drawerData=null;
 
 // ════ SUPABASE CLOUD DB ════
@@ -458,6 +458,7 @@ async function loadUserProfile(){
   currentIsAdmin=data.role==='admin';
   currentRole=data.role==='maintenance'?'tech':data.role;
   currentUser=data.full_name;
+  currentUsername=data.username;
   currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
   setRole(currentRole,currentUser,currentTitle);
 }
@@ -467,7 +468,7 @@ async function cloudLogin(){
  authBusy(true);authMessage('در حال اتصال به سامانه…');
  try{
   await ensureCloud();
-  const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+  const loginEmails={masoud:'aghdam.masoud@yahoo.com',biabani:'biabani@mehrsa.local',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
   const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
   authMessage('در حال بررسی اطلاعات ورود…');
   const {data,error}=await cloud.auth.signInWithPassword({email,password});
@@ -813,11 +814,17 @@ async function loadWorkOrders(){
   if(!cloudUser)return;
   const box=document.getElementById("work-orders"); if(!box)return;
   const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
-  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن مأموریت‌های فنی، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
+  if(error){box.innerHTML='<div class="empty">بارگذاری مأموریت‌ها ناموفق بود: '+escapeHtml(error.message)+'</div>';return;}
   const admin=currentIsAdmin;
+  const visible=(data||[]).filter(w=>admin||w.assigned_username===currentUsername);
   box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
     '<div class="stitle">مأموریت‌های فنی</div>'+
-    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>'):""} </div></div>`).join(""):'<div class="empty">مأموریتی ثبت نشده است.</div>');
+    (visible.length?visible.map(w=>{
+      const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+      const canUpdate=!admin&&w.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(w.status);
+      const canApprove=admin&&w.status==="completed";
+      return `<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${escapeHtml(w.assigned_username)}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${labels[w.status]||escapeHtml(w.status)}</span>${w.due_date?'<span class="chip">مهلت: '+escapeHtml(w.due_date)+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${canApprove?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':canUpdate?'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>':''}</div></div>`;
+    }).join(""):'<div class="empty">مأموریتی برای نمایش وجود ندارد.</div>');
 }
 function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function newWorkOrder(){
@@ -831,16 +838,26 @@ async function newWorkOrder(){
  if(error){alert("ثبت مأموریت ناموفق: "+error.message);return;} await loadWorkOrders();
 }
 async function updateWork(id,status){
- const report=prompt("گزارش پیشرفت یا نتیجه اجرا:"); if(report===null)return;
- const next=prompt("وضعیت را وارد کنید: in_progress یا completed",status==="assigned"?"in_progress":"completed");
- if(!["in_progress","completed"].includes(next)){alert("وضعیت نامعتبر است.");return;}
- const {error}=await cloud.from("technical_work_orders").update({status:next,report,updated_at:new Date().toISOString()}).eq("id",id);
- if(error){alert("ثبت گزارش ناموفق: "+error.message);return;} await loadWorkOrders();
+ if(!cloudUser)return;
+ const report=prompt("گزارش پیشرفت یا نتیجه اجرا را وارد کنید:");
+ if(report===null)return;
+ const choices=["in_progress","completed","needs_material"];
+ const labels={in_progress:"در حال انجام",completed:"انجام‌شده",needs_material:"نیازمند تأمین متریال"};
+ const current=["assigned"].includes(status)?"in_progress":status;
+ const selected=prompt("وضعیت را دقیقاً با یکی از اعداد زیر وارد کنید:\n1 - در حال انجام\n2 - انجام‌شده\n3 - نیازمند تأمین متریال",current==="needs_material"?"3":current==="completed"?"2":"1");
+ if(selected===null)return;
+ const next=({"1":"in_progress","2":"completed","3":"needs_material"})[selected.trim()];
+ if(!choices.includes(next)){alert("وضعیت انتخاب‌شده معتبر نیست.");return;}
+ const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;}
+ await loadWorkOrders();
 }
 async function approveWork(id){
  if(!currentIsAdmin)return;
- const {error}=await cloud.from("technical_work_orders").update({status:"approved",updated_at:new Date().toISOString()}).eq("id",id);
- if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;} await loadWorkOrders();
+ if(!confirm("تکمیل این مأموریت تأیید نهایی شود؟"))return;
+ const {error}=await cloud.rpc("approve_work_order",{p_id:id});
+ if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;}
+ await loadWorkOrders();
 }
 window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
 
