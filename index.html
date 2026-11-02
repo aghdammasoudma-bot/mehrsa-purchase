@@ -247,8 +247,7 @@ button:active{transform:translateY(1px)}
 .role-btn-title{font-size:14px;line-height:1.6}
 .role-btn-sub{font-size:11px;color:#C1DADD;line-height:1.7}
 .fab{width:58px;height:58px;bottom:calc(22px + env(safe-area-inset-bottom,0));left:20px;background:linear-gradient(135deg,#176B73,#218A88);box-shadow:0 8px 24px rgba(23,107,115,.3)}
-.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}
-.drawer-handle{background:#C8D5DB}
+.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}.drawer-handle{background:#C8D5DB}
 input,select,textarea{border-radius:10px}
 @media(min-width:640px){.role-screen{justify-content:center;padding-top:28px;padding-bottom:28px}.role-screen #auth-box{margin:14px auto 18px!important}.role-btn{padding:13px 17px}}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
@@ -261,37 +260,14 @@ input,select,textarea{border-radius:10px}
 <!-- ROLE SCREEN -->
 <div class="role-screen" id="role-screen">
   <h2>⚙️ سامانه درخواست خرید</h2>
-  <p>واحد فنی — برنامه‌ریز — بازرگانی<br>نقش خود را انتخاب کنید</p>
+  <p>ورود به سامانه با حساب کاربری اختصاصی</p>
   <div id="auth-box" style="width:min(420px,92vw);margin:12px auto 18px;text-align:right;background:rgba(255,255,255,.08);padding:14px;border-radius:12px">
-    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">ایمیل سازمانی</label>
-    <input id="auth-email" type="email" autocomplete="username" placeholder="name@company.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <label style="display:block;color:#fff;font-size:12px;margin:6px 0">شناسه ورود</label>
+    <input id="auth-email" type="text" autocomplete="username" placeholder="شناسه کاربری" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
     <label style="display:block;color:#fff;font-size:12px;margin:6px 0">رمز عبور</label>
-    <input id="auth-password" type="password" autocomplete="current-password" placeholder="حداقل ۸ کاراکتر" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
-    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="cloudLogin()">ورود</button><button class="btn btn-ghost" style="flex:1;color:#fff;border-color:#789" onclick="cloudSignup()">ساخت حساب</button></div>
-    <div id="auth-msg" style="color:#ffd48a;font-size:11px;margin-top:8px;line-height:1.7">برای همگام‌سازی، ابتدا با حساب کاربری وارد شوید.</div>
-  </div>
-  <div id="role-options" style="display:none">
-  <button class="role-btn" onclick="setRole('tech','مسعود هاشمی','سرپرست فنی')">
-    <div class="role-btn-title">🔧 سرپرست / تیم فنی</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری — مشاهده همه</div>
-  </button>
-  <button class="role-btn" onclick="setRole('tech','رضا دژآلود','تکنسین برق')">
-    <div class="role-btn-title">⚡ رضا دژآلود — برق</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری درخواست‌های خود</div>
-  </button>
-  <button class="role-btn" onclick="setRole('tech','حمید رنجبر','تکنسین تاسیسات')">
-    <div class="role-btn-title">🏭 حمید رنجبر — تاسیسات</div>
-    <div class="role-btn-sub">ثبت درخواست — پیگیری درخواست‌های خود</div>
-  </button>
-  <button class="role-btn" onclick="setRole('planner','برنامه‌ریز','برنامه‌ریز')">
-    <div class="role-btn-title">📅 برنامه‌ریز</div>
-    <div class="role-btn-sub">بررسی درخواست‌های فنی — تأیید / رد — ارسال به بازرگانی</div>
-  </button>
-  <button class="role-btn" onclick="setRole('procurement','بازرگانی','کارشناس بازرگانی')">
-    <div class="role-btn-title">🛒 بازرگانی</div>
-    <div class="role-btn-sub">استعلام — سفارش — پیگیری تحویل</div>
-  </button>
-  <button class="role-btn" onclick="cloudLogout()"><div class="role-btn-title">خروج از حساب</div></button>
+    <input id="auth-password" type="password" autocomplete="current-password" placeholder="رمز عبور اختصاصی" style="width:100%;padding:12px;border-radius:8px;border:1px solid #456;direction:ltr;margin-bottom:8px">
+    <button class="btn btn-primary" style="width:100%" onclick="cloudLogin()">ورود به سامانه</button>
+    <div id="auth-msg" style="color:#ffd48a;font-size:11px;margin-top:8px;line-height:1.7">هر کاربر فقط به سطح دسترسی تعریف‌شده برای حساب خودش وارد می‌شود.</div>
   </div>
 </div>
 
@@ -301,7 +277,7 @@ input,select,textarea{border-radius:10px}
     <div class="top h1" id="top-name" style="font-size:14px;font-weight:700;color:#fff"></div>
     <div class="top-sub" id="top-role"></div>
   </div>
-  <button class="role-tag" onclick="showRoleScreen()">تغییر نقش ↩</button>
+  <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
 </div>
 
 <!-- PIPELINE TABS -->
@@ -426,8 +402,7 @@ const SEED=[
   {id:"PR-006",status:"planner_rejected",prio:"🟡 متوسط",title:"مخزن گازوئیل ۱۰۰۰۰ لیتری",
    desc:"نصب مخزن ذخیره گازوئیل برای بویلرها",unit:"دستگاه",qty:1,
    equip:"STB-01 دیگ بخار",by:"حمید رنجبر",role:"tech",date:"1405/07/12",
-   justification:"تأمین سوخت پایدار",plannerNote:"طرح نیاز به بازبینی مکان استقرار دارد — برگشت برای اصلاح",
-   timeline:[
+   justification:"تأمین سوخت پایدار",plannerNote:"طرح نیاز به بازبینی مکان استقرار دارد — برگشت برای اصلاح",   timeline:[
      {role:"tech",by:"حمید رنجبر",action:"ثبت درخواست",note:"",ts:"1405/07/12 ۱۰:۰۰",icon:"📝"},
      {role:"tech",by:"حمید رنجبر",action:"ارسال به برنامه‌ریز",note:"",ts:"1405/07/12 ۱۰:۰۵",icon:"📤"},
      {role:"planner",by:"برنامه‌ریز",action:"رد شد — برگشت به فنی",note:"طرح نیاز به بازبینی مکان استقرار دارد",ts:"1405/07/14 ۱۱:۳۰",icon:"❌"}
@@ -442,24 +417,38 @@ let requests=[], db=null, drawerData=null;
 const SUPABASE_URL="https://jpzgtbafrpjjbtwqwzlr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Y_mc64kSyCr8bKpZNmUE8Q_uFbOI5m8";
 const cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let cloudUser=null, syncing=false;
+let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
-function showRoles(){const ro=document.getElementById('role-options');if(ro)ro.style.display=cloudUser?'block':'none';}
+async function loadUserProfile(){
+  if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
+  const {data,error}=await cloud.from('user_profiles')
+    .select('username,full_name,role,is_active')
+    .eq('user_id',cloudUser.id).maybeSingle();
+  if(error) throw new Error('خطا در دریافت پروفایل: '+error.message);
+  if(!data) throw new Error('برای این حساب پروفایل سازمانی تعریف نشده است.');
+  if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');
+  profileRole=data.role;
+  currentIsAdmin=data.role==='admin';
+  currentRole=(data.role==='admin'||data.role==='maintenance')?'tech':data.role;
+  currentUser=data.full_name;
+  currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
+  setRole(currentRole,currentUser,currentTitle);
+}
 async function cloudLogin(){
- const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
- if(!email||!password){authMessage('ایمیل و رمز عبور را وارد کنید.');return;}
- authMessage('در حال ورود…');const {data,error}=await cloud.auth.signInWithPassword({email,password});
- if(error){authMessage('ورود ناموفق: '+error.message);return;}cloudUser=data.user;showRoles();authMessage('ورود موفق بود. نقش کاری را انتخاب کنید.');await initDB();
+ const login=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
+ if(!login||!password){authMessage('شناسه کاربری و رمز عبور را وارد کنید.');return;}
+ const email=login.includes('@')?login:login+'@example.com';
+ authMessage('در حال بررسی اطلاعات ورود…');
+ const {data,error}=await cloud.auth.signInWithPassword({email,password});
+ if(error){authMessage('ورود ناموفق: شناسه یا رمز عبور صحیح نیست.');return;}
+ cloudUser=data.user;
+ try{await loadUserProfile();await initDB();authMessage('ورود موفق بود.');}
+ catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';showRoleScreen();}
 }
-async function cloudSignup(){
- const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
- if(!email||password.length<8){authMessage('ایمیل معتبر و رمز حداقل ۸ کاراکتری وارد کنید.');return;}
- authMessage('در حال ساخت حساب…');const {data,error}=await cloud.auth.signUp({email,password});
- if(error){authMessage('ساخت حساب ناموفق: '+error.message);return;}
- if(data.session){cloudUser=data.user;showRoles();authMessage('حساب ساخته شد؛ نقش کاری را انتخاب کنید.');await initDB();}
- else authMessage('حساب ثبت شد. ایمیل تأیید را بررسی کنید؛ سپس وارد شوید.');
+async function cloudLogout(){
+ await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
+ showRoleScreen();authMessage('از حساب خارج شدید.');
 }
-async function cloudLogout(){await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';try{localStorage.removeItem('pr_role')}catch(e){}showRoleScreen();showRoles();authMessage('از حساب خارج شدید.');}
 async function initDB(){
  if(!cloudUser){requests=[];return;}
  const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
@@ -477,16 +466,15 @@ async function saveDB(){
 }
 
 // ════ ROLE ════
-function setRole(role, user, title){
-  currentRole=role; currentUser=user; currentTitle=title;
-  try{localStorage.setItem("pr_role",JSON.stringify({role,user,title}));}catch(e){}
+function setRole(role,user,title){
+  currentRole=role;currentUser=user;currentTitle=title;
   document.getElementById("role-screen").style.display="none";
   document.getElementById("topbar").style.display="flex";
   document.getElementById("pipeline-bar").style.display="flex";
   document.getElementById("main-content").style.display="block";
   document.getElementById("top-name").textContent=user;
   document.getElementById("top-role").textContent=title;
-  document.getElementById("fab").style.display=(role==="tech")?"flex":"none";
+  document.getElementById("fab").style.display=(role==="tech"||profileRole==="maintenance")?"flex":"none";
   renderAll();
 }
 function showRoleScreen(){
@@ -500,7 +488,7 @@ function showRoleScreen(){
 function inboxItems(){
   if(currentRole==="tech"){
     return requests.filter(r=>{
-      if(currentUser==="مسعود هاشمی") return r.status==="draft"||r.status==="planner_rejected";
+      if(currentIsAdmin) return r.status==="draft"||r.status==="planner_rejected";
       return r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected");
     });
   }
@@ -517,7 +505,6 @@ function switchView(v){
   });
   renderList();
 }
-
 function renderAll(){
   renderKPIs();
   renderList();
@@ -545,7 +532,7 @@ function renderList(){
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else{
-    list=currentRole==="tech"&&currentUser!=="مسعود هاشمی"
+    list=currentRole==="tech"&&!currentIsAdmin
       ?requests.filter(r=>r.by===currentUser)
       :requests;
   }
@@ -568,7 +555,7 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
-  const needsAction=(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&(currentUser==="مسعود هاشمی"||r.by===currentUser))
+  const needsAction=(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser))
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
   return `
@@ -637,7 +624,6 @@ function requestDetail(r){
     </div>
 
     <div style="margin-bottom:12px">${statusBadge(r.status)}</div>
-
     <div style="overflow-x:auto">
       <div class="flow">${flowHtml}</div>
     </div>
@@ -892,15 +878,13 @@ document.getElementById("drawer").addEventListener("click",e=>e.stopPropagation(
 // ════ BOOT ════
 (async()=>{
   const {data}=await cloud.auth.getSession();cloudUser=data.session?.user||null;
-  cloud.auth.onAuthStateChange((_event,session)=>{cloudUser=session?.user||null;showRoles();if(!cloudUser)showRoleScreen();});
-  showRoles();
-  if(cloudUser){authMessage('وارد حساب هستید؛ نقش کاری را انتخاب کنید.');await initDB();}
+  cloud.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT'){cloudUser=null;currentRole='';currentUser='';currentIsAdmin=false;showRoleScreen();}
+  });
+  if(cloudUser){
+    try{await loadUserProfile();await initDB();authMessage('نشست قبلی بازیابی شد.');}
+    catch(e){authMessage(e.message);await cloud.auth.signOut();cloudUser=null;showRoleScreen();}
+  }
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed', err)));
-}
-</script>
-</body>
-</html>
