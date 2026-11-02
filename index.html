@@ -247,8 +247,7 @@ button:active{transform:translateY(1px)}
 .role-btn-title{font-size:14px;line-height:1.6}
 .role-btn-sub{font-size:11px;color:#C1DADD;line-height:1.7}
 .fab{width:58px;height:58px;bottom:calc(22px + env(safe-area-inset-bottom,0));left:20px;background:linear-gradient(135deg,#176B73,#218A88);box-shadow:0 8px 24px rgba(23,107,115,.3)}
-.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}.drawer-handle{background:#C8D5DB}
-input,select,textarea{border-radius:10px}
+.drawer{border-radius:22px 22px 0 0;box-shadow:0 -12px 45px rgba(13,32,48,.18)}.drawer-handle{background:#C8D5DB}input,select,textarea{border-radius:10px}
 @media(min-width:640px){.role-screen{justify-content:center;padding-top:28px;padding-bottom:28px}.role-screen #auth-box{margin:14px auto 18px!important}.role-btn{padding:13px 17px}}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
@@ -426,8 +425,7 @@ async function loadUserProfile(){
     .eq('user_id',cloudUser.id).maybeSingle();
   if(error) throw new Error('خطا در دریافت پروفایل: '+error.message);
   if(!data) throw new Error('برای این حساب پروفایل سازمانی تعریف نشده است.');
-  if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');
-  profileRole=data.role;
+  if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');  profileRole=data.role;
   currentIsAdmin=data.role==='admin';
   currentRole=(data.role==='admin'||data.role==='maintenance')?'tech':data.role;
   currentUser=data.full_name;
@@ -437,7 +435,8 @@ async function loadUserProfile(){
 async function cloudLogin(){
  const login=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value;
  if(!login||!password){authMessage('شناسه کاربری و رمز عبور را وارد کنید.');return;}
- const email=login.includes('@')?login:login+'@example.com';
+ const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+ const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
  authMessage('در حال بررسی اطلاعات ورود…');
  const {data,error}=await cloud.auth.signInWithPassword({email,password});
  if(error){authMessage('ورود ناموفق: شناسه یا رمز عبور صحیح نیست.');return;}
@@ -517,8 +516,7 @@ function renderKPIs(){
   const total=requests.length;
   const inbox=inboxItems().length;
   const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status)).length;
-  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;
-  document.getElementById("dashboard-kpis").innerHTML=`
+  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;  document.getElementById("dashboard-kpis").innerHTML=`
     <div class="kpi-row">
       <div class="kpi"><div class="kpi-n" style="color:var(--steel)">${total}</div><div class="kpi-l">کل درخواست‌ها</div></div>
       <div class="kpi"><div class="kpi-n" style="color:var(--red)">${inbox}</div><div class="kpi-l">نیاز به اقدام</div></div>
@@ -636,8 +634,7 @@ function requestDetail(r){
         ${r.equip&&r.equip!=="—"?`<span>⚙️ ${r.equip}</span>`:""}
         ${r.supplier?`<span>🏭 ${r.supplier}</span>`:""}
         ${r.orderNo?`<span>📋 ${r.orderNo}</span>`:""}
-      </div>
-      ${r.plannerNote?`<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--amber)">📅 برنامه‌ریز: ${r.plannerNote}</div>`:""}
+      </div>      ${r.plannerNote?`<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--amber)">📅 برنامه‌ریز: ${r.plannerNote}</div>`:""}
     </div>
 
     <div class="stitle">تاریخچه تغییرات</div>
