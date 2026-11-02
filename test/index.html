@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="درخواست خرید">
+
+
 <title>سامانه درخواست خرید واحد فنی</title>
 <style>
 :root{
@@ -425,7 +427,7 @@ async function loadUserProfile(){
   if(!data) throw new Error('برای این حساب پروفایل سازمانی تعریف نشده است.');
   if(!data.is_active) throw new Error('این حساب توسط مدیر غیرفعال شده است.');  profileRole=data.role;
   currentIsAdmin=data.role==='admin';
-  currentRole=(data.role==='admin'||data.role==='maintenance')?'tech':data.role;
+  currentRole=data.role==='maintenance'?'tech':data.role;
   currentUser=data.full_name;
   currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
   setRole(currentRole,currentUser,currentTitle);
@@ -471,7 +473,7 @@ function setRole(role,user,title){
   document.getElementById("main-content").style.display="block";
   document.getElementById("top-name").textContent=user;
   document.getElementById("top-role").textContent=title;
-  document.getElementById("fab").style.display=(role==="tech"||profileRole==="maintenance")?"flex":"none";
+  document.getElementById("fab").style.display=(role==="tech"||role==="admin"||profileRole==="maintenance")?"flex":"none";
   renderAll();
 }
 function showRoleScreen(){
@@ -483,12 +485,10 @@ function showRoleScreen(){
 }
 
 function inboxItems(){
-  if(currentRole==="tech"){
-    return requests.filter(r=>{
-      if(currentIsAdmin) return r.status==="draft"||r.status==="planner_rejected";
-      return r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected");
-    });
-  }
+  if(currentIsAdmin) return requests.filter(r=>
+    ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+  if(currentRole==="tech") return requests.filter(r=>
+    r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected"));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
   if(currentRole==="procurement") return requests.filter(r=>
     ["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
@@ -528,7 +528,7 @@ function renderList(){
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else{
-    list=currentRole==="tech"&&!currentIsAdmin
+    list=currentRole==="tech"
       ?requests.filter(r=>r.by===currentUser)
       :requests;
   }
@@ -551,7 +551,8 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
-  const needsAction=(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser))
+  const needsAction=(currentIsAdmin&&["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
+    ||(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&r.by===currentUser)
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
   return `
@@ -642,88 +643,42 @@ function requestDetail(r){
 }
 
 function actionButtons(r){
-  const now=()=>new Date().toLocaleDateString('fa-IR')+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
-
-  if(currentRole==="tech"){
+  let html="";
+  if((currentRole==="tech"||currentIsAdmin)&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
     if(r.status==="draft"){
-      return `
-        <div class="comment-box"><label>یادداشت (اختیاری)</label>
-        <textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button>
-          <button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button>
-        </div>`;
+      html+=`<div class="comment-box"><label>یادداشت (اختیاری)</label><textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
+    }else{
+      html+=`<div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">❌ این درخواست توسط برنامه‌ریز رد شده است.<br><strong>دلیل:</strong> ${r.plannerNote||"—"}</div>
+      <div class="comment-box"><label>اصلاحات انجام شده</label><textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
-    if(r.status==="planner_rejected"){
-      return `
-        <div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">
-          ❌ این درخواست توسط برنامه‌ریز رد شده است.<br>
-          <strong>دلیل:</strong> ${r.plannerNote||"—"}
-        </div>
-        <div class="comment-box"><label>اصلاحات انجام شده</label>
-        <textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button>
-          <button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button>
-        </div>`;
-    }
-    return "";
   }
-
-  if(currentRole==="planner"&&r.status==="submitted"){
-    return `
-      <div class="comment-box"><label>یادداشت برنامه‌ریز</label>
-      <textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
-      <div class="actions">
-        <button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button>
-        <button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button>
-      </div>`;
+  if((currentRole==="planner"||currentIsAdmin)&&r.status==="submitted"){
+    html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
+    <div class="actions"><button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button><button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button></div>`;
   }
-
-  if(currentRole==="procurement"){
+  if(currentRole==="procurement"||currentIsAdmin){
     if(r.status==="planner_approved"){
-      return `
-        <div class="comment-box"><label>نام تأمین‌کننده</label>
-        <input id="act-supplier" placeholder="نام شرکت تأمین‌کننده">
-        <label style="margin-top:8px">یادداشت استعلام</label>
-        <textarea id="act-note" placeholder="از چند تأمین‌کننده استعلام گرفته شد؟"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="doAction('inquiry')">🔍 شروع استعلام قیمت</button>
-        </div>`;
-    }
-    if(r.status==="procurement_inquiry"){
-      return `
-        <div class="comment-box"><label>شماره سفارش</label>
-        <input id="act-order" placeholder="مثال: ORD-4460">
-        <label style="margin-top:8px">تأمین‌کننده نهایی</label>
-        <input id="act-supplier" placeholder="نام شرکت" value="${r.supplier||''}">
-        <label style="margin-top:8px">یادداشت</label>
-        <textarea id="act-note" placeholder="شرایط سفارش، قیمت توافقی…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-success" onclick="doAction('order')">📦 ثبت سفارش</button>
-        </div>`;
-    }
-    if(r.status==="procurement_ordered"){
-      return `
-        <div class="comment-box"><label>اطلاعات حمل</label>
-        <input id="act-note" placeholder="شماره بارنامه، نام راننده…"></div>
-        <div class="actions">
-          <button class="btn btn-amber" onclick="doAction('ship')">🚚 ارسال شد — در راه است</button>
-        </div>`;
-    }
-    if(r.status==="in_transit"){
-      return `
-        <div class="comment-box"><label>یادداشت تحویل</label>
-        <textarea id="act-note" placeholder="وضعیت کالای تحویلی، نقص احتمالی…"></textarea></div>
-        <div class="actions">
-          <button class="btn btn-success" onclick="doAction('deliver')">✅ تحویل به انبار — بسته شود</button>
-        </div>`;
-    }
-    if(r.status==="delivered"){
-      return `<div class="actions"><button class="btn btn-ghost" onclick="doAction('close')">🔒 بستن درخواست</button></div>`;
+      html+=`<div class="comment-box"><label>نام تأمین‌کننده</label><input id="act-supplier" placeholder="نام شرکت تأمین‌کننده"><label style="margin-top:8px">یادداشت استعلام</label><textarea id="act-note" placeholder="از چند تأمین‌کننده استعلام گرفته شد؟"></textarea></div>
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('inquiry')">🔍 شروع استعلام قیمت</button></div>`;
+    }else if(r.status==="procurement_inquiry"){
+      html+=`<div class="comment-box"><label>شماره سفارش</label><input id="act-order" placeholder="مثال: ORD-4460"><label style="margin-top:8px">تأمین‌کننده نهایی</label><input id="act-supplier" placeholder="نام شرکت" value="${r.supplier||''}"><label style="margin-top:8px">یادداشت</label><textarea id="act-note" placeholder="شرایط سفارش، قیمت توافقی…"></textarea></div>
+      <div class="actions"><button class="btn btn-success" onclick="doAction('order')">📦 ثبت سفارش</button></div>`;
+    }else if(r.status==="procurement_ordered"){
+      html+=`<div class="comment-box"><label>اطلاعات حمل</label><input id="act-note" placeholder="شماره بارنامه، نام راننده…"></div>
+      <div class="actions"><button class="btn btn-amber" onclick="doAction('ship')">🚚 ارسال شد — در راه است</button></div>`;
+    }else if(r.status==="in_transit"){
+      html+=`<div class="comment-box"><label>یادداشت تحویل</label><textarea id="act-note" placeholder="وضعیت کالای تحویلی، نقص احتمالی…"></textarea></div>
+      <div class="actions"><button class="btn btn-success" onclick="doAction('deliver')">✅ تحویل به انبار</button></div>`;
+    }else if(r.status==="delivered"){
+      html+=`<div class="actions"><button class="btn btn-ghost" onclick="doAction('close')">🔒 بستن درخواست</button></div>`;
     }
   }
-  return "";
+  if(currentIsAdmin&&r.status!=="closed"){
+    html+=`<div class="actions" style="border-top:1px solid var(--line);padding-top:12px;margin-top:14px"><button class="btn btn-danger btn-sm" onclick="doDelete()">حذف مدیریتی درخواست</button></div>`;
+  }
+  return html;
 }
 
 async function doAction(type){
