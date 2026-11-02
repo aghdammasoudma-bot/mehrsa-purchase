@@ -527,7 +527,7 @@ function showRoleScreen(){
 function inboxItems(){
   if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
   if(currentIsAdmin) return requests.filter(r=>
-    ["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+    ["draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
   if(currentRole==="tech") return requests.filter(r=>
     r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected"));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
@@ -697,7 +697,7 @@ function actionButtons(r){
       <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
   }
-  if((currentRole==="planner"||currentIsAdmin)&&r.status==="submitted"){
+  if(currentRole==="planner"&&r.status==="submitted"){
     html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
     <div class="actions"><button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button><button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button></div>`;
   }
