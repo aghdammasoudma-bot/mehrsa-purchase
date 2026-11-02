@@ -252,6 +252,54 @@ button:active{transform:translateY(1px)}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
+
+/* ─── EXECUTIVE VISUAL SYSTEM / DEPTH LAYER ─── */
+:root{
+ --surface-1:#fff;--surface-2:#f7fafb;--depth-1:0 2px 5px rgba(16,36,58,.04),0 12px 28px rgba(16,36,58,.065);
+ --depth-2:0 7px 16px rgba(16,36,58,.08),0 22px 42px rgba(16,36,58,.11);
+}
+body{background:radial-gradient(ellipse at 88% 0%,rgba(69,184,176,.09),transparent 30%),linear-gradient(180deg,#F7F9FB 0%,#EEF3F6 100%);}
+.content{max-width:1120px;padding-top:26px}
+.top{background:linear-gradient(112deg,#0C2034 0%,#153C52 58%,#176B73 100%);position:sticky}
+.top:after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+.pipeline{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid #DCE6EA}
+.pipe-step{transition:all .2s ease}
+.pipe-step.active{background:linear-gradient(180deg,rgba(69,184,176,.10),rgba(69,184,176,.025));border-radius:12px 12px 0 0}
+.stitle{display:flex;align-items:center;gap:10px;color:#405969;font-size:12px}
+.stitle:before{content:"";width:4px;height:17px;border-radius:4px;background:linear-gradient(180deg,#45B8B0,#176B73)}
+/* dimensional cards: layered edge + restrained perspective */
+.req-card,.kpi{position:relative;isolation:isolate;transform:translateZ(0);box-shadow:var(--depth-1);border:1px solid rgba(195,211,220,.82);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.req-card:before,.kpi:before{pointer-events:none}
+.req-card:after{content:"";position:absolute;z-index:-1;inset:5px -4px -5px 4px;border-radius:inherit;background:linear-gradient(135deg,rgba(23,107,115,.10),rgba(16,36,58,.025));filter:blur(5px);opacity:.75}
+.req-card:hover{transform:translateY(-3px) perspective(900px) rotateX(.35deg);box-shadow:var(--depth-2);border-color:#B9D1D5}
+.req-card-top{background:linear-gradient(145deg,#fff 0%,#FBFDFE 100%)}
+.req-card-bot{background:linear-gradient(90deg,#F2F7F8,#F8FAFB)}
+.req-card-title{letter-spacing:-.2px}
+.kpi{min-height:104px;background:linear-gradient(145deg,#fff 0%,#F8FBFC 100%);transform:perspective(700px) rotateX(0deg)}
+.kpi:before{width:5px;background:linear-gradient(180deg,#45B8B0,#176B73);box-shadow:2px 0 8px rgba(23,107,115,.15)}
+.kpi:after{content:"";position:absolute;left:-20px;bottom:-34px;width:105px;height:105px;border-radius:50%;background:radial-gradient(circle,rgba(69,184,176,.10),transparent 68%);pointer-events:none}
+.kpi-n{font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #fff}
+.b{border:1px solid rgba(30,65,80,.055);box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+.btn{min-height:40px;letter-spacing:-.1px}
+.btn-primary,.btn-success,.btn-danger,.btn-amber{box-shadow:0 4px 0 rgba(10,30,45,.12),0 7px 15px rgba(16,36,58,.08)}
+.btn-primary:hover,.btn-success:hover,.btn-danger:hover,.btn-amber:hover{transform:translateY(-2px);filter:saturate(1.08)}
+.fab{border:1px solid rgba(255,255,255,.55);box-shadow:0 5px 0 #10575D,0 12px 28px rgba(16,90,95,.28);transform:translateY(-2px)}
+.drawer{border:1px solid rgba(210,225,230,.8);box-shadow:0 -18px 55px rgba(9,30,45,.22)}
+#work-orders .req-card{overflow:hidden}
+#work-orders .req-card-top{position:relative}
+#work-orders .req-card-top:before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#45B8B0,#176B73)}
+#work-orders section.req-card{box-shadow:0 14px 38px rgba(16,36,58,.09);border-radius:20px}
+#work-orders section.req-card h2{letter-spacing:-.45px;color:#17384A}
+#work-orders section.req-card textarea:focus,#work-orders section.req-card select:focus{outline:none;border-color:#218A88!important;box-shadow:0 0 0 3px rgba(69,184,176,.14)}
+.role-screen{background:radial-gradient(ellipse at 15% 12%,rgba(69,184,176,.22),transparent 34%),radial-gradient(ellipse at 90% 90%,rgba(55,112,144,.3),transparent 38%),linear-gradient(145deg,#0B1E32,#143B50 62%,#15565C)}
+#auth-box{box-shadow:0 24px 70px rgba(0,0,0,.25)!important}
+@media(max-width:640px){
+ .content{padding-top:16px}
+ .req-card:hover{transform:none}
+ .kpi{min-height:92px}
+}
+@media(prefers-reduced-motion:reduce){.req-card,.kpi,.btn{transition:none!important;transform:none!important}}
+
 </style>
 </head>
 <body>
