@@ -448,20 +448,20 @@ async function cloudLogout(){
  await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
  showRoleScreen();authMessage('از حساب خارج شدید.');
 }
+async function refreshRequests(){
+  if(!cloudUser){requests=[];return;}
+  const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
+  if(error) throw new Error('خطا در دریافت درخواست‌ها: '+error.message);
+  requests=(data||[]).map(x=>x.payload);
+  if(currentRole) renderAll();
+}
 async function initDB(){
- if(!cloudUser){requests=[];return;}
- const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
- if(error){authMessage('خطای دیتابیس: '+error.message+' — ابتدا SQL همراه بسته را در SQL Editor اجرا کنید.');requests=SEED;return;}
- if(data&&data.length){requests=data.map(x=>x.payload);}
- else {requests=SEED;await saveDB();}
- if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');if(!error&&data){requests=data.map(x=>x.payload);if(currentRole)renderAll();}},12000);}
+  if(!cloudUser){requests=[];return;}
+  await refreshRequests();
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();}catch(e){console.error(e);}},12000);}
 }
 async function saveDB(){
- if(!cloudUser){alert('ابتدا وارد حساب کاربری شوید.');return;}
- const rows=requests.map(r=>({id:r.id,payload:r,updated_at:new Date().toISOString()}));
- const {error}=await cloud.from('pr_requests').upsert(rows,{onConflict:'id'});
- if(error){alert('ذخیره ابری انجام نشد: '+error.message);throw error;}
- try{localStorage.setItem('pr_reqs',JSON.stringify(requests));}catch(e){}
+  throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
 }
 
 // ════ ROLE ════
@@ -731,65 +731,25 @@ function actionButtons(r){
 async function doAction(type){
   const r=drawerData;
   if(!r) return;
-  const idx=requests.findIndex(x=>x.id===r.id);
-  if(idx<0) return;
-  const now=new Date().toLocaleDateString('fa-IR')+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
   const note=document.getElementById("act-note")?.value.trim()||"";
   const supplier=document.getElementById("act-supplier")?.value.trim()||"";
   const orderNo=document.getElementById("act-order")?.value.trim()||"";
-
-  const ev=(action,icon,extra={})=>({role:currentRole,by:currentUser,action,note,ts:now,icon,...extra});
-
-  if(type==="submit"){
-    requests[idx].status="submitted";
-    requests[idx].timeline.push(ev("ارسال به برنامه‌ریز","📤"));
-  } else if(type==="resubmit"){
-    requests[idx].status="submitted";
-    requests[idx].plannerNote="";
-    requests[idx].timeline.push(ev("ارسال مجدد پس از اصلاح","📤"));
-  } else if(type==="cancel"){
-    if(!confirm("آیا مطمئن هستید؟")) return;
-    requests.splice(idx,1);
-  } else if(type==="approve"){
-    if(!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
-    requests[idx].status="planner_approved";
-    requests[idx].plannerNote=note;
-    requests[idx].timeline.push(ev("تأیید — ارسال به بازرگانی","✅"));
-  } else if(type==="reject"){
-    if(!note){alert("لطفاً دلیل رد را بنویسید");return;}
-    requests[idx].status="planner_rejected";
-    requests[idx].plannerNote=note;
-    requests[idx].timeline.push(ev("رد شد — برگشت به فنی","❌"));
-  } else if(type==="inquiry"){
-    if(supplier) requests[idx].supplier=supplier;
-    requests[idx].status="procurement_inquiry";
-    requests[idx].timeline.push(ev("شروع استعلام قیمت","🔍"));
-  } else if(type==="order"){
-    if(supplier) requests[idx].supplier=supplier;
-    if(orderNo) requests[idx].orderNo=orderNo;
-    requests[idx].status="procurement_ordered";
-    requests[idx].timeline.push(ev(`سفارش ثبت شد${orderNo?" — "+orderNo:""}${supplier?" از "+supplier:""}","📦`));
-  } else if(type==="ship"){
-    requests[idx].status="in_transit";
-    requests[idx].timeline.push(ev("ارسال از تأمین‌کننده — در راه","🚚"));
-  } else if(type==="deliver"){
-    requests[idx].status="delivered";
-    requests[idx].timeline.push(ev("تحویل به انبار","✅"));
-  } else if(type==="close"){
-    requests[idx].status="closed";
-    requests[idx].timeline.push(ev("درخواست بسته شد","🔒"));
-  }
-
-  await saveDB();
+  if(type==="cancel"&&!confirm("آیا مطمئن هستید؟")) return;
+  if(type==="approve"&&!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
+  if(type==="reject"&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
+  const actionMap={submit:"submit",resubmit:"resubmit",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
+  const {error}=await cloud.rpc(type==="cancel"?"delete_purchase_request":"transition_purchase_request",type==="cancel"?{p_request_id:r.id}:{p_request_id:r.id,p_action:actionMap[type],p_note:note,p_supplier:supplier,p_order_no:orderNo});
+  if(error){alert("عملیات انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
 
 async function doDelete(){
-  if(!confirm("این درخواست حذف شود؟")) return;
-  const idx=requests.findIndex(x=>x.id===drawerData.id);
-  if(idx>=0) requests.splice(idx,1);
-  await saveDB();
+  if(!drawerData||!confirm("این درخواست حذف شود؟")) return;
+  const {error}=await cloud.rpc("delete_purchase_request",{p_request_id:drawerData.id});
+  if(error){alert("حذف انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
@@ -839,22 +799,17 @@ async function submitNewRequest(send){
   if(send&&!just){alert("توجیه فنی الزامی است");return;}
   const now=new Date().toLocaleDateString('fa-IR');
   const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
-  const n=requests.length+1;
-  const id=`PR-${String(n+100).slice(1)}`;
-  const r={
-    id,status:send?"submitted":"draft",
-    prio:document.getElementById("nf-prio").value,
-    title,desc:document.getElementById("nf-desc").value.trim(),
-    justification:just,
+  const payload={
+    status:send?"submitted":"draft",prio:document.getElementById("nf-prio").value,
+    title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
     unit:document.getElementById("nf-unit").value||"عدد",
     qty:parseInt(document.getElementById("nf-qty").value)||1,
-    equip:document.getElementById("nf-equip").value,
-    by:currentUser,role:currentRole,date:now,
-    timeline:[{role:currentRole,by:currentUser,action:"ثبت درخواست",note:"",ts,icon:"📝"}]
+    equip:document.getElementById("nf-equip").value,date:now,
+    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"}]
   };
-  if(send) r.timeline.push({role:currentRole,by:currentUser,action:"ارسال به برنامه‌ریز",note:"",ts,icon:"📤"});
-  requests.push(r);
-  await saveDB();
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:send});
+  if(error){alert("ثبت درخواست انجام نشد: "+error.message);return;}
+  await refreshRequests();
   closeDrawer();
   renderAll();
 }
