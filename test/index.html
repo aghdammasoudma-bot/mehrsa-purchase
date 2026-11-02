@@ -320,6 +320,46 @@ body{background:radial-gradient(ellipse at 88% 0%,rgba(69,184,176,.09),transpare
 .mission-form-actions .btn-primary{min-width:190px}
 .mission-form-actions button:disabled{opacity:.55;cursor:wait}
 
+
+/* High-legibility Persian typography — test build */
+html{ text-rendering:optimizeLegibility; -webkit-text-size-adjust:100%; }
+body,button,input,select,textarea{
+  font-family:Tahoma,"Segoe UI",Arial,sans-serif !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+#work-orders section.req-card{
+  font-size:16px;
+  line-height:2;
+  color:#172B3A;
+  padding:26px !important;
+}
+#work-orders section.req-card .req-card-id{font-size:14px;line-height:1.9;font-weight:700}
+#work-orders section.req-card h2{font-size:24px !important;line-height:1.8 !important;font-weight:800;letter-spacing:0 !important}
+#work-orders section.req-card h3{font-size:19px !important;line-height:1.8;font-weight:800}
+#work-orders section.req-card p,
+#work-orders section.req-card div[style*="white-space:pre-wrap"]{
+  font-size:16px !important;line-height:2.15 !important;font-weight:500;
+}
+#work-orders section.req-card label{font-size:16px !important;line-height:1.9;font-weight:800}
+#work-orders section.req-card textarea,
+#work-orders section.req-card select{
+  font-family:Tahoma,"Segoe UI",Arial,sans-serif !important;
+  font-size:16px !important;line-height:2 !important;
+  font-weight:500;letter-spacing:0;
+}
+#work-orders section.req-card .btn{font-size:15px;line-height:1.8;min-height:48px}
+#work-orders section.req-card .b,
+#work-orders section.req-card .chip{font-size:13px;line-height:1.8}
+@media(max-width:640px){
+  #work-orders section.req-card{padding:20px !important}
+  #work-orders section.req-card h2{font-size:21px !important}
+  #work-orders section.req-card p,
+  #work-orders section.req-card div[style*="white-space:pre-wrap"],
+  #work-orders section.req-card textarea,
+  #work-orders section.req-card select{font-size:15px !important}
+}
+
 </style>
 </head>
 <body>
