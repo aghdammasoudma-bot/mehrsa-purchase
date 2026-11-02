@@ -629,7 +629,7 @@ function showRoleScreen(){
 
 function inboxItems(){
   if(currentIsAdmin) return requests.filter(r=>
-    ["admin_review","admin_rejected","draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+    ["admin_review","admin_rejected","draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
   if(currentRole==="tech"||currentRole==="maintenance") return requests.filter(r=>
     r.by===currentUser&&["draft","admin_rejected","planner_rejected"].includes(r.status));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
@@ -696,7 +696,7 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
-  const needsAction=(currentIsAdmin&&["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
+  const needsAction=(currentIsAdmin&&["draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
     ||((currentRole==="tech"||currentRole==="maintenance")&&["draft","admin_rejected","planner_rejected"].includes(r.status)&&r.by===currentUser)
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
@@ -792,18 +792,18 @@ function actionButtons(r){
   if((currentRole==="tech"||currentRole==="maintenance"||currentIsAdmin)&&(r.status==="draft"||r.status==="admin_rejected"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
     if(r.status==="draft"){
       html+=`<div class="comment-box"><label>یادداشت (اختیاری)</label><textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال جهت تأیید سرپرست فنی</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ${currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی"}</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
     }else{
       html+=`<div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">❌ این درخواست توسط برنامه‌ریز رد شده است.<br><strong>دلیل:</strong> ${r.plannerNote||"—"}</div>
       <div class="comment-box"><label>اصلاحات انجام شده</label><textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد جهت تأیید سرپرست فنی</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ${currentIsAdmin?"ارسال مجدد مستقیم به برنامه‌ریز":"ارسال مجدد جهت تأیید سرپرست فنی"}</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
   }
   if(currentIsAdmin&&r.status==="admin_review"&&r.by!==currentUser){
     html+=`<div class="comment-box"><label>یادداشت سرپرست فنی</label><textarea id="act-note" placeholder="توضیح تأیید یا دلیل رد درخواست…"></textarea></div>
     <div class="actions"><button class="btn btn-success" onclick="doAction('admin_approve')">✅ تأیید و ارجاع به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('admin_reject')">❌ رد درخواست</button></div>`;
   }
-  if((currentRole==="planner"||currentIsAdmin)&&r.status==="submitted"){
+  if(currentRole==="planner"&&r.status==="submitted"){
     html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
     <div class="actions"><button class="btn btn-success" onclick="doAction('approve')">✅ تأیید — ارسال به بازرگانی</button><button class="btn btn-danger" onclick="doAction('reject')">❌ رد — برگشت به فنی</button></div>`;
   }
@@ -890,7 +890,7 @@ function newRequestForm(){
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="submitNewRequest(false)">💾 ذخیره پیش‌نویس</button>
-      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ارسال جهت تأیید سرپرست فنی</button>
+      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ${currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی"}</button>
     </div>`;
 }
 
