@@ -894,9 +894,6 @@ body{background:radial-gradient(ellipse at 50% -10%,#1a3556 0,#0a1422 48%,#08111
   <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div>
 </div>
 
-<!-- FAB -->
-<button class="fab" id="fab" style="display:none" onclick="openNewRequest()">＋</button>
-
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
 <!-- DRAWER -->
 <div class="overlay" id="overlay">
@@ -1110,7 +1107,6 @@ function setRole(role,user,title){
   document.getElementById("top-name").textContent=user;
   document.getElementById("top-role").textContent=title;
   document.getElementById("mobile-bottom-nav").style.display="flex";updateDashboardIdentity();syncBottomNav();
-  document.getElementById("fab").style.display=(role==="tech"||role==="admin"||profileRole==="maintenance")?"flex":"none";
   renderAll();
 }
 function showRoleScreen(){
@@ -1119,7 +1115,6 @@ function showRoleScreen(){
   document.getElementById("pipeline-bar").style.display="none";
   document.getElementById("main-content").style.display="none";
   document.getElementById("mobile-bottom-nav").style.display="none";
-  document.getElementById("fab").style.display="none";
 }
 
 function inboxItems(){
