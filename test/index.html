@@ -741,11 +741,12 @@ function setRole(role,user,title){
   document.getElementById("management-hero").style.display="block";
   document.getElementById("quick-actions").style.display="flex";
   document.getElementById("mobile-bottom-nav").style.display="flex";
-  document.getElementById("hero-user").textContent=user;
-  document.getElementById("hero-role").textContent=title;
-  document.getElementById("hero-avatar").textContent=(user||"م").trim().charAt(0);
-  document.getElementById("top-name").textContent=user;
-  document.getElementById("top-role").textContent=title;
+  const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+  setText("hero-user",user);
+  setText("hero-role",title);
+  setText("hero-avatar",(user||"م").trim().charAt(0));
+  setText("top-name",user);
+  setText("top-role",title);
   renderAll();
 }
 function showRoleScreen(){
