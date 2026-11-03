@@ -255,6 +255,27 @@ button:active{transform:translateY(1px)}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
+/* Mission creation form */
+.mission-form{padding:4px 2px 8px}
+.mission-form-head{display:flex;align-items:center;gap:14px;padding:8px 0 20px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.mission-form-icon{width:52px;height:52px;flex:0 0 52px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#E4F2F1,#F2F7F8);color:#176B73;font-size:25px;border:1px solid #D2E6E5;box-shadow:0 5px 12px rgba(16,60,70,.08)}
+.mission-kicker{font-size:9px;letter-spacing:1.5px;font-weight:900;color:#21817F}
+.mission-form-head h2{font-size:19px;font-weight:850;color:var(--text);margin:3px 0}
+.mission-form-head p{font-size:11px;color:var(--sub);line-height:1.8}
+.mission-section-title{font-size:12px;font-weight:850;color:#315365;margin:17px 0 11px;display:flex;align-items:center;gap:8px}
+.mission-section-title:before{content:"";width:3px;height:15px;border-radius:3px;background:#45B8B0}
+.mission-form .field label b{color:#B4232D}
+.mission-form .field input,.mission-form .field select,.mission-form .field textarea{background:#F8FAFB;border:1px solid #D6E2E7;min-height:44px}
+.mission-form .field textarea{line-height:1.9}
+.mission-hint{display:block;color:var(--sub);font-size:10px;margin-top:5px}
+.mission-callout{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid #D7E9E8;background:#F0F7F6;border-radius:12px;color:#365B61;font-size:11px;line-height:1.9;margin:12px 0 16px}
+.mission-callout strong{color:#176B73;font-size:11px}
+.mission-form-actions{justify-content:flex-end;padding-top:12px;border-top:1px solid var(--line)}
+.mission-form-actions .btn-primary{min-width:190px}
+.mission-form-actions button:disabled{opacity:.55;cursor:wait}
+
+
+
 </style>
 </head>
 <body>
@@ -853,16 +874,54 @@ async function loadWorkOrders(){
     ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>'):""} </div></div>`).join(""):'<div class="empty">مأموریتی ثبت نشده است.</div>');
 }
 function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-async function newWorkOrder(){
+function newWorkOrder(){
  if(!currentIsAdmin)return;
- const title=prompt("عنوان مأموریت فنی:"); if(!title)return;
- const description=prompt("شرح و اقدام مورد انتظار:"); if(!description)return;
- const assigned_username=prompt("مسئول را وارد کنید: reza یا hamid","reza");
- if(!["reza","hamid"].includes((assigned_username||"").trim().toLowerCase())){alert("فقط reza یا hamid مجاز است.");return;}
- const due_date=prompt("مهلت انجام (YYYY-MM-DD)، اختیاری:")||null;
- const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username:assigned_username.trim().toLowerCase(),due_date});
- if(error){alert("ثبت مأموریت ناموفق: "+error.message);return;} await loadWorkOrders();
+ document.getElementById("drawer-content").innerHTML=workOrderForm();
+ openDrawer();
 }
+function workOrderForm(){
+ return `
+ <div class="mission-form">
+  <div class="mission-form-head">
+   <div class="mission-form-icon">⚙</div>
+   <div><div class="mission-kicker">TECHNICAL OPERATIONS</div><h2>تعریف مأموریت فنی</h2><p>ابلاغ یک اقدام مشخص به مسئول اجرا و تعیین مهلت پیگیری</p></div>
+  </div>
+  <div class="mission-section-title">مشخصات مأموریت</div>
+  <div class="field"><label for="wo-title">عنوان مأموریت <b>*</b></label><input id="wo-title" maxlength="140" placeholder="مثال: رفع نشتی پمپ روغن داغ بویلر شماره ۲"></div>
+  <div class="field"><label for="wo-description">شرح کار و خروجی مورد انتظار <b>*</b></label><textarea id="wo-description" maxlength="2000" style="min-height:125px" placeholder="شرح دقیق مشکل، محدوده کار، اقدام مورد انتظار و معیار تحویل را بنویسید..."></textarea><small class="mission-hint">شرح باید برای مسئول اجرا روشن و قابل ارزیابی باشد.</small></div>
+  <div class="mission-section-title">ارجاع و زمان‌بندی</div>
+  <div class="frow">
+   <div class="field"><label for="wo-assignee">مسئول اجرا <b>*</b></label><select id="wo-assignee"><option value="reza">رضا دژآلود</option><option value="hamid">حمید رنجبر</option></select></div>
+   <div class="field"><label for="wo-due">مهلت انجام</label><input id="wo-due" type="date"></div>
+  </div>
+  <div class="mission-callout"><strong>نکته مدیریتی</strong><span>پس از ثبت، مأموریت در حساب مسئول اجرا نمایش داده می‌شود. مسئول باید گزارش پیشرفت و نتیجه نهایی را در همین مأموریت ثبت کند.</span></div>
+  <div class="actions mission-form-actions">
+   <button class="btn btn-ghost" onclick="closeDrawer()">انصراف</button>
+   <button class="btn btn-primary" id="wo-submit" onclick="submitWorkOrder()">ثبت و ابلاغ مأموریت ←</button>
+  </div>
+ </div>`;
+}
+async function submitWorkOrder(){
+ if(!currentIsAdmin)return;
+ const title=document.getElementById("wo-title")?.value.trim();
+ const description=document.getElementById("wo-description")?.value.trim();
+ const assigned_username=document.getElementById("wo-assignee")?.value;
+ const due_date=document.getElementById("wo-due")?.value||null;
+ if(!title){alert("عنوان مأموریت را وارد کنید.");document.getElementById("wo-title")?.focus();return;}
+ if(!description||description.length<15){alert("شرح مأموریت باید حداقل ۱۵ نویسه و شامل اقدام مورد انتظار باشد.");document.getElementById("wo-description")?.focus();return;}
+ if(due_date){
+  const chosen=new Date(due_date+"T00:00:00");
+  const today=new Date();today.setHours(0,0,0,0);
+  if(chosen<today){alert("مهلت انجام نمی‌تواند قبل از امروز باشد.");return;}
+ }
+ const btn=document.getElementById("wo-submit");if(btn){btn.disabled=true;btn.textContent="در حال ثبت...";}
+ const {error}=await cloud.from("technical_work_orders").insert({title,description,assigned_username,due_date});
+ if(error){if(btn){btn.disabled=false;btn.textContent="ثبت و ابلاغ مأموریت ←";}alert("ثبت مأموریت ناموفق بود: "+error.message);return;}
+ closeDrawer();
+ await loadWorkOrders();
+}
+
+
 function openWorkReportCard(id,status){
  const old=document.getElementById("work-report-modal"); if(old)old.remove();
  const initial=status==="assigned"?"in_progress":status;
