@@ -205,7 +205,7 @@ body{background:var(--bg);letter-spacing:0;line-height:1.55;-webkit-font-smoothi
 button,input,select,textarea{font:inherit}
 button{transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
 button:active{transform:translateY(1px)}
-.top{height:auto;min-height:72px;padding:12px 18px;background:linear-gradient(115deg,#10243A 0%,#19455A 100%);box-shadow:0 5px 22px rgba(16,36,58,.15)}
+.top{height:auto;min-height:calc(72px + env(safe-area-inset-top,0px));padding:calc(12px + env(safe-area-inset-top,0px)) 18px 12px;background:linear-gradient(115deg,#10243A 0%,#19455A 100%);box-shadow:0 5px 22px rgba(16,36,58,.15)}
 .top h1,.top .h1{font-size:16px!important;letter-spacing:-.2px}
 .top-sub{font-size:11px;color:#B4D9DC;margin-top:3px}
 .role-tag{padding:8px 13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);font-size:11px}
