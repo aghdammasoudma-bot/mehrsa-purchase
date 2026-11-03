@@ -601,6 +601,8 @@ async function cloudLogin(){
   cloudUser=null;currentRole='';currentUser='';showRoleScreen();
  }finally{authBusy(false);}
 }
+window.cloudLogin=cloudLogin;
+document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('#auth-box button');if(b){b.type='button';b.addEventListener('click',e=>{e.preventDefault();cloudLogin();});}});
 async function cloudLogout(){
  await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
  showRoleScreen();authMessage('از حساب خارج شدید.');
