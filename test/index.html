@@ -521,20 +521,6 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
   <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
 </div>
 
-<!-- PIPELINE TABS -->
-<div class="pipeline" id="pipeline-bar" style="display:none">
-  <div class="pipe-step active" data-view="inbox" onclick="switchView('inbox')">
-    📥 صندوق ورودی <span class="pipe-count alert" id="cnt-inbox">0</span>
-  </div>
-  <div class="pipe-step" data-view="all" onclick="switchView('all')">
-    📋 همه درخواست‌ها
-  </div>
-  <div class="pipe-step" data-view="done" onclick="switchView('done')">
-    ✅ تکمیل شده
-  </div>
-  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 مأموریت‌های فنی</div>
-</div>
-
 <!-- CONTENT -->
 <section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>مرکز فرماندهی<br>عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="profile-panel"><div class="profile-avatar" id="hero-avatar">م</div><div class="profile-meta"><strong id="hero-user">کاربر سامانه</strong><span id="hero-role">واحد فنی</span></div><span class="online-dot"></span></div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
 <div class="content" id="main-content" style="display:none">
