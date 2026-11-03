@@ -779,8 +779,6 @@ function renderAll(){
   renderKPIs();
   renderList();
   const cnt=inboxItems().length;
-  document.getElementById("cnt-inbox").textContent=cnt;
-  document.getElementById("cnt-inbox").className="pipe-count"+(cnt>0?" alert":"");
 }
 
 function renderKPIs(){
