@@ -865,7 +865,9 @@ function openNewRequest(){
 
 function newRequestForm(){
   const eqOpts=EQ.map(e=>`<option>${e}</option>`).join("");
+  const bulkBtn=currentIsAdmin?`<button class="btn btn-amber" style="width:100%;margin-bottom:14px" onclick="openBulkPurchase()">▤ ثبت گروهی خریدهای فنی معوق</button>`:"";
   return `
+    ${bulkBtn}
     <h2 style="font-size:16px;font-weight:800;margin-bottom:16px">➕ درخواست خرید جدید</h2>
     <div class="field"><label>عنوان درخواست *</label>
     <input id="nf-title" placeholder="مثال: تعویض پمپ سانتریفیوژ"></div>
@@ -893,6 +895,111 @@ function newRequestForm(){
       <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ${currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی"}</button>
     </div>`;
 }
+
+
+const PENDING_TECH_PURCHASES = [
+["12B3 ساعت فرمان هفتگی شیوا امواج",1,"عدد"],
+["شلنگ ۱.۵ متری فشارقوی پرسی، یک‌سر مهره یک‌سر رزوه",4,"عدد"],
+["بست فلزی ۲ اینچ",30,"عدد"],
+["بست فلزی ۱۳–۸",20,"عدد"],
+["بست فلزی ۲۵–۱۸ میلی‌متر",30,"عدد"],
+["بست فلزی ۱۸–۱۱",20,"عدد"],
+["کابل HDMI بافو ۱۵ متری",1,"عدد"],
+["داکت ۲۰×۲۰ میلی‌متر",8,"متر"],
+["لوله مانیسمان ۲ اینچ رده ۴۰ گازی، طول ۶۰۰۰ میلی‌متر",7,"شاخه"],
+["زانویی مانیسمان ۲ اینچ رده ۴۰ گازی",22,"عدد"],
+["زانویی جوشی مانیسمان ۲ اینچ، ۴۵ درجه",10,"عدد"],
+["فلنج جوشی گلویی ۲ اینچ DN50 PN16",16,"عدد"],
+["شیر فلکه فلنجی چدنی سوزنی ۲ اینچ PN16",4,"عدد"],
+["الکترود ESAB 6010 قطر ۲.۵ میلی‌متر",15,"—"],
+["الکترود ESAB 6010 قطر ۳.۲۵ میلی‌متر",15,"—"],
+["الکترود استیل 316 قطر ۲.۵ میلی‌متر",10,"—"],
+["الکترود استیل 316 قطر ۳.۲۵ میلی‌متر",10,"—"],
+["صفحه برش استیل‌بر قطر ۱۵۰ میلی‌متر",4,"عدد"],
+["جرثقیل ۳ تن بسکت‌دار نوار نقاله پرس فوم",1,"دستگاه"],
+["متر ۱۰ متری",1,"عدد"],
+["متر ۵ متری",1,"عدد"],
+["متر ۳ متری",5,"عدد"],
+["لنت جلوی نیسان",2,"دست"],
+["لنت عقب نیسان",2,"دست"],
+["هواکش صنعتی تک‌فاز ۲۸۰۰ RPM، ابعاد ۸۰۰×۸۰۰ میلی‌متر",2,"عدد"],
+["کفش مردانه سایز ۴۳",1,"جفت"],
+["پلی‌اتیلن چسب‌دار عرض ۱۰۱۰ میلی‌متر",15,"—"],
+["لولای دو تکه نمره ۱۰",10,"عدد"],
+["قفل کمدی ۲۰۰۲",4,"عدد"],
+["کوپلینگ چدنی KB-80 با منجیت",2,"عدد"],
+["موتورگیربکس سه‌فاز SEWR47DT80K4، دور ۲۸ rpm، توان ۰.۵۵ kW",2,"عدد"],
+["ترمز ۳۸۰ DC با پل دیود",2,"عدد"],
+["چهارراهی برق ارت‌دار سیم‌بلند",3,"عدد"],
+["برج خنک‌کننده فایبرگلاس ظرفیت ۲۰۰۰۰۰ لیتر بر ساعت",1,"دستگاه"],
+["فیلتر گازوئیل لیفتراک ۳ تن نیسان",3,"عدد"],
+["لنت ترمز چرخ جلو لیفتراک ۳ تن سپاهان",1,"دست"],
+["فیلتر ثانویه گازوئیل لیفتراک ۳ تن سپاهان",2,"عدد"],
+["سنسور فیلتر گازوئیل لیفتراک ۳ تن سپاهان",1,"عدد"],
+["پایه فیلتر گازوئیل لیفتراک ۳ تن نیسان",1,"عدد"],
+["فشارسنج ۲۵۰ mbar، سایز ۱/۲ اینچ، قطر صفحه ۶۰ میلی‌متر",2,"عدد"],
+["واشر سگدست لیفتراک ۳ تن نیسان",2,"عدد"],
+["گوشی ایمنی خلبانی",2,"عدد"],
+["سه‌راهی جوشی مانیسمان ۲ اینچ",3,"عدد"]
+];
+function openBulkPurchase(){
+ if(!currentIsAdmin){alert("این بخش فقط برای مدیر سامانه فعال است.");return;}
+ const rows=PENDING_TECH_PURCHASES.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x[0])}</td><td>${x[1]}</td><td>${escapeHtml(x[2])}</td></tr>`).join("");
+ document.getElementById("drawer-content").innerHTML=`
+ <h2 style="font-size:17px;margin-bottom:8px">ثبت گروهی خریدهای فنی معوق</h2>
+ <p style="font-size:12px;color:var(--sub);line-height:1.9;margin-bottom:12px">۴۳ قلم از فهرست تأییدشده. هر قلم به‌صورت یک درخواست مستقل و با ارسال مستقیم به برنامه‌ریز ثبت می‌شود. مواردی که واحدشان در فهرست مشخص نبوده با «—» علامت‌گذاری شده‌اند.</p>
+ <div style="max-height:48vh;overflow:auto;border:1px solid var(--line);border-radius:10px">
+ <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:right">
+ <thead style="position:sticky;top:0;background:var(--pale)"><tr><th>ردیف</th><th>شرح کالا</th><th>تعداد</th><th>واحد</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="field" style="margin-top:12px"><label>توجیه ثبت</label><textarea id="bulk-just" style="min-height:65px">ثبت گروهی اقلام خرید فنی معوق بر اساس فهرست تأییدشده سرپرست فنی.</textarea></div>
+ <div class="actions"><button class="btn btn-ghost" onclick="openNewRequest()">بازگشت</button><button class="btn btn-success" id="bulk-submit" onclick="submitBulkPurchase()">ثبت ۴۳ درخواست و ارسال به برنامه‌ریز</button></div>
+ <div id="bulk-progress" style="font-size:12px;color:var(--sub);margin-top:10px"></div>`;
+ openDrawer();
+}
+async function submitBulkPurchase(){
+ if(!currentIsAdmin)return;
+ const justification=document.getElementById("bulk-just")?.value.trim();
+ if(!justification){alert("توجیه ثبت را وارد کنید.");return;}
+ if(!confirm("۴۳ درخواست مستقل ثبت و مستقیماً برای برنامه‌ریز ارسال شود؟ این عملیات قابل بازگشت گروهی نیست."))return;
+ const btn=document.getElementById("bulk-submit"), progress=document.getElementById("bulk-progress");
+ btn.disabled=true;btn.textContent="در حال ثبت...";
+ const now=new Date().toLocaleDateString("fa-IR");
+ const ts=now+" "+new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
+ const errors=[];
+ for(let i=0;i<PENDING_TECH_PURCHASES.length;i++){
+  const [title,qty,unit]=PENDING_TECH_PURCHASES[i];
+  const payload={status:"submitted",prio:"🟡 متوسط",title,desc:"ثبت‌شده از فهرست خریدهای فنی معوق.",justification,unit:unit==="—"?"عدد":unit,qty,equip:"—",date:now,timeline:[{action:"ثبت گروهی درخواست خرید",note:"فهرست خریدهای فنی معوق",ts,icon:"📝"},{action:"ارسال مستقیم به برنامه‌ریز",note:"",ts,icon:"📤"}]};
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:true});
+  if(error)errors.push({row:i+1,title,error:error.message});
+  progress.textContent="پیشرفت ثبت: "+(i+1)+" از "+PENDING_TECH_PURCHASES.length+"؛ خطا: "+errors.length;
+ }
+ await refreshRequests();renderAll();
+ if(errors.length){
+  progress.innerHTML="ثبت پایان یافت؛ "+(PENDING_TECH_PURCHASES.length-errors.length)+" موفق، "+errors.length+" ناموفق.<br>"+errors.map(e=>escapeHtml(e.row+". "+e.title+": "+e.error)).join("<br>");
+  btn.disabled=false;btn.textContent="تلاش مجدد فقط برای موارد ناموفق";
+  btn.onclick=()=>retryBulkFailures(errors,justification);
+ }else{
+  progress.textContent="هر ۴۳ درخواست با موفقیت ثبت و برای برنامه‌ریز ارسال شد.";
+  btn.textContent="ثبت با موفقیت انجام شد";btn.disabled=true;
+ }
+}
+async function retryBulkFailures(errors,justification){
+ const btn=document.getElementById("bulk-submit"),progress=document.getElementById("bulk-progress");
+ btn.disabled=true;const now=new Date().toLocaleDateString("fa-IR");
+ const ts=now+" "+new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
+ const remaining=[];
+ for(let j=0;j<errors.length;j++){
+  const e=errors[j],[title,qty,unit]=PENDING_TECH_PURCHASES[e.row-1];
+  const payload={status:"submitted",prio:"🟡 متوسط",title,desc:"ثبت‌شده از فهرست خریدهای فنی معوق.",justification,unit:unit==="—"?"عدد":unit,qty,equip:"—",date:now,timeline:[{action:"ثبت گروهی درخواست خرید",note:"فهرست خریدهای فنی معوق",ts,icon:"📝"},{action:"ارسال مستقیم به برنامه‌ریز",note:"",ts,icon:"📤"}]};
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:true});
+  if(error)remaining.push({...e,error:error.message});
+  progress.textContent="تلاش مجدد: "+(j+1)+" از "+errors.length;
+ }
+ await refreshRequests();renderAll();
+ progress.textContent=remaining.length?"تعداد ناموفق باقی‌مانده: "+remaining.length:"تمام موارد ناموفق نیز ثبت شدند.";
+ btn.disabled=true;btn.textContent="پایان";
+}
+window.openBulkPurchase=openBulkPurchase;window.submitBulkPurchase=submitBulkPurchase;
 
 async function submitNewRequest(send){
   const title=document.getElementById("nf-title")?.value.trim();
