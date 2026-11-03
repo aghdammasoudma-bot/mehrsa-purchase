@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="عملیات فنی مهرسا">
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png?v=3">
-<link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 
 
@@ -38,9 +38,8 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 button{cursor:pointer;font-family:inherit;border:none}
 
 /* ─── TOP BAR ─── */
-.top{background:var(--navy);padding:0 16px;height:54px;display:flex;align-items:center;
-  justify-content:space-between;position:sticky;top:0;z-index:200;
-  padding-top:env(safe-area-inset-top,0)}
+.top{background:var(--navy);padding:env(safe-area-inset-top,0px) 16px 0;height:calc(54px + env(safe-area-inset-top,0px));min-height:54px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;isolation:isolate}
 .top h1{font-size:14px;font-weight:700;color:#fff}
 .top-sub{font-size:10px;color:#7AAAD8;margin-top:1px}
 .role-tag{background:rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;
