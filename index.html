@@ -8,9 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="عملیات فنی مهرسا">
-<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png?v=3">
-<link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png?v=3">
-<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png?v=3">
+<link rel="apple-touch-icon" sizes="192x192" href="../icons/icon-192.png?v=3">
 
 
 <title>سامانه مدیریت عملیات فنی مهرسا</title>
@@ -208,7 +207,7 @@ body{background:var(--bg);letter-spacing:0;line-height:1.55;-webkit-font-smoothi
 button,input,select,textarea{font:inherit}
 button{transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
 button:active{transform:translateY(1px)}
-.top{height:auto;min-height:calc(72px + env(safe-area-inset-top,0px));padding:calc(12px + env(safe-area-inset-top,0px)) 18px 12px;background:linear-gradient(115deg,#10243A 0%,#19455A 100%);box-shadow:0 5px 22px rgba(16,36,58,.15);position:relative;isolation:isolate}
+.top{height:auto;min-height:calc(72px + env(safe-area-inset-top,0px));padding:calc(12px + env(safe-area-inset-top,0px)) 18px 12px;background:linear-gradient(115deg,#10243A 0%,#19455A 100%);box-shadow:0 5px 22px rgba(16,36,58,.15)}
 .top h1,.top .h1{font-size:16px!important;letter-spacing:-.2px}
 .top-sub{font-size:11px;color:#B4D9DC;margin-top:3px}
 .role-tag{padding:8px 13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);font-size:11px}
@@ -254,6 +253,55 @@ button:active{transform:translateY(1px)}
 @media(max-width:480px){.content{padding:15px 12px 100px}.top{padding-left:13px;padding-right:13px}.pipe-step{padding:12px 11px;font-size:11px}.req-card-top{padding:14px}.req-card-bot{padding:11px 14px}.kpi{padding:14px 12px}.kpi-n{font-size:25px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
+
+/* ─── EXECUTIVE VISUAL SYSTEM / DEPTH LAYER ─── */
+:root{
+ --surface-1:#fff;--surface-2:#f7fafb;--depth-1:0 2px 5px rgba(16,36,58,.04),0 12px 28px rgba(16,36,58,.065);
+ --depth-2:0 7px 16px rgba(16,36,58,.08),0 22px 42px rgba(16,36,58,.11);
+}
+body{background:radial-gradient(ellipse at 88% 0%,rgba(69,184,176,.09),transparent 30%),linear-gradient(180deg,#F7F9FB 0%,#EEF3F6 100%);}
+.content{max-width:1120px;padding-top:26px}
+.top{background:linear-gradient(112deg,#0C2034 0%,#153C52 58%,#176B73 100%);position:sticky}
+.top:after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+.pipeline{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid #DCE6EA}
+.pipe-step{transition:all .2s ease}
+.pipe-step.active{background:linear-gradient(180deg,rgba(69,184,176,.10),rgba(69,184,176,.025));border-radius:12px 12px 0 0}
+.stitle{display:flex;align-items:center;gap:10px;color:#405969;font-size:12px}
+.stitle:before{content:"";width:4px;height:17px;border-radius:4px;background:linear-gradient(180deg,#45B8B0,#176B73)}
+/* dimensional cards: layered edge + restrained perspective */
+.req-card,.kpi{position:relative;isolation:isolate;transform:translateZ(0);box-shadow:var(--depth-1);border:1px solid rgba(195,211,220,.82);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.req-card:before,.kpi:before{pointer-events:none}
+.req-card:after{content:"";position:absolute;z-index:-1;inset:5px -4px -5px 4px;border-radius:inherit;background:linear-gradient(135deg,rgba(23,107,115,.10),rgba(16,36,58,.025));filter:blur(5px);opacity:.75}
+.req-card:hover{transform:translateY(-3px) perspective(900px) rotateX(.35deg);box-shadow:var(--depth-2);border-color:#B9D1D5}
+.req-card-top{background:linear-gradient(145deg,#fff 0%,#FBFDFE 100%)}
+.req-card-bot{background:linear-gradient(90deg,#F2F7F8,#F8FAFB)}
+.req-card-title{letter-spacing:-.2px}
+.kpi{min-height:104px;background:linear-gradient(145deg,#fff 0%,#F8FBFC 100%);transform:perspective(700px) rotateX(0deg)}
+.kpi:before{width:5px;background:linear-gradient(180deg,#45B8B0,#176B73);box-shadow:2px 0 8px rgba(23,107,115,.15)}
+.kpi:after{content:"";position:absolute;left:-20px;bottom:-34px;width:105px;height:105px;border-radius:50%;background:radial-gradient(circle,rgba(69,184,176,.10),transparent 68%);pointer-events:none}
+.kpi-n{font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #fff}
+.b{border:1px solid rgba(30,65,80,.055);box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+.btn{min-height:40px;letter-spacing:-.1px}
+.btn-primary,.btn-success,.btn-danger,.btn-amber{box-shadow:0 4px 0 rgba(10,30,45,.12),0 7px 15px rgba(16,36,58,.08)}
+.btn-primary:hover,.btn-success:hover,.btn-danger:hover,.btn-amber:hover{transform:translateY(-2px);filter:saturate(1.08)}
+.fab{border:1px solid rgba(255,255,255,.55);box-shadow:0 5px 0 #10575D,0 12px 28px rgba(16,90,95,.28);transform:translateY(-2px)}
+.drawer{border:1px solid rgba(210,225,230,.8);box-shadow:0 -18px 55px rgba(9,30,45,.22)}
+#work-orders .req-card{overflow:hidden}
+#work-orders .req-card-top{position:relative}
+#work-orders .req-card-top:before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#45B8B0,#176B73)}
+#work-orders section.req-card{box-shadow:0 14px 38px rgba(16,36,58,.09);border-radius:20px}
+#work-orders section.req-card h2{letter-spacing:-.45px;color:#17384A}
+#work-orders section.req-card textarea:focus,#work-orders section.req-card select:focus{outline:none;border-color:#218A88!important;box-shadow:0 0 0 3px rgba(69,184,176,.14)}
+.role-screen{background:radial-gradient(ellipse at 15% 12%,rgba(69,184,176,.22),transparent 34%),radial-gradient(ellipse at 90% 90%,rgba(55,112,144,.3),transparent 38%),linear-gradient(145deg,#0B1E32,#143B50 62%,#15565C)}
+#auth-box{box-shadow:0 24px 70px rgba(0,0,0,.25)!important}
+@media(max-width:640px){
+ .content{padding-top:16px}
+ .req-card:hover{transform:none}
+ .kpi{min-height:92px}
+}
+@media(prefers-reduced-motion:reduce){.req-card,.kpi,.btn{transition:none!important;transform:none!important}}
+
+
 /* Mission creation form */
 .mission-form{padding:4px 2px 8px}
 .mission-form-head{display:flex;align-items:center;gap:14px;padding:8px 0 20px;border-bottom:1px solid var(--line);margin-bottom:18px}
@@ -274,7 +322,178 @@ button:active{transform:translateY(1px)}
 .mission-form-actions button:disabled{opacity:.55;cursor:wait}
 
 
+/* Persian text rendering refinement — preserve original sizes */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body,button,input,select,textarea{
+  font-family:Tahoma,"Segoe UI",Arial,sans-serif !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  font-kerning:normal;
+}
+#work-orders section.req-card,
+#work-orders section.req-card h2,
+#work-orders section.req-card h3,
+#work-orders section.req-card p,
+#work-orders section.req-card label,
+#work-orders section.req-card textarea,
+#work-orders section.req-card select,
+#work-orders section.req-card .btn,
+#work-orders section.req-card .b,
+#work-orders section.req-card .chip{
+  letter-spacing:normal;
+}
+#work-orders section.req-card{
+  line-height:1.8;
+}
+#work-orders section.req-card p,
+#work-orders section.req-card div[style*="white-space:pre-wrap"]{
+  line-height:1.9 !important;
+}
+#work-orders section.req-card textarea,
+#work-orders section.req-card select{
+  font-family:Tahoma,"Segoe UI",Arial,sans-serif !important;
+  font-weight:400;
+  line-height:1.8 !important;
+}
 
+/* ─── MEHRSA DARK ENTERPRISE THEME ─── */
+:root{color-scheme:dark;--ink:#E7EEF8;--navy:#101D32;--blue:#172943;--steel:#2787F5;--sky:#55A7FF;--pale:#1A2D48;--line:#2A3D58;--bg:#0B1422;--card:#142238;--text:#E4ECF7;--sub:#91A5BF;--green:#69D39A;--green-bg:#173B32;--amber:#F2C66D;--amber-bg:#40351F;--red:#FF858B;--red-bg:#43252D;--orange:#FFAA78;--orange-bg:#432D25;--purple:#C5A1FF;--purple-bg:#332849;--grey:#A5B3C5;--grey-bg:#29364A;--shadow:0 8px 28px rgba(0,0,0,.24);--surface-1:#142238;--surface-2:#192A42;--depth-1:0 3px 8px rgba(0,0,0,.22),0 12px 28px rgba(0,0,0,.18);--depth-2:0 8px 18px rgba(0,0,0,.3),0 22px 42px rgba(0,0,0,.25)}
+html,body{background:#0B1422!important;color:var(--text)!important}body{background:radial-gradient(ellipse at 88% 0%,rgba(39,135,245,.12),transparent 32%),linear-gradient(180deg,#101D30 0%,#0B1422 100%)!important}
+.top{background:linear-gradient(112deg,#0A1424 0%,#142A47 58%,#174477 100%)!important}.top-sub{color:#9AB8DD!important}.role-tag{background:#203650!important;border-color:#38516F!important;color:#EAF3FF!important}
+.pipeline{background:#111F33!important;border-color:#263A55!important}.pipe-step{color:#91A5BF!important}.pipe-step.active{color:#70B5FF!important;background:linear-gradient(180deg,rgba(39,135,245,.16),rgba(39,135,245,.03))!important;border-bottom-color:#3D98FF!important}.pipe-count{background:#29415F!important;color:#DCEBFF!important}.pipe-count.alert{background:#762F3A!important;color:#FFE4E6!important}
+.stitle{color:#A8BAD0!important}.req-card,.kpi,.drawer,.comment-box{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}.req-card{box-shadow:var(--depth-1)!important}.req-card-top{background:linear-gradient(145deg,#172840,#142238)!important;border-color:#293D59!important}.req-card-title,.kpi-n,#work-orders section.req-card h2{color:#EAF2FC!important;text-shadow:none!important}.req-card-id,.req-card-bot-left,.kpi-l,.tl-meta{color:#9BAFC8!important}.req-card-bot{background:#192B43!important}.kpi{background:linear-gradient(145deg,#172840,#132137)!important}.kpi:before{background:linear-gradient(180deg,#55A7FF,#247CE0)!important}.kpi:after{background:radial-gradient(circle,rgba(67,147,255,.13),transparent 68%)!important}
+.b-green{background:#173B32!important;color:#7DE0AA!important}.b-amber{background:#40351F!important;color:#F6D17D!important}.b-red{background:#43252D!important;color:#FF9AA0!important}.b-orange{background:#432D25!important;color:#FFB58A!important}.b-purple{background:#332849!important;color:#D0B5FF!important}.b-blue,.chip{background:#1D3553!important;color:#9CCAFF!important}.b-grey{background:#29364A!important;color:#C0CBD9!important}.b-navy{background:#203B60!important;color:#EAF3FF!important}
+.btn-primary{background:linear-gradient(135deg,#176BC4,#2787F5)!important;color:#fff!important;box-shadow:0 5px 16px rgba(25,112,213,.25)!important}.btn-success{background:#176B4A!important;color:#fff!important}.btn-danger{background:#8B303B!important;color:#fff!important}.btn-ghost{background:#1A2B43!important;border-color:#3A506D!important;color:#DCE8F7!important}
+.field label,.comment-box label{color:#A9BCD4!important}.field input,.field select,.field textarea,.comment-box textarea,#work-report,#work-status{background:#0E1B2D!important;color:#E4ECF7!important;border-color:#334A68!important}.field input::placeholder,.field textarea::placeholder,textarea::placeholder{color:#7187A3!important}
+.overlay{background:rgba(0,0,0,.72)!important}.drawer{background:#142238!important;border-color:#30445F!important}.drawer-handle{background:#526780!important}.tl-dot{background:#192B43!important;border-color:#3A506D!important}.tl-item:before{background:#344A66!important}.flow-step.current{background:#1B3554!important}.flow-step.current .flow-lbl{color:#7FBCFF!important}.flow-step:not(.done):not(.current){opacity:.55}
+.role-screen{background:radial-gradient(ellipse at 15% 12%,rgba(39,135,245,.2),transparent 34%),linear-gradient(145deg,#091426 0%,#122944 62%,#153E68 100%)!important}#auth-box{background:#142238!important;border-color:#334A68!important;color:#E4ECF7!important}#auth-box label{color:#B7C9DF!important}#auth-email,#auth-password{background:#0C192A!important;border-color:#334A68!important;color:#E4ECF7!important}#auth-msg{color:#9BAFC8!important}#auth-box .btn-ghost{color:#9CCAFF!important;border-color:#3A5678!important;background:#1A2B43!important}.role-btn{background:rgba(25,47,75,.82)!important;border-color:#3A5678!important}.role-btn-title{color:#F0F5FC!important}.role-btn-sub,.role-screen p{color:#AFC4DE!important}
+.mission-form,.mission-form-head,.mission-callout{background:#142238!important;color:#E4ECF7!important;border-color:#30445F!important}.mission-section-title{color:#AFC4DE!important}.mission-hint{color:#8FA5C0!important}.mission-callout{background:#1A2D48!important}.fab{background:linear-gradient(135deg,#176BC4,#2787F5)!important;box-shadow:0 5px 0 #124B88,0 12px 28px rgba(0,0,0,.35)!important}hr{border-color:#30445F!important}table{color:#E4ECF7!important}thead{background:#1A2D48!important}td,th{border-color:#30445F!important}.empty{color:#91A5BF!important}
+
+
+/* Dashboard visual layer restored */
+
+.pipe-step{flex:none;padding:10px 14px;text-align:center;position:relative;color:rgba(255,255,255,.5);
+  font-size:10px;font-weight:700;white-space:nowrap;min-width:80px;cursor:pointer}
+
+.pipe-step.active{color:#fff;border-bottom:2px solid var(--sky)}
+
+.pipe-count{background:var(--steel);color:#fff;border-radius:10px;padding:1px 7px;
+  font-size:10px;margin-right:4px;vertical-align:middle}
+
+.pipe-count.alert{background:var(--red)}
+
+
+/* ─── KPI ROW ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 11px;text-align:center;box-shadow:var(--shadow)}
+
+.kpi-n{font-size:26px;font-weight:800}
+
+.kpi-l{font-size:10px;color:var(--sub);margin-top:3px}
+
+.pipe-step{color:#758895;padding:14px 15px;font-size:12px;min-width:auto;border-bottom:3px solid transparent}
+
+.pipe-step.active{color:var(--steel);border-bottom-color:var(--sky)}
+
+.pipe-count{background:#DCECEB;color:#18565A;border-radius:9px;padding:2px 7px}
+
+.pipe-count.alert{background:#FBE3E4;color:#A21F2B}
+
+.kpi{border-radius:16px;padding:16px 13px;border-color:#E1E9ED;box-shadow:0 4px 15px rgba(19,45,63,.045);text-align:right;position:relative;overflow:hidden}
+
+.kpi:before{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:#45B8B0}
+
+.kpi-n{font-size:28px;color:#173C4A;line-height:1.2}
+
+.kpi-l{font-size:11px;margin-top:7px;color:#6A7E8B}
+
+.pipe-step{transition:all .2s ease}
+
+.pipe-step.active{background:linear-gradient(180deg,rgba(69,184,176,.10),rgba(69,184,176,.025));border-radius:12px 12px 0 0}
+
+/* dimensional cards: layered edge + restrained perspective */
+.req-card,.kpi{position:relative;isolation:isolate;transform:translateZ(0);box-shadow:var(--depth-1);border:1px solid rgba(195,211,220,.82);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+
+.req-card:before,.kpi:before{pointer-events:none}
+
+.kpi{min-height:104px;background:linear-gradient(145deg,#fff 0%,#F8FBFC 100%);transform:perspective(700px) rotateX(0deg)}
+
+.kpi:before{width:5px;background:linear-gradient(180deg,#45B8B0,#176B73);box-shadow:2px 0 8px rgba(23,107,115,.15)}
+
+.kpi:after{content:"";position:absolute;left:-20px;bottom:-34px;width:105px;height:105px;border-radius:50%;background:radial-gradient(circle,rgba(69,184,176,.10),transparent 68%);pointer-events:none}
+
+.kpi-n{font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #fff}
+.pipe-step{color:#91A5BF!important}
+.pipe-step.active{color:#70B5FF!important;background:linear-gradient(180deg,rgba(39,135,245,.16),rgba(39,135,245,.03))!important;border-bottom-color:#3D98FF!important}
+.pipe-count{background:#29415F!important;color:#DCEBFF!important}
+.pipe-count.alert{background:#762F3A!important;color:#FFE4E6!important}
+.req-card,.kpi,.drawer,.comment-box{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
+.req-card-title,.kpi-n,#work-orders section.req-card h2{color:#EAF2FC!important;text-shadow:none!important}
+.req-card-id,.req-card-bot-left,.kpi-l,.tl-meta{color:#9BAFC8!important}
+.kpi{background:linear-gradient(145deg,#172840,#132137)!important}
+.kpi:before{background:linear-gradient(180deg,#55A7FF,#247CE0)!important}
+.kpi:after{background:radial-gradient(circle,rgba(67,147,255,.13),transparent 68%)!important}
+
+.pipe-step{white-space:nowrap!important;color:#a9bdd4!important}
+.pipe-step.active{background:#1d4266!important;color:#fff!important;border-radius:10px}
+
+.management-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(190px,.8fr);gap:12px;margin:14px auto 16px;max-width:1120px}
+
+.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background-image:linear-gradient(90deg,rgba(7,18,30,.68) 0%,rgba(7,18,30,.28) 38%,rgba(7,18,30,.04) 100%),url('https://uppp.soceco.uci.edu/sites/default/files/styles/large_3_2_ratio__1080x720_/public/news/pexels-tom-fisk-10396410.jpg?itok=U_vVBz3l');background-size:cover;background-position:center 48%;isolation:isolate;padding:24px 25px;display:flex;align-items:center}
+
+.hero-industrial:before{content:"";position:absolute;inset:0;z-index:-1;background:none}
+
+.hero-copy{position:relative;z-index:3}
+.hero-eyebrow{font-size:9px;letter-spacing:2px;color:#8bb9d3;font-weight:800}
+.hero-copy h2{font-size:clamp(22px,3vw,31px);line-height:1.45;margin:10px 0 5px;color:#fff;font-weight:900}
+.hero-copy p{font-size:11px;color:#b8cadd;margin:0}
+
+.factory-art{display:none}
+.factory-ground{position:absolute;bottom:20px;left:0;right:0;height:2px;background:#78a9bd;opacity:.6}
+.stack-a{height:112px;left:22%}
+.stack-b{height:82px;left:33%;width:15px}
+.tank-a{height:67px;width:54px;left:48%}
+.tank-b{height:91px;width:67px;left:67%}
+.pipe-a{left:49%;width:55px}
+.pipe-b{left:67%;width:66px;height:55px;bottom:112px}
+.hero-glow{position:absolute;width:180px;height:180px;border-radius:50%;background:#57a6b9;filter:blur(70px);opacity:.22;right:12%;top:-70px}
+
+.profile-panel{background:linear-gradient(145deg,#14283d,#101c2c);border:1px solid #2a4058;border-radius:20px;display:flex;align-items:center;gap:13px;padding:20px;min-height:120px;box-shadow:0 12px 30px rgba(0,0,0,.16)}
+
+.profile-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:18px;background:linear-gradient(145deg,#3c7892,#24435f);border:2px solid #82b5c5;display:grid;place-items:center;font-size:25px;font-weight:900;color:white}
+
+.profile-meta{display:flex;flex-direction:column;gap:7px;min-width:0}
+.profile-meta strong{font-size:14px;color:#f3f7fb}
+.profile-meta span{font-size:11px;color:#93abc2}
+.online-dot{width:9px;height:9px;border-radius:50%;background:#42d392;box-shadow:0 0 0 4px rgba(66,211,146,.12);margin-right:auto;align-self:flex-start}
+
+.quick-actions{max-width:1120px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+.quick-action{border:1px solid #2a4058!important;background:linear-gradient(145deg,#14263a,#101c2c)!important;color:#e8f1fb!important;border-radius:16px!important;padding:13px 15px!important;text-align:right;display:grid;grid-template-columns:36px 1fr;column-gap:10px;align-items:center;box-shadow:0 8px 22px rgba(0,0,0,.12)}
+
+.quick-action>span{grid-row:span 2;width:36px;height:36px;border-radius:11px;background:#1d4261;color:#8fd0df;display:grid;place-items:center;font-size:21px}
+.quick-action b{font-size:12px}
+.quick-action small{font-size:10px;color:#8ea5bd;margin-top:3px}
+
+.kpi-row{gap:10px!important;margin-bottom:18px!important}
+.kpi{background:linear-gradient(145deg,#172b40,#111e2e)!important;border:1px solid #2a4058!important;border-radius:15px!important;box-shadow:0 8px 22px rgba(0,0,0,.14)!important;padding:15px!important}
+.kpi-l{color:#9bb0c7!important}
+.kpi-n{font-size:25px!important}
+
+.mobile-bottom-nav{position:fixed;z-index:80;bottom:0;left:0;right:0;display:flex;justify-content:space-around;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(9,19,31,.96);border-top:1px solid #2a4058;backdrop-filter:blur(18px)}
+
+.mobile-bottom-nav button{border:0;background:transparent;color:#91a8c0;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;padding:4px 7px}
+.mobile-bottom-nav button span{font-size:19px;line-height:22px}
+.mobile-bottom-nav button small{font-size:9px}
+.mobile-bottom-nav button.active{color:#8bd1df}
+
+.mobile-bottom-nav .nav-primary{margin-top:-24px;background:linear-gradient(145deg,#56b5c2,#287d9a);color:#061724;border:4px solid #0b1928;border-radius:17px;width:53px;height:53px;justify-content:center;box-shadow:0 5px 18px rgba(47,151,177,.28)}
+.mobile-bottom-nav .nav-primary span{font-size:26px}
 </style>
 </head>
 <body>
@@ -302,28 +521,14 @@ button:active{transform:translateY(1px)}
   <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
 </div>
 
-<!-- PIPELINE TABS -->
-<div class="pipeline" id="pipeline-bar" style="display:none">
-  <div class="pipe-step active" data-view="inbox" onclick="switchView('inbox')">
-    📥 صندوق ورودی <span class="pipe-count alert" id="cnt-inbox">0</span>
-  </div>
-  <div class="pipe-step" data-view="all" onclick="switchView('all')">
-    📋 همه درخواست‌ها
-  </div>
-  <div class="pipe-step" data-view="done" onclick="switchView('done')">
-    ✅ تکمیل شده
-  </div>
-  <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 مأموریت‌های فنی</div>
-</div>
-
 <!-- CONTENT -->
+<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="profile-panel"><div class="profile-avatar" id="hero-avatar" style="overflow:hidden;padding:0"><img src="data:image/jpeg;base64,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" alt="تصویر پروفایل" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit"></div><div class="profile-meta"><strong id="hero-user">کاربر سامانه</strong><span id="hero-role">واحد فنی</span></div><span class="online-dot"></span></div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
   <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div>
 </div>
 
-<!-- FAB -->
-<button class="fab" id="fab" style="display:none" onclick="openNewRequest()">＋</button>
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
 
 <!-- DRAWER -->
 <div class="overlay" id="overlay">
@@ -353,14 +558,14 @@ const FLOW_ORDER=FLOW.map(f=>f.key);
 
 const PRIO_MAP={"🔴 فوری":"b-red","🟠 بالا":"b-orange","🟡 متوسط":"b-amber","🟢 پایین":"b-green"};
 const STATUS_LABEL={
-  "draft":"پیش‌نویس","submitted":"ارسال شده به برنامه‌ریز",
+  "draft":"پیش‌نویس","admin_review":"در انتظار تأیید سرپرست فنی","admin_rejected":"رد شده توسط سرپرست فنی","submitted":"ارسال شده به برنامه‌ریز",
   "planner_review":"در بررسی برنامه‌ریز","planner_approved":"تأیید شده — در انتظار بازرگانی",
   "planner_rejected":"رد شده توسط برنامه‌ریز",
   "procurement_inquiry":"استعلام قیمت","procurement_ordered":"سفارش داده شده",
   "in_transit":"در راه","delivered":"تحویل داده شده","closed":"بسته شده"
 };
 const STATUS_BADGE={
-  "draft":"b-grey","submitted":"b-blue","planner_review":"b-amber",
+  "draft":"b-grey","admin_review":"b-amber","admin_rejected":"b-red","submitted":"b-blue","planner_review":"b-amber",
   "planner_approved":"b-blue","planner_rejected":"b-red",
   "procurement_inquiry":"b-purple","procurement_ordered":"b-orange",
   "in_transit":"b-green","delivered":"b-green","closed":"b-grey"
@@ -433,7 +638,7 @@ const SEED=[
 ];
 
 // ════ STATE ════
-let currentRole='', currentUser='', currentTitle='', currentView='inbox';
+let currentRole='', currentUser='', currentUsername='', currentTitle='', currentView='inbox';
 let requests=[], db=null, drawerData=null;
 
 // ════ SUPABASE CLOUD DB ════
@@ -468,7 +673,7 @@ window.addEventListener('error',e=>{
 window.addEventListener('unhandledrejection',e=>{
  const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اتصال: '+(e.reason?.message||String(e.reason));
 });
-let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='';
+let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='', workDetailOpen=false;
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
 async function loadUserProfile(){
   if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
@@ -481,6 +686,7 @@ async function loadUserProfile(){
   currentIsAdmin=data.role==='admin';
   currentRole=data.role==='maintenance'?'tech':data.role;
   currentUser=data.full_name;
+  currentUsername=data.username;
   currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
   setRole(currentRole,currentUser,currentTitle);
 }
@@ -490,7 +696,7 @@ async function cloudLogin(){
  authBusy(true);authMessage('در حال اتصال به سامانه…');
  try{
   await ensureCloud();
-  const loginEmails={masoud:'aghdam.masoud@yahoo.com',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
+  const loginEmails={masoud:'aghdam.masoud@yahoo.com',biabani:'biabani@mehrsa.local',reza:'reza@example.com',hamid:'hamid@example.com',mohammadi:'mohammadi@example.com',karami:'karami@example.com'};
   const email=login.includes('@')?login:(loginEmails[login.toLowerCase()]||login+'@example.com');
   authMessage('در حال بررسی اطلاعات ورود…');
   const {data,error}=await cloud.auth.signInWithPassword({email,password});
@@ -503,6 +709,8 @@ async function cloudLogin(){
   cloudUser=null;currentRole='';currentUser='';showRoleScreen();
  }finally{authBusy(false);}
 }
+window.cloudLogin=cloudLogin;
+document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('#auth-box button');if(b){b.type='button';b.addEventListener('click',e=>{e.preventDefault();cloudLogin();});}});
 async function cloudLogout(){
  await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
  showRoleScreen();authMessage('از حساب خارج شدید.');
@@ -518,7 +726,7 @@ async function initDB(){
   if(!cloudUser){requests=[];return;}
   await refreshRequests();
   await loadWorkOrders();
-  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();await loadWorkOrders();}catch(e){console.error(e);}},12000);}
+  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();if(!workDetailOpen)await loadWorkOrders();}catch(e){console.error(e);}},12000);}
 }
 async function saveDB(){
   throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
@@ -529,27 +737,29 @@ function setRole(role,user,title){
   currentRole=role;currentUser=user;currentTitle=title;
   document.getElementById("role-screen").style.display="none";
   document.getElementById("topbar").style.display="flex";
-  document.getElementById("pipeline-bar").style.display="flex";
   document.getElementById("main-content").style.display="block";
-  document.getElementById("top-name").textContent=user;
-  document.getElementById("top-role").textContent=title;
-  document.getElementById("fab").style.display=(role==="tech"||role==="admin"||profileRole==="maintenance")?"flex":"none";
+  document.getElementById("management-hero").style.display="block";
+  document.getElementById("quick-actions").style.display="flex";
+  document.getElementById("mobile-bottom-nav").style.display="flex";
+  const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+  setText("hero-user",user);
+  setText("hero-role",title);
+  // Keep the portrait image; do not overwrite it with the user initial.
+  setText("top-name",user);
+  setText("top-role",title);
   renderAll();
 }
 function showRoleScreen(){
   document.getElementById("role-screen").style.display="flex";
   document.getElementById("topbar").style.display="none";
-  document.getElementById("pipeline-bar").style.display="none";
   document.getElementById("main-content").style.display="none";
-  document.getElementById("fab").style.display="none";
 }
 
 function inboxItems(){
-  if(currentRole==="tech") return requests.filter(r=>["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered","closed"].includes(r.status));
   if(currentIsAdmin) return requests.filter(r=>
-    ["draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
-  if(currentRole==="tech") return requests.filter(r=>
-    r.by===currentUser&&(r.status==="draft"||r.status==="planner_rejected"));
+    ["admin_review","admin_rejected","draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
+  if(currentRole==="tech"||currentRole==="maintenance") return requests.filter(r=>
+    r.by===currentUser&&["draft","admin_rejected","planner_rejected"].includes(r.status));
   if(currentRole==="planner") return requests.filter(r=>r.status==="submitted");
   if(currentRole==="procurement") return requests.filter(r=>
     ["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
@@ -570,8 +780,6 @@ function renderAll(){
   renderKPIs();
   renderList();
   const cnt=inboxItems().length;
-  document.getElementById("cnt-inbox").textContent=cnt;
-  document.getElementById("cnt-inbox").className="pipe-count"+(cnt>0?" alert":"");
 }
 
 function renderKPIs(){
@@ -614,8 +822,8 @@ function statusBadge(s){return `<span class="b ${STATUS_BADGE[s]||'b-grey'}">${s
 
 function reqCard(r){
   const isUrgent=r.prio==="🔴 فوری";
-  const needsAction=(currentIsAdmin&&["draft","planner_rejected","submitted","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
-    ||(currentRole==="tech"&&(r.status==="draft"||r.status==="planner_rejected")&&r.by===currentUser)
+  const needsAction=(currentIsAdmin&&["draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status))
+    ||((currentRole==="tech"||currentRole==="maintenance")&&["draft","admin_rejected","planner_rejected"].includes(r.status)&&r.by===currentUser)
     ||(currentRole==="planner"&&r.status==="submitted")
     ||(currentRole==="procurement"&&["planner_approved","procurement_inquiry","procurement_ordered","in_transit"].includes(r.status));
   return `
@@ -737,15 +945,19 @@ async function saveEditPurchase(id){
 window.openEditPurchase=openEditPurchase;window.saveEditPurchase=saveEditPurchase;
 function actionButtons(r){
   let html="";
-  if((currentRole==="tech"||currentIsAdmin)&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
+  if((currentRole==="tech"||currentRole==="maintenance"||currentIsAdmin)&&(r.status==="draft"||r.status==="admin_rejected"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
     if(r.status==="draft"){
       html+=`<div class="comment-box"><label>یادداشت (اختیاری)</label><textarea id="act-note" placeholder="توضیح بیشتر برای برنامه‌ریز…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ارسال به برنامه‌ریز</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('submit')">📤 ${currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی"}</button><button class="btn btn-ghost" onclick="doDelete()">🗑 حذف</button></div>`;
     }else{
       html+=`<div style="background:var(--red-bg);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--red)">❌ این درخواست توسط برنامه‌ریز رد شده است.<br><strong>دلیل:</strong> ${r.plannerNote||"—"}</div>
       <div class="comment-box"><label>اصلاحات انجام شده</label><textarea id="act-note" placeholder="توضیح دهید چه تغییراتی اعمال شد…"></textarea></div>
-      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ارسال مجدد به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
+      <div class="actions"><button class="btn btn-primary" onclick="doAction('resubmit')">📤 ${currentIsAdmin?"ارسال مجدد مستقیم به برنامه‌ریز":"ارسال مجدد جهت تأیید سرپرست فنی"}</button><button class="btn btn-danger" onclick="doAction('cancel')">لغو درخواست</button></div>`;
     }
+  }
+  if(currentIsAdmin&&r.status==="admin_review"&&r.by!==currentUser){
+    html+=`<div class="comment-box"><label>یادداشت سرپرست فنی</label><textarea id="act-note" placeholder="توضیح تأیید یا دلیل رد درخواست…"></textarea></div>
+    <div class="actions"><button class="btn btn-success" onclick="doAction('admin_approve')">✅ تأیید و ارجاع به برنامه‌ریز</button><button class="btn btn-danger" onclick="doAction('admin_reject')">❌ رد درخواست</button></div>`;
   }
   if(currentRole==="planner"&&r.status==="submitted"){
     html+=`<div class="comment-box"><label>یادداشت برنامه‌ریز</label><textarea id="act-note" placeholder="موعد پیشنهادی، شرایط خاص، دلیل رد…"></textarea></div>
@@ -782,8 +994,8 @@ async function doAction(type){
   const orderNo=document.getElementById("act-order")?.value.trim()||"";
   if(type==="cancel"&&!confirm("آیا مطمئن هستید؟")) return;
   if(type==="approve"&&!note&&!confirm("بدون یادداشت تأیید شود؟")) return;
-  if(type==="reject"&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
-  const actionMap={submit:"submit",resubmit:"resubmit",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
+  if((type==="reject"||type==="admin_reject")&&!note){alert("لطفاً دلیل رد را بنویسید");return;}
+  const actionMap={submit:"submit",resubmit:"resubmit",admin_approve:"admin_approve",admin_reject:"admin_reject",approve:"approve",reject:"reject",inquiry:"inquiry",order:"order",ship:"ship",deliver:"deliver",close:"close"};
   const {error}=await cloud.rpc(type==="cancel"?"delete_purchase_request":"transition_purchase_request",type==="cancel"?{p_request_id:r.id}:{p_request_id:r.id,p_action:actionMap[type],p_note:note,p_supplier:supplier,p_order_no:orderNo});
   if(error){alert("عملیات انجام نشد: "+error.message);return;}
   await refreshRequests();
@@ -809,7 +1021,9 @@ function openNewRequest(){
 
 function newRequestForm(){
   const eqOpts=EQ.map(e=>`<option>${e}</option>`).join("");
+  const bulkBtn=currentIsAdmin?`<button class="btn btn-amber" style="width:100%;margin-bottom:14px" onclick="openBulkPurchase()">▤ ثبت گروهی خریدهای فنی معوق</button>`:"";
   return `
+    ${bulkBtn}
     <h2 style="font-size:16px;font-weight:800;margin-bottom:16px">➕ درخواست خرید جدید</h2>
     <div class="field"><label>عنوان درخواست *</label>
     <input id="nf-title" placeholder="مثال: تعویض پمپ سانتریفیوژ"></div>
@@ -834,9 +1048,114 @@ function newRequestForm(){
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="submitNewRequest(false)">💾 ذخیره پیش‌نویس</button>
-      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ارسال به برنامه‌ریز</button>
+      <button class="btn btn-success" style="flex:1" onclick="submitNewRequest(true)">📤 ${currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی"}</button>
     </div>`;
 }
+
+
+const PENDING_TECH_PURCHASES = [
+["12B3 ساعت فرمان هفتگی شیوا امواج",1,"عدد"],
+["شلنگ ۱.۵ متری فشارقوی پرسی، یک‌سر مهره یک‌سر رزوه",4,"عدد"],
+["بست فلزی ۲ اینچ",30,"عدد"],
+["بست فلزی ۱۳–۸",20,"عدد"],
+["بست فلزی ۲۵–۱۸ میلی‌متر",30,"عدد"],
+["بست فلزی ۱۸–۱۱",20,"عدد"],
+["کابل HDMI بافو ۱۵ متری",1,"عدد"],
+["داکت ۲۰×۲۰ میلی‌متر",8,"متر"],
+["لوله مانیسمان ۲ اینچ رده ۴۰ گازی، طول ۶۰۰۰ میلی‌متر",7,"شاخه"],
+["زانویی مانیسمان ۲ اینچ رده ۴۰ گازی",22,"عدد"],
+["زانویی جوشی مانیسمان ۲ اینچ، ۴۵ درجه",10,"عدد"],
+["فلنج جوشی گلویی ۲ اینچ DN50 PN16",16,"عدد"],
+["شیر فلکه فلنجی چدنی سوزنی ۲ اینچ PN16",4,"عدد"],
+["الکترود ESAB 6010 قطر ۲.۵ میلی‌متر",15,"—"],
+["الکترود ESAB 6010 قطر ۳.۲۵ میلی‌متر",15,"—"],
+["الکترود استیل 316 قطر ۲.۵ میلی‌متر",10,"—"],
+["الکترود استیل 316 قطر ۳.۲۵ میلی‌متر",10,"—"],
+["صفحه برش استیل‌بر قطر ۱۵۰ میلی‌متر",4,"عدد"],
+["جرثقیل ۳ تن بسکت‌دار نوار نقاله پرس فوم",1,"دستگاه"],
+["متر ۱۰ متری",1,"عدد"],
+["متر ۵ متری",1,"عدد"],
+["متر ۳ متری",5,"عدد"],
+["لنت جلوی نیسان",2,"دست"],
+["لنت عقب نیسان",2,"دست"],
+["هواکش صنعتی تک‌فاز ۲۸۰۰ RPM، ابعاد ۸۰۰×۸۰۰ میلی‌متر",2,"عدد"],
+["کفش مردانه سایز ۴۳",1,"جفت"],
+["پلی‌اتیلن چسب‌دار عرض ۱۰۱۰ میلی‌متر",15,"—"],
+["لولای دو تکه نمره ۱۰",10,"عدد"],
+["قفل کمدی ۲۰۰۲",4,"عدد"],
+["کوپلینگ چدنی KB-80 با منجیت",2,"عدد"],
+["موتورگیربکس سه‌فاز SEWR47DT80K4، دور ۲۸ rpm، توان ۰.۵۵ kW",2,"عدد"],
+["ترمز ۳۸۰ DC با پل دیود",2,"عدد"],
+["چهارراهی برق ارت‌دار سیم‌بلند",3,"عدد"],
+["برج خنک‌کننده فایبرگلاس ظرفیت ۲۰۰۰۰۰ لیتر بر ساعت",1,"دستگاه"],
+["فیلتر گازوئیل لیفتراک ۳ تن نیسان",3,"عدد"],
+["لنت ترمز چرخ جلو لیفتراک ۳ تن سپاهان",1,"دست"],
+["فیلتر ثانویه گازوئیل لیفتراک ۳ تن سپاهان",2,"عدد"],
+["سنسور فیلتر گازوئیل لیفتراک ۳ تن سپاهان",1,"عدد"],
+["پایه فیلتر گازوئیل لیفتراک ۳ تن نیسان",1,"عدد"],
+["فشارسنج ۲۵۰ mbar، سایز ۱/۲ اینچ، قطر صفحه ۶۰ میلی‌متر",2,"عدد"],
+["واشر سگدست لیفتراک ۳ تن نیسان",2,"عدد"],
+["گوشی ایمنی خلبانی",2,"عدد"],
+["سه‌راهی جوشی مانیسمان ۲ اینچ",3,"عدد"]
+];
+function openBulkPurchase(){
+ if(!currentIsAdmin){alert("این بخش فقط برای مدیر سامانه فعال است.");return;}
+ const rows=PENDING_TECH_PURCHASES.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x[0])}</td><td>${x[1]}</td><td>${escapeHtml(x[2])}</td></tr>`).join("");
+ document.getElementById("drawer-content").innerHTML=`
+ <h2 style="font-size:17px;margin-bottom:8px">ثبت گروهی خریدهای فنی معوق</h2>
+ <p style="font-size:12px;color:var(--sub);line-height:1.9;margin-bottom:12px">۴۳ قلم از فهرست تأییدشده. هر قلم به‌صورت یک درخواست مستقل و با ارسال مستقیم به برنامه‌ریز ثبت می‌شود. مواردی که واحدشان در فهرست مشخص نبوده با «—» علامت‌گذاری شده‌اند.</p>
+ <div style="max-height:48vh;overflow:auto;border:1px solid var(--line);border-radius:10px">
+ <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:right">
+ <thead style="position:sticky;top:0;background:var(--pale)"><tr><th>ردیف</th><th>شرح کالا</th><th>تعداد</th><th>واحد</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="field" style="margin-top:12px"><label>توجیه ثبت</label><textarea id="bulk-just" style="min-height:65px">ثبت گروهی اقلام خرید فنی معوق بر اساس فهرست تأییدشده سرپرست فنی.</textarea></div>
+ <div class="actions"><button class="btn btn-ghost" onclick="openNewRequest()">بازگشت</button><button class="btn btn-success" id="bulk-submit" onclick="submitBulkPurchase()">ثبت ۴۳ درخواست و ارسال به برنامه‌ریز</button></div>
+ <div id="bulk-progress" style="font-size:12px;color:var(--sub);margin-top:10px"></div>`;
+ openDrawer();
+}
+async function submitBulkPurchase(){
+ if(!currentIsAdmin)return;
+ const justification=document.getElementById("bulk-just")?.value.trim();
+ if(!justification){alert("توجیه ثبت را وارد کنید.");return;}
+ if(!confirm("۴۳ درخواست مستقل ثبت و مستقیماً برای برنامه‌ریز ارسال شود؟ این عملیات قابل بازگشت گروهی نیست."))return;
+ const btn=document.getElementById("bulk-submit"), progress=document.getElementById("bulk-progress");
+ btn.disabled=true;btn.textContent="در حال ثبت...";
+ const now=new Date().toLocaleDateString("fa-IR");
+ const ts=now+" "+new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
+ const errors=[];
+ for(let i=0;i<PENDING_TECH_PURCHASES.length;i++){
+  const [title,qty,unit]=PENDING_TECH_PURCHASES[i];
+  const payload={status:"submitted",prio:"🟡 متوسط",title,desc:"ثبت‌شده از فهرست خریدهای فنی معوق.",justification,unit:unit==="—"?"عدد":unit,qty,equip:"—",date:now,timeline:[{action:"ثبت گروهی درخواست خرید",note:"فهرست خریدهای فنی معوق",ts,icon:"📝"},{action:"ارسال مستقیم به برنامه‌ریز",note:"",ts,icon:"📤"}]};
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:true});
+  if(error)errors.push({row:i+1,title,error:error.message});
+  progress.textContent="پیشرفت ثبت: "+(i+1)+" از "+PENDING_TECH_PURCHASES.length+"؛ خطا: "+errors.length;
+ }
+ await refreshRequests();renderAll();
+ if(errors.length){
+  progress.innerHTML="ثبت پایان یافت؛ "+(PENDING_TECH_PURCHASES.length-errors.length)+" موفق، "+errors.length+" ناموفق.<br>"+errors.map(e=>escapeHtml(e.row+". "+e.title+": "+e.error)).join("<br>");
+  btn.disabled=false;btn.textContent="تلاش مجدد فقط برای موارد ناموفق";
+  btn.onclick=()=>retryBulkFailures(errors,justification);
+ }else{
+  progress.textContent="هر ۴۳ درخواست با موفقیت ثبت و برای برنامه‌ریز ارسال شد.";
+  btn.textContent="ثبت با موفقیت انجام شد";btn.disabled=true;
+ }
+}
+async function retryBulkFailures(errors,justification){
+ const btn=document.getElementById("bulk-submit"),progress=document.getElementById("bulk-progress");
+ btn.disabled=true;const now=new Date().toLocaleDateString("fa-IR");
+ const ts=now+" "+new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
+ const remaining=[];
+ for(let j=0;j<errors.length;j++){
+  const e=errors[j],[title,qty,unit]=PENDING_TECH_PURCHASES[e.row-1];
+  const payload={status:"submitted",prio:"🟡 متوسط",title,desc:"ثبت‌شده از فهرست خریدهای فنی معوق.",justification,unit:unit==="—"?"عدد":unit,qty,equip:"—",date:now,timeline:[{action:"ثبت گروهی درخواست خرید",note:"فهرست خریدهای فنی معوق",ts,icon:"📝"},{action:"ارسال مستقیم به برنامه‌ریز",note:"",ts,icon:"📤"}]};
+  const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:true});
+  if(error)remaining.push({...e,error:error.message});
+  progress.textContent="تلاش مجدد: "+(j+1)+" از "+errors.length;
+ }
+ await refreshRequests();renderAll();
+ progress.textContent=remaining.length?"تعداد ناموفق باقی‌مانده: "+remaining.length:"تمام موارد ناموفق نیز ثبت شدند.";
+ btn.disabled=true;btn.textContent="پایان";
+}
+window.openBulkPurchase=openBulkPurchase;window.submitBulkPurchase=submitBulkPurchase;
 
 async function submitNewRequest(send){
   const title=document.getElementById("nf-title")?.value.trim();
@@ -846,12 +1165,12 @@ async function submitNewRequest(send){
   const now=new Date().toLocaleDateString('fa-IR');
   const ts=now+" "+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
   const payload={
-    status:send?"submitted":"draft",prio:document.getElementById("nf-prio").value,
+    status:send?(currentIsAdmin?"submitted":"admin_review"):"draft",prio:document.getElementById("nf-prio").value,
     title,desc:document.getElementById("nf-desc").value.trim(),justification:just,
     unit:document.getElementById("nf-unit").value||"عدد",
     qty:parseInt(document.getElementById("nf-qty").value)||1,
     equip:document.getElementById("nf-equip").value,date:now,
-    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"}]
+    timeline:[{action:"ثبت درخواست",note:"",ts,icon:"📝"},{...(send?{action:currentIsAdmin?"ارسال مستقیم به برنامه‌ریز":"ارسال جهت تأیید سرپرست فنی",note:"",ts,icon:"📤"}:{})}]
   };
   const {error}=await cloud.rpc("create_purchase_request",{p_payload:payload,p_submit:send});
   if(error){alert("ثبت درخواست انجام نشد: "+error.message);return;}
@@ -863,14 +1182,51 @@ window.submitNewRequest=submitNewRequest;
 
 
 async function loadWorkOrders(){
-  if(!cloudUser)return;
-  const box=document.getElementById("work-orders"); if(!box)return;
-  const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
-  if(error){box.innerHTML='<div class="empty">برای فعال‌شدن مأموریت‌های فنی، ابتدا اسکریپت SQL نسخه آزمایشی را اجرا کنید.</div>';return;}
-  const admin=currentIsAdmin;
-  box.innerHTML=(admin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
-    '<div class="stitle">مأموریت‌های فنی</div>'+
-    ((data||[]).length?(data||[]).map(w=>`<div class="req-card"><div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${w.assigned_username==="reza"?"رضا":"حمید"}</span><div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div><div class="req-card-meta"><span class="b b-blue">${({assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده",approved:"تأیید مدیر"})[w.status]||w.status}</span>${w.due_date?'<span class="chip">مهلت: '+w.due_date+'</span>':''}</div></div><div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>${w.status!=="approved"?(admin?'<button class="btn btn-success btn-sm" onclick="approveWork('+w.id+')">تأیید نهایی</button>':'<button class="btn btn-primary btn-sm" onclick="updateWork('+w.id+',\''+w.status+'\')">ثبت گزارش مأموریت</button>'):""} </div></div>`).join(""):'<div class="empty">مأموریتی ثبت نشده است.</div>');
+ if(!cloudUser)return;
+ const box=document.getElementById("work-orders");if(!box)return;
+ const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
+ if(error){box.innerHTML='<div class="empty">بارگذاری مأموریت‌ها ناموفق بود: '+escapeHtml(error.message)+'</div>';return;}
+ const visible=(data||[]).filter(w=>currentIsAdmin||w.assigned_username===currentUsername);
+ const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+ box.innerHTML=(currentIsAdmin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
+ '<div class="stitle">مأموریت‌های فنی</div>'+
+ (visible.length?visible.map(w=>`<div class="req-card" style="cursor:pointer" onclick="openWorkDetail(${w.id})">
+ <div class="req-card-top"><span class="req-card-id">مأموریت-${w.id} · مسئول: ${escapeHtml(w.assigned_username)}</span>
+ <div class="req-card-title">${escapeHtml(w.title)}</div><div>${escapeHtml(w.description)}</div>
+ <div class="req-card-meta"><span class="b b-blue">${labels[w.status]||escapeHtml(w.status)}</span>${w.due_date?'<span class="chip">مهلت: '+escapeHtml(w.due_date)+'</span>':''}</div></div>
+ <div class="req-card-bot"><span>${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span><b style="color:var(--steel)">مشاهده جزئیات و ثبت گزارش ←</b></div></div>`).join(""):'<div class="empty">مأموریتی برای نمایش وجود ندارد.</div>');
+}
+async function openWorkDetail(id){
+ const {data,error}=await cloud.from("technical_work_orders").select("*").eq("id",id).single();
+ if(error||!data){alert("دریافت جزئیات مأموریت ناموفق بود.");return;}
+ workDetailOpen=true;
+ const admin=currentIsAdmin, canEdit=!admin&&data.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(data.status), canApprove=admin&&data.status==="completed";
+ const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+ const box=document.getElementById("work-orders");
+ box.innerHTML=`<section class="req-card" style="padding:22px">
+ <div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span class="req-card-id">مأموریت-${data.id} · مسئول: ${escapeHtml(data.assigned_username)}</span><button class="btn btn-sm" onclick="backToWorkOrders()">بازگشت</button></div>
+ <h2 style="font-size:20px;margin:16px 0 8px">${escapeHtml(data.title)}</h2><p style="line-height:2">${escapeHtml(data.description)}</p>
+ <div class="req-card-meta" style="margin:14px 0"><span class="b b-blue">${labels[data.status]||escapeHtml(data.status)}</span>${data.due_date?'<span class="chip">مهلت: '+escapeHtml(data.due_date)+'</span>':''}</div>
+ <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+ <h3 style="font-size:15px;margin-bottom:8px">گزارش ثبت‌شده</h3><div style="white-space:pre-wrap;line-height:2;background:var(--bg);padding:14px;border-radius:9px">${escapeHtml(data.report||"هنوز گزارشی ثبت نشده است.")}</div>
+ ${canEdit?`<label style="display:block;font-weight:700;margin:20px 0 8px" for="work-report">گزارش اقدامات انجام‌شده</label>
+ <textarea id="work-report" style="width:100%;min-height:150px;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;line-height:1.9" placeholder="شرح اقدامات، قطعات تعویض‌شده، نتیجه تست و موارد باقی‌مانده را وارد کنید...">${escapeHtml(data.report||"")}</textarea>
+ <label style="display:block;font-weight:700;margin:16px 0 8px" for="work-status">وضعیت مأموریت</label>
+ <select id="work-status" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit">
+ <option value="in_progress" ${["assigned","in_progress"].includes(data.status)?"selected":""}>در حال انجام</option><option value="completed">انجام‌شده — ارسال برای تأیید مدیر</option><option value="needs_material" ${data.status==="needs_material"?"selected":""}>نیازمند تأمین متریال</option></select>
+ <button class="btn btn-primary" style="margin-top:16px" onclick="saveWorkDetail(${data.id})">ثبت گزارش و وضعیت</button>`:''}
+ ${canApprove?'<button class="btn btn-success" style="margin-top:18px" onclick="approveWork('+data.id+')">تأیید نهایی مأموریت</button>':''}
+ ${!canEdit&&!canApprove?'<p class="chip" style="display:inline-block;margin-top:18px">این مأموریت در وضعیت فعلی قابل ویرایش نیست.</p>':''}
+ </section>`;
+}
+async function backToWorkOrders(){workDetailOpen=false;await loadWorkOrders();}
+async function saveWorkDetail(id){
+ const report=document.getElementById("work-report").value.trim(), status=document.getElementById("work-status").value;
+ if(!report){alert("لطفاً گزارش اقدامات را وارد کنید.");return;}
+ if(status==="completed"&&report.length<10){alert("گزارش برای ارسال به تأیید مدیر کافی نیست.");return;}
+ const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:status,p_report:report});
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;}
+ await openWorkDetail(id);
 }
 function escapeHtml(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function newWorkOrder(){
@@ -919,55 +1275,31 @@ async function submitWorkOrder(){
  closeDrawer();
  await loadWorkOrders();
 }
+window.newWorkOrder=newWorkOrder;window.submitWorkOrder=submitWorkOrder;
 
-
-function openWorkReportCard(id,status){
- const old=document.getElementById("work-report-modal"); if(old)old.remove();
- const initial=status==="assigned"?"in_progress":status;
- const modal=document.createElement("div");
- modal.id="work-report-modal";
- modal.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.58);display:flex;align-items:center;justify-content:center;padding:18px";
- modal.innerHTML=`
- <div style="width:min(100%,460px);background:var(--card,#fff);color:var(--text,#1f2937);border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);direction:rtl">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-   <div style="font-size:17px;font-weight:800">ثبت گزارش مأموریت فنی</div>
-   <button type="button" class="btn btn-ghost btn-sm" id="wr-close">✕</button>
-  </div>
-  <div class="field"><label for="wr-report">گزارش پیشرفت / نتیجه اجرا</label><textarea id="wr-report" rows="5" placeholder="اقدامات انجام‌شده، وضعیت فعلی و موارد باقی‌مانده را وارد کنید..." style="width:100%;min-height:120px"></textarea></div>
-  <div class="field"><label for="wr-status">وضعیت مأموریت</label>
-   <select id="wr-status" style="width:100%">
-    <option value="in_progress" ${initial==="in_progress"?"selected":""}>در حال انجام</option>
-    <option value="completed" ${initial==="completed"?"selected":""}>انجام‌شده؛ آماده تأیید مدیر</option>
-   </select>
-  </div>
-  <div style="display:flex;gap:10px;margin-top:18px">
-   <button type="button" class="btn btn-primary" id="wr-save" style="flex:1">ثبت گزارش</button>
-   <button type="button" class="btn btn-ghost" id="wr-cancel">انصراف</button>
-  </div>
- </div>`;
- document.body.appendChild(modal);
- const close=()=>modal.remove();
- modal.querySelector("#wr-close").onclick=close;
- modal.querySelector("#wr-cancel").onclick=close;
- modal.addEventListener("click",e=>{if(e.target===modal)close();});
- modal.querySelector("#wr-save").onclick=async()=>{
-  const report=modal.querySelector("#wr-report").value.trim();
-  const next=modal.querySelector("#wr-status").value;
-  if(!report){alert("لطفاً گزارش اجرا را وارد کنید.");return;}
-  const btn=modal.querySelector("#wr-save");btn.disabled=true;btn.textContent="در حال ثبت...";
-  const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
-  if(error){alert("ثبت گزارش ناموفق: "+error.message);btn.disabled=false;btn.textContent="ثبت گزارش";return;}
-  close();await loadWorkOrders();
- };
+async function updateWork(id,status){
+ if(!cloudUser)return;
+ const report=prompt("گزارش پیشرفت یا نتیجه اجرا را وارد کنید:");
+ if(report===null)return;
+ const choices=["in_progress","completed","needs_material"];
+ const labels={in_progress:"در حال انجام",completed:"انجام‌شده",needs_material:"نیازمند تأمین متریال"};
+ const current=["assigned"].includes(status)?"in_progress":status;
+ const selected=prompt("وضعیت را دقیقاً با یکی از اعداد زیر وارد کنید:\n1 - در حال انجام\n2 - انجام‌شده\n3 - نیازمند تأمین متریال",current==="needs_material"?"3":current==="completed"?"2":"1");
+ if(selected===null)return;
+ const next=({"1":"in_progress","2":"completed","3":"needs_material"})[selected.trim()];
+ if(!choices.includes(next)){alert("وضعیت انتخاب‌شده معتبر نیست.");return;}
+ const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:next,p_report:report});
+ if(error){alert("ثبت گزارش ناموفق: "+error.message);return;}
+ await loadWorkOrders();
 }
-async function updateWork(id,status){openWorkReportCard(id,status);}
-
 async function approveWork(id){
  if(!currentIsAdmin)return;
+ if(!confirm("تکمیل این مأموریت تأیید نهایی شود؟"))return;
  const {error}=await cloud.rpc("approve_work_order",{p_id:id});
- if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;} await loadWorkOrders();
+ if(error){alert("تأیید انجام کار ناموفق: "+error.message);return;}
+ workDetailOpen=false;await loadWorkOrders();
 }
-window.newWorkOrder=newWorkOrder;window.updateWork=updateWork;window.approveWork=approveWork;
+window.newWorkOrder=newWorkOrder;window.openWorkDetail=openWorkDetail;window.saveWorkDetail=saveWorkDetail;window.approveWork=approveWork;
 
 // ════ DRAWER ════
 function openDrawer(){document.getElementById("overlay").classList.add("open");}
