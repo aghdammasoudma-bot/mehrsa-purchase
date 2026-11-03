@@ -653,6 +653,7 @@ function requestDetail(r){
     </div>`).join(""):"";
 
   const actions=actionButtons(r);
+  const editButton=currentIsAdmin?`<div class="actions"><button class="btn btn-amber" onclick="openEditPurchase('${r.id}')">✏️ ویرایش مشخصات درخواست</button></div>`:"";
 
   return `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
@@ -664,6 +665,7 @@ function requestDetail(r){
     </div>
 
     <div style="margin-bottom:12px">${statusBadge(r.status)}</div>
+    ${editButton}
     <div style="overflow-x:auto">
       <div class="flow">${flowHtml}</div>
     </div>
@@ -685,6 +687,34 @@ function requestDetail(r){
     ${actions}`;
 }
 
+function openEditPurchase(id){
+ if(!currentIsAdmin)return;
+ const r=requests.find(x=>String(x.id)===String(id));if(!r)return;
+ const eqOpts=EQ.map(e=>'<option value="'+escapeHtml(e)+'" '+((r.equip||'—')===e?'selected':'')+'>'+escapeHtml(e)+'</option>').join('');
+ document.getElementById('drawer-content').innerHTML=
+ '<h2 style="font-size:17px;margin-bottom:14px">ویرایش درخواست '+escapeHtml(r.id)+'</h2>'+
+ '<div class="field"><label>عنوان درخواست</label><input id="ep-title" value="'+escapeHtml(r.title)+'"></div>'+
+ '<div class="field"><label>شرح</label><textarea id="ep-desc">'+escapeHtml(r.desc||'')+'</textarea></div>'+
+ '<div class="field"><label>توجیه فنی</label><textarea id="ep-just">'+escapeHtml(r.justification||'')+'</textarea></div>'+
+ '<div class="frow"><div class="field"><label>اولویت</label><select id="ep-prio">'+['🔴 فوری','🟠 بالا','🟡 متوسط','🟢 پایین'].map(x=>'<option '+(r.prio===x?'selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+ '<div class="field"><label>تعداد</label><input id="ep-qty" type="number" min="1" value="'+(Number(r.qty)||1)+'"></div></div>'+
+ '<div class="frow"><div class="field"><label>واحد</label><input id="ep-unit" value="'+escapeHtml(r.unit||'عدد')+'"></div>'+
+ '<div class="field"><label>تجهیز مرتبط</label><select id="ep-equip">'+eqOpts+'</select></div></div>'+
+ '<div class="actions"><button class="btn btn-ghost" onclick="openRequest(\''+String(id)+'\')">انصراف</button><button class="btn btn-success" id="ep-save" onclick="saveEditPurchase(\''+String(id)+'\')">ذخیره تغییرات</button></div>'+
+ '<p style="font-size:11px;color:var(--sub)">فقط مشخصات درخواست و اولویت تغییر می‌کند؛ وضعیت گردش کار و سوابق حفظ می‌شوند.</p>';
+}
+async function saveEditPurchase(id){
+ if(!currentIsAdmin)return;
+ const r=requests.find(x=>String(x.id)===String(id));if(!r)return;
+ const title=document.getElementById('ep-title').value.trim(),qty=Number(document.getElementById('ep-qty').value);
+ if(!title||!Number.isInteger(qty)||qty<1){alert('عنوان و تعداد معتبر الزامی است.');return;}
+ const payload={...r,title,desc:document.getElementById('ep-desc').value.trim(),justification:document.getElementById('ep-just').value.trim(),prio:document.getElementById('ep-prio').value,qty,unit:document.getElementById('ep-unit').value.trim()||'عدد',equip:document.getElementById('ep-equip').value};
+ const btn=document.getElementById('ep-save');btn.disabled=true;btn.textContent='در حال ذخیره...';
+ const {error}=await cloud.rpc('admin_update_purchase_request',{p_request_id:String(id),p_payload:payload});
+ if(error){btn.disabled=false;btn.textContent='ذخیره تغییرات';alert('ذخیره انجام نشد: '+error.message);return;}
+ await refreshRequests();renderAll();openRequest(id);
+}
+window.openEditPurchase=openEditPurchase;window.saveEditPurchase=saveEditPurchase;
 function actionButtons(r){
   let html="";
   if((currentRole==="tech"||currentIsAdmin)&&(r.status==="draft"||r.status==="planner_rejected")&&(currentIsAdmin||r.by===currentUser)){
