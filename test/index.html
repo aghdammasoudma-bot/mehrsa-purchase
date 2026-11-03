@@ -372,6 +372,34 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
 .role-screen{background:radial-gradient(ellipse at 15% 12%,rgba(39,135,245,.2),transparent 34%),linear-gradient(145deg,#091426 0%,#122944 62%,#153E68 100%)!important}#auth-box{background:#142238!important;border-color:#334A68!important;color:#E4ECF7!important}#auth-box label{color:#B7C9DF!important}#auth-email,#auth-password{background:#0C192A!important;border-color:#334A68!important;color:#E4ECF7!important}#auth-msg{color:#9BAFC8!important}#auth-box .btn-ghost{color:#9CCAFF!important;border-color:#3A5678!important;background:#1A2B43!important}.role-btn{background:rgba(25,47,75,.82)!important;border-color:#3A5678!important}.role-btn-title{color:#F0F5FC!important}.role-btn-sub,.role-screen p{color:#AFC4DE!important}
 .mission-form,.mission-form-head,.mission-callout{background:#142238!important;color:#E4ECF7!important;border-color:#30445F!important}.mission-section-title{color:#AFC4DE!important}.mission-hint{color:#8FA5C0!important}.mission-callout{background:#1A2D48!important}.fab{background:linear-gradient(135deg,#176BC4,#2787F5)!important;box-shadow:0 5px 0 #124B88,0 12px 28px rgba(0,0,0,.35)!important}hr{border-color:#30445F!important}table{color:#E4ECF7!important}thead{background:#1A2D48!important}td,th{border-color:#30445F!important}.empty{color:#91A5BF!important}
 
+/* MANAGEMENT DASHBOARD REDESIGN */
+body{background:radial-gradient(ellipse at 50% -10%,#1a3556 0,#0a1422 48%,#08111d 100%)!important;color:#e8f0fa!important;padding-bottom:88px}
+.top{background:rgba(10,22,37,.94)!important;border-bottom:1px solid #243a53!important;backdrop-filter:blur(16px);padding:13px 18px!important}
+.role-tag{border:1px solid #38516d!important;background:#17283d!important;color:#c8d8eb!important;border-radius:10px!important}
+.pipeline{margin:12px 14px 8px!important;border:1px solid #263d58;border-radius:14px;background:#101f31!important;overflow:auto;scrollbar-width:none}
+.pipe-step{white-space:nowrap!important;color:#a9bdd4!important}.pipe-step.active{background:#1d4266!important;color:#fff!important;border-radius:10px}
+.content{max-width:1120px;margin:0 auto!important;padding:14px 16px 30px!important}
+.management-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(190px,.8fr);gap:12px;margin:14px auto 16px;max-width:1120px}
+.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background:linear-gradient(115deg,#10283e,#163c56 48%,#24536b);isolation:isolate;padding:24px 25px;display:flex;align-items:center}
+.hero-industrial:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,18,30,.97),rgba(7,18,30,.78) 45%,rgba(7,18,30,.08)),repeating-linear-gradient(0deg,transparent 0 27px,rgba(173,213,231,.07) 28px),repeating-linear-gradient(90deg,transparent 0 39px,rgba(173,213,231,.06) 40px)}
+.hero-copy{position:relative;z-index:3}.hero-eyebrow{font-size:9px;letter-spacing:2px;color:#8bb9d3;font-weight:800}.hero-copy h2{font-size:clamp(22px,3vw,31px);line-height:1.45;margin:10px 0 5px;color:#fff;font-weight:900}.hero-copy p{font-size:11px;color:#b8cadd;margin:0}
+.factory-art{position:absolute;inset:0 38% 0 0;opacity:.9;z-index:1}.factory-ground{position:absolute;bottom:20px;left:0;right:0;height:2px;background:#78a9bd;opacity:.6}
+.stack{position:absolute;bottom:22px;width:20px;background:linear-gradient(90deg,#557c8b,#a1c4c9,#456b7b);border:1px solid #9bc2c8}.stack-a{height:112px;left:22%}.stack-b{height:82px;left:33%;width:15px}
+.tank{position:absolute;bottom:22px;border:2px solid #80aab6;background:linear-gradient(90deg,rgba(74,126,143,.55),rgba(153,190,193,.18));border-radius:9px 9px 2px 2px}.tank-a{height:67px;width:54px;left:48%}.tank-b{height:91px;width:67px;left:67%}
+.pipe{position:absolute;border:2px solid #91b8c0;border-bottom:0;border-radius:12px 12px 0 0;height:35px;bottom:88px}.pipe-a{left:49%;width:55px}.pipe-b{left:67%;width:66px;height:55px;bottom:112px}.hero-glow{position:absolute;width:180px;height:180px;border-radius:50%;background:#57a6b9;filter:blur(70px);opacity:.22;right:12%;top:-70px}
+.profile-panel{background:linear-gradient(145deg,#14283d,#101c2c);border:1px solid #2a4058;border-radius:20px;display:flex;align-items:center;gap:13px;padding:20px;min-height:120px;box-shadow:0 12px 30px rgba(0,0,0,.16)}
+.profile-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:18px;background:linear-gradient(145deg,#3c7892,#24435f);border:2px solid #82b5c5;display:grid;place-items:center;font-size:25px;font-weight:900;color:white}
+.profile-meta{display:flex;flex-direction:column;gap:7px;min-width:0}.profile-meta strong{font-size:14px;color:#f3f7fb}.profile-meta span{font-size:11px;color:#93abc2}.online-dot{width:9px;height:9px;border-radius:50%;background:#42d392;box-shadow:0 0 0 4px rgba(66,211,146,.12);margin-right:auto;align-self:flex-start}
+.quick-actions{max-width:1120px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.quick-action{border:1px solid #2a4058!important;background:linear-gradient(145deg,#14263a,#101c2c)!important;color:#e8f1fb!important;border-radius:16px!important;padding:13px 15px!important;text-align:right;display:grid;grid-template-columns:36px 1fr;column-gap:10px;align-items:center;box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.quick-action>span{grid-row:span 2;width:36px;height:36px;border-radius:11px;background:#1d4261;color:#8fd0df;display:grid;place-items:center;font-size:21px}.quick-action b{font-size:12px}.quick-action small{font-size:10px;color:#8ea5bd;margin-top:3px}
+.kpi-row{gap:10px!important;margin-bottom:18px!important}.kpi{background:linear-gradient(145deg,#172b40,#111e2e)!important;border:1px solid #2a4058!important;border-radius:15px!important;box-shadow:0 8px 22px rgba(0,0,0,.14)!important;padding:15px!important}.kpi-l{color:#9bb0c7!important}.kpi-n{font-size:25px!important}.stitle{color:#e4edf8!important}
+.mobile-bottom-nav{position:fixed;z-index:80;bottom:0;left:0;right:0;display:flex;justify-content:space-around;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(9,19,31,.96);border-top:1px solid #2a4058;backdrop-filter:blur(18px)}
+.mobile-bottom-nav button{border:0;background:transparent;color:#91a8c0;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;padding:4px 7px}.mobile-bottom-nav button span{font-size:19px;line-height:22px}.mobile-bottom-nav button small{font-size:9px}.mobile-bottom-nav button.active{color:#8bd1df}
+.mobile-bottom-nav .nav-primary{margin-top:-24px;background:linear-gradient(145deg,#56b5c2,#287d9a);color:#061724;border:4px solid #0b1928;border-radius:17px;width:53px;height:53px;justify-content:center;box-shadow:0 5px 18px rgba(47,151,177,.28)}.mobile-bottom-nav .nav-primary span{font-size:26px}
+.empty,.request-card,.work-card{background:#142438!important;border-color:#2b425b!important;color:#e3edf8!important}
+@media(max-width:650px){.management-hero{grid-template-columns:1fr;gap:9px;margin:10px 12px 13px}.hero-industrial{min-height:170px;padding:19px}.profile-panel{min-height:82px;padding:12px 15px;border-radius:15px}.profile-avatar{width:48px;height:48px;flex-basis:48px;border-radius:15px}.quick-actions{margin:0 12px 14px;gap:7px}.quick-action{padding:10px 8px!important;grid-template-columns:29px 1fr;column-gap:6px}.quick-action>span{width:29px;height:29px;font-size:17px}.quick-action b{font-size:10px}.quick-action small{font-size:9px}.content{padding:10px 12px 25px!important}.pipeline{margin:8px 12px!important}}
+
 </style>
 </head>
 <body>
@@ -413,6 +441,7 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
   <div class="pipe-step" data-view="work" onclick="switchView('work')">🛠 مأموریت‌های فنی</div>
 </div>
 
+<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>مرکز فرماندهی<br>عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="profile-panel"><div class="profile-avatar" id="hero-avatar">م</div><div class="profile-meta"><strong id="hero-user">کاربر سامانه</strong><span id="hero-role">واحد فنی</span></div><span class="online-dot"></span></div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="openNewRequest()"><span>＋</span><b>درخواست خرید</b><small>ثبت نیاز فنی</small></button><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
 <!-- CONTENT -->
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
@@ -422,6 +451,7 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
 <!-- FAB -->
 <button class="fab" id="fab" style="display:none" onclick="openNewRequest()">＋</button>
 
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
 <!-- DRAWER -->
 <div class="overlay" id="overlay">
   <div class="drawer" id="drawer">
@@ -623,6 +653,8 @@ async function saveDB(){
 }
 
 // ════ ROLE ════
+function updateDashboardIdentity(){const name=currentUser||'کاربر سامانه',title=currentTitle||'واحد فنی';const n=document.getElementById('hero-user'),r=document.getElementById('hero-role'),a=document.getElementById('hero-avatar');if(n)n.textContent=name;if(r)r.textContent=title;if(a)a.textContent=name.trim().charAt(0)||'م';}
+function syncBottomNav(){document.querySelectorAll('#mobile-bottom-nav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===currentView));}
 function setRole(role,user,title){
   currentRole=role;currentUser=user;currentTitle=title;
   document.getElementById("role-screen").style.display="none";
@@ -631,6 +663,7 @@ function setRole(role,user,title){
   document.getElementById("main-content").style.display="block";
   document.getElementById("top-name").textContent=user;
   document.getElementById("top-role").textContent=title;
+  document.getElementById("management-hero").style.display="grid";document.getElementById("quick-actions").style.display="grid";document.getElementById("mobile-bottom-nav").style.display="flex";updateDashboardIdentity();syncBottomNav();
   document.getElementById("fab").style.display=(role==="tech"||role==="admin"||profileRole==="maintenance")?"flex":"none";
   renderAll();
 }
@@ -639,6 +672,7 @@ function showRoleScreen(){
   document.getElementById("topbar").style.display="none";
   document.getElementById("pipeline-bar").style.display="none";
   document.getElementById("main-content").style.display="none";
+  document.getElementById("management-hero").style.display="none";document.getElementById("quick-actions").style.display="none";document.getElementById("mobile-bottom-nav").style.display="none";
   document.getElementById("fab").style.display="none";
 }
 
@@ -661,6 +695,7 @@ function switchView(v){
   document.querySelectorAll(".pipe-step").forEach(el=>{
     el.classList.toggle("active",el.dataset.view===v);
   });
+  syncBottomNav();
   renderList();
 }
 function renderAll(){
