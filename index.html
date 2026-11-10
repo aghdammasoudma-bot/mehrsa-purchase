@@ -1399,5 +1399,11 @@ document.addEventListener("DOMContentLoaded",addPrintButtons);
 setInterval(addPrintButtons,1200);
 </script>
 
+
+<style>
+/* کاهش ارتفاع پنجره بازشونده درخواست‌ها به اندازه یک سانتی‌متر */
+.drawer{max-height:calc(94vh - 1cm)!important}
+@media(min-width:640px){.drawer{max-height:calc(88vh - 1cm)!important}}
+</style>
 </body>
 </html>
