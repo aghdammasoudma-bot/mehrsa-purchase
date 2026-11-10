@@ -1400,10 +1400,25 @@ setInterval(addPrintButtons,1200);
 </script>
 
 
+
+
 <style>
-/* کاهش ارتفاع پنجره بازشونده درخواست‌ها به اندازه یک سانتی‌متر */
-.drawer{max-height:calc(94vh - 1cm)!important}
-@media(min-width:640px){.drawer{max-height:calc(88vh - 1cm)!important}}
+/* فشرده‌سازی کارت‌های فهرست «همه درخواست‌ها»؛ کاهش ارتفاع واقعی هر کارت */
+#req-list .req-card{margin-bottom:5px!important;border-radius:10px!important}
+#req-list .req-card-top{padding:6px 11px 5px!important}
+#req-list .req-card-top > div{gap:4px!important}
+#req-list .req-card-title{font-size:12px!important;line-height:1.2!important;margin:2px 0 3px!important}
+#req-list .req-card-id{font-size:9px!important;line-height:1.1!important}
+#req-list .req-card-meta{gap:3px!important;line-height:1.15!important}
+#req-list .req-card-bot{padding:4px 10px!important;min-height:0!important;line-height:1.2!important}
+#req-list .req-card-bot-left{font-size:9px!important;line-height:1.2!important}
+#req-list .req-card .b,#req-list .req-card .chip{font-size:8px!important;padding:1px 5px!important;line-height:1.2!important}
+#req-list .req-card p,#req-list .req-card span{line-height:1.2}
+@media(max-width:640px){
+ #req-list .req-card-top{padding:5px 9px 4px!important}
+ #req-list .req-card-title{font-size:11px!important;margin:1px 0 2px!important}
+ #req-list .req-card-bot{padding:3px 8px!important}
+}
 </style>
 </body>
 </html>
