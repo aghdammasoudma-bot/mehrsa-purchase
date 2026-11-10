@@ -803,6 +803,14 @@ function renderKPIs(){
     </div>`;
 }
 
+function ensureRequestPrintButton(){
+  const req=document.getElementById("req-list");
+  if(!req || req.querySelector(".print-toolbar")) return;
+  const bar=document.createElement("div");
+  bar.className="print-toolbar";
+  bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\'req-list\',\'فهرست درخواست‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
+  req.insertBefore(bar,req.firstChild);
+}
 function renderList(){
   if(currentView==="work") return;
   let list;
@@ -816,6 +824,7 @@ function renderList(){
     document.getElementById("req-list").innerHTML=`
       <div class="empty"><div class="empty-icon">${currentView==="inbox"?"🎉":"📋"}</div>
       <div>${currentView==="inbox"?"صندوق ورودی خالی است — همه چیز روی روال!":"درخواستی یافت نشد"}</div></div>`;
+    ensureRequestPrintButton();
     return;
   }
 
@@ -823,6 +832,7 @@ function renderList(){
   document.getElementById("req-list").innerHTML=`
     <div class="stitle">${label[currentView]||""}</div>
     ${list.map(r=>reqCard(r)).join("")}`;
+  ensureRequestPrintButton();
 }
 
 function statusLabel(s){return STATUS_LABEL[s]||s}
