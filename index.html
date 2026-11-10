@@ -1374,11 +1374,6 @@ function printSection(elementId,title){
 }
 function addPrintButtons(){
  const req=document.getElementById("req-list"), work=document.getElementById("work-orders");
- if(req && req.children.length && !req.querySelector(".print-toolbar")){
-  const bar=document.createElement("div");bar.className="print-toolbar";
-  bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\'req-list\',\'فهرست درخواست‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
-  req.insertBefore(bar,req.firstChild);
- }
  if(work && work.style.display!=="none" && work.children.length && !work.querySelector(".print-toolbar")){
   const bar=document.createElement("div");bar.className="print-toolbar";
   bar.innerHTML='<b>گزارش مأموریت‌های فنی</b><button class="btn btn-primary btn-sm" onclick="printSection(\'work-orders\',\'گزارش مأموریت‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
@@ -1395,14 +1390,18 @@ setInterval(addPrintButtons,1200);
 
 
 <style>
-/* کاهش ارتفاع قاب هر درخواست بدون کوچک‌کردن نوشته‌ها و نشان‌ها */
-#req-list .req-card{margin-bottom:10px}
-#req-list .req-card-top{padding-top:10px;padding-bottom:8px}
-#req-list .req-card-title{margin-top:4px;margin-bottom:6px;line-height:1.4}
-#req-list .req-card-bot{padding-top:8px;padding-bottom:8px;min-height:0}
+/* قاب‌های PR: کاهش ارتفاع کلی حدود یک سانتی‌متر، بدون کوچک‌کردن فونت‌ها */
+#req-list .req-card{margin-bottom:9px!important}
+#req-list .req-card-top{padding:5px 15px 5px!important}
+#req-list .req-card-top > div:first-child{margin:0!important}
+#req-list .req-card-title{font-size:15px!important;line-height:1.35!important;margin:3px 0 5px!important}
+#req-list .req-card-meta{gap:5px!important;line-height:1.25!important}
+#req-list .req-card-meta .b,#req-list .req-card-meta .chip{padding:3px 9px!important;line-height:1.3!important}
+#req-list .req-card-bot{padding:5px 15px!important;min-height:0!important;line-height:1.3!important}
+#req-list .req-card-bot-left{font-size:11px!important}
 @media(max-width:640px){
- #req-list .req-card-top{padding-top:9px;padding-bottom:7px}
- #req-list .req-card-bot{padding-top:7px;padding-bottom:7px}
+ #req-list .req-card-top{padding:5px 11px 5px!important}
+ #req-list .req-card-bot{padding:5px 11px!important}
 }
 </style>
 </body>
