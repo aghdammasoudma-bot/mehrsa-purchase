@@ -1341,5 +1341,45 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<style>
+.print-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 14px}
+@media(max-width:480px){.print-toolbar{align-items:flex-start;flex-direction:column}}
+@media print{.no-print,button,.actions,.fab,.mobile-bottom-nav,.top,.pipeline{display:none!important}}
+</style>
+<script>
+function printSection(elementId,title){
+ const source=document.getElementById(elementId);
+ if(!source){alert("محتوای قابل چاپ پیدا نشد.");return;}
+ const w=window.open("","_blank");
+ if(!w){alert("پنجره چاپ مسدود شده است؛ اجازه Pop-up را فعال کنید.");return;}
+ const clone=source.cloneNode(true);
+ clone.querySelectorAll("button,.actions,.print-toolbar,.no-print").forEach(el=>el.remove());
+ const css='*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;direction:rtl;color:#172B3A;font-size:12px;line-height:1.8;margin:18px}.head{border-bottom:2px solid #176B73;padding-bottom:10px;margin-bottom:16px}h1{font-size:19px}.req-card{border:1px solid #ccd8de;border-radius:8px;margin:0 0 10px;break-inside:avoid;box-shadow:none!important}.req-card-top,.req-card-bot{padding:10px 12px}.req-card-bot{background:#f3f7f8;border-top:1px solid #e2e9ec}.req-card-title{font-weight:bold;font-size:13px;margin:5px 0}.b,.chip{display:inline-block;border:1px solid #ccd8de;border-radius:12px;padding:2px 7px;margin:2px}@page{size:A4;margin:12mm}@media print{body{margin:0}.req-card{break-inside:avoid}}';
+ w.document.open();
+ w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+title+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+title+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main></body></html>');
+ w.document.querySelector("main").appendChild(clone);
+ w.document.close();
+ w.onload=function(){w.focus();setTimeout(function(){w.print();},350);};
+}
+function addPrintButtons(){
+ const req=document.getElementById("req-list"), work=document.getElementById("work-orders");
+ if(req && req.children.length && !req.querySelector(".print-toolbar")){
+  const bar=document.createElement("div");bar.className="print-toolbar";
+  bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\\'req-list\\',\\'فهرست درخواست‌های فنی\\')">🖨 چاپ / ذخیره PDF</button>';
+  req.insertBefore(bar,req.firstChild);
+ }
+ if(work && work.style.display!=="none" && work.children.length && !work.querySelector(".print-toolbar")){
+  const bar=document.createElement("div");bar.className="print-toolbar";
+  bar.innerHTML='<b>گزارش مأموریت‌های فنی</b><button class="btn btn-primary btn-sm" onclick="printSection(\\'work-orders\\',\\'گزارش مأموریت‌های فنی\\')">🖨 چاپ / ذخیره PDF</button>';
+  work.insertBefore(bar,work.firstChild);
+ }
+}
+window.printSection=printSection;
+new MutationObserver(addPrintButtons).observe(document.getElementById("main-content"),{childList:true,subtree:true});
+document.addEventListener("DOMContentLoaded",addPrintButtons);
+setInterval(addPrintButtons,1200);
+</script>
+
 </body>
 </html>
