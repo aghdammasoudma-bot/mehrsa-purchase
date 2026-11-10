@@ -1366,12 +1366,12 @@ function addPrintButtons(){
  const req=document.getElementById("req-list"), work=document.getElementById("work-orders");
  if(req && req.children.length && !req.querySelector(".print-toolbar")){
   const bar=document.createElement("div");bar.className="print-toolbar";
-  bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\\'req-list\\',\\'فهرست درخواست‌های فنی\\')">🖨 چاپ / ذخیره PDF</button>';
+  bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\'req-list\',\'فهرست درخواست‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
   req.insertBefore(bar,req.firstChild);
  }
  if(work && work.style.display!=="none" && work.children.length && !work.querySelector(".print-toolbar")){
   const bar=document.createElement("div");bar.className="print-toolbar";
-  bar.innerHTML='<b>گزارش مأموریت‌های فنی</b><button class="btn btn-primary btn-sm" onclick="printSection(\\'work-orders\\',\\'گزارش مأموریت‌های فنی\\')">🖨 چاپ / ذخیره PDF</button>';
+  bar.innerHTML='<b>گزارش مأموریت‌های فنی</b><button class="btn btn-primary btn-sm" onclick="printSection(\'work-orders\',\'گزارش مأموریت‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
   work.insertBefore(bar,work.firstChild);
  }
 }
