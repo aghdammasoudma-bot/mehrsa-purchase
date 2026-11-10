@@ -1357,25 +1357,7 @@ function printSection(elementId,title){
  clone.querySelectorAll("button,.actions,.print-toolbar,.no-print").forEach(el=>el.remove());
  const css='*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;direction:rtl;color:#172B3A;font-size:12px;line-height:1.8;margin:18px}.head{border-bottom:2px solid #176B73;padding-bottom:10px;margin-bottom:16px}h1{font-size:19px}.req-card{border:1px solid #ccd8de;border-radius:8px;margin:0 0 10px;break-inside:avoid;box-shadow:none!important}.req-card-top,.req-card-bot{padding:10px 12px}.req-card-bot{background:#f3f7f8;border-top:1px solid #e2e9ec}.req-card-title{font-weight:bold;font-size:13px;margin:5px 0}.b,.chip{display:inline-block;border:1px solid #ccd8de;border-radius:12px;padding:2px 7px;margin:2px}@page{size:A4;margin:12mm}@media print{body{margin:0}.req-card{break-inside:avoid}}';
  w.document.open();
- w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+title+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+title+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main>
-<style>
-/* Compact request cards */
-#req-list .req-card{margin-bottom:7px;border-radius:12px}
-#req-list .req-card-top{padding:9px 12px 7px}
-#req-list .req-card-title{font-size:13px;line-height:1.35;margin:3px 0 5px}
-#req-list .req-card-meta{gap:4px}
-#req-list .req-card-bot{padding:6px 12px;min-height:0}
-#req-list .req-card-bot-left{font-size:10px}
-#req-list .b,#req-list .chip{font-size:9px;padding:2px 7px}
-#req-list .req-card-id{font-size:9px}
-@media(max-width:640px){
- #req-list .req-card-top{padding:8px 10px 6px}
- #req-list .req-card-title{font-size:12px;margin:2px 0 4px}
- #req-list .req-card-bot{padding:5px 10px}
-}
-</style>
-
-</body></html>');
+ w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+title+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+title+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main></body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
  w.onload=function(){w.focus();setTimeout(function(){w.print();},350);};
@@ -1403,21 +1385,14 @@ setInterval(addPrintButtons,1200);
 
 
 <style>
-/* فشرده‌سازی کارت‌های فهرست «همه درخواست‌ها»؛ کاهش ارتفاع واقعی هر کارت */
-#req-list .req-card{margin-bottom:5px!important;border-radius:10px!important}
-#req-list .req-card-top{padding:6px 11px 5px!important}
-#req-list .req-card-top > div{gap:4px!important}
-#req-list .req-card-title{font-size:12px!important;line-height:1.2!important;margin:2px 0 3px!important}
-#req-list .req-card-id{font-size:9px!important;line-height:1.1!important}
-#req-list .req-card-meta{gap:3px!important;line-height:1.15!important}
-#req-list .req-card-bot{padding:4px 10px!important;min-height:0!important;line-height:1.2!important}
-#req-list .req-card-bot-left{font-size:9px!important;line-height:1.2!important}
-#req-list .req-card .b,#req-list .req-card .chip{font-size:8px!important;padding:1px 5px!important;line-height:1.2!important}
-#req-list .req-card p,#req-list .req-card span{line-height:1.2}
+/* کاهش ارتفاع قاب هر درخواست بدون کوچک‌کردن نوشته‌ها و نشان‌ها */
+#req-list .req-card{margin-bottom:10px}
+#req-list .req-card-top{padding-top:10px;padding-bottom:8px}
+#req-list .req-card-title{margin-top:4px;margin-bottom:6px;line-height:1.4}
+#req-list .req-card-bot{padding-top:8px;padding-bottom:8px;min-height:0}
 @media(max-width:640px){
- #req-list .req-card-top{padding:5px 9px 4px!important}
- #req-list .req-card-title{font-size:11px!important;margin:1px 0 2px!important}
- #req-list .req-card-bot{padding:3px 8px!important}
+ #req-list .req-card-top{padding-top:9px;padding-bottom:7px}
+ #req-list .req-card-bot{padding-top:7px;padding-bottom:7px}
 }
 </style>
 </body>
