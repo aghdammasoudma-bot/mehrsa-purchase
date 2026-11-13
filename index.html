@@ -695,7 +695,7 @@ body{background:#F1F3F6!important;color:#202833!important}
 </div>
 
 <!-- CONTENT -->
-<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="profile-panel"><div class="profile-avatar" id="hero-avatar" aria-label="نشان حساب کاربری">م</div><div class="profile-meta"><strong id="hero-user">کاربر سامانه</strong><span id="hero-role">واحد فنی</span></div><span class="online-dot"></span></div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
+<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="hero-caption">سامانه عملیات فنی</div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
   <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
@@ -1611,22 +1611,57 @@ setInterval(addPrintButtons,1200);
  #req-list .req-card-bot{padding:5px 11px!important}
 }
 
-/* Banner: restore full-width centered image */
+/* Banner: image-sized frame and compact title */
+.management-hero{
+  max-width:1160px!important;
+  margin:18px auto 14px!important;
+  padding:0 14px!important;
+}
+.hero-industrial{
+  position:relative!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:1107 / 1110!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#fff!important;
+  box-shadow:0 4px 16px rgba(30,50,70,.07)!important;
+}
 .mehrsa-hero-logo{
   position:absolute!important;
   inset:0!important;
-  left:0!important;right:0!important;top:0!important;bottom:0!important;
-  width:100%!important;height:100%!important;
+  width:100%!important;
+  height:100%!important;
   object-fit:contain!important;
   object-position:center!important;
+  padding:0!important;
+  margin:0!important;
   background:#fff!important;
-  padding:12px!important;
-  border:0!important;border-radius:0!important;
+  border:0!important;
+  border-radius:0!important;
   box-shadow:none!important;
   z-index:2!important;
 }
-.hero-copy{
-  display:none!important;
+.hero-copy,.hero-glow{display:none!important}
+.hero-caption{
+  max-width:1160px;
+  margin:7px auto 0;
+  padding:5px 14px 7px;
+  text-align:right;
+  color:#245B88;
+  font-size:15px;
+  line-height:1.4;
+  font-weight:800;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+@media(max-width:640px){
+  .management-hero{padding:0 10px!important;margin:12px auto 10px!important}
+  .hero-caption{padding:4px 10px 6px;font-size:13px}
 }
 </style>
 </body>
