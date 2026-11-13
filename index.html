@@ -565,6 +565,51 @@ body{background:#F1F3F6!important;color:#202833!important}
 }
 @media(max-width:380px){.kpi{gap:7px!important;padding:11px 8px!important}.kpi-icon{flex-basis:32px!important;width:32px!important;height:32px!important}}
 
+
+/* ─── REQUEST TABLE + LEFT DETAIL PANEL ─── */
+.request-workspace{display:grid;grid-template-columns:minmax(300px,.82fr) minmax(0,1.7fr);gap:16px;direction:ltr;align-items:start;margin-top:8px}
+.request-detail-column,.request-list-column{direction:rtl;min-width:0;background:#fff;border:1px solid #DCE2E9;border-radius:15px;box-shadow:0 4px 16px rgba(30,50,70,.055);overflow:hidden}
+.request-detail-column{position:sticky;top:76px;max-height:calc(100vh - 100px);overflow:auto;padding:16px}
+.request-detail-heading{display:flex;flex-direction:column;gap:5px;padding:0 0 13px;margin-bottom:12px;border-bottom:1px solid #E5EAF0;color:#263746;font-weight:800;font-size:15px}
+.request-detail-heading small{font-size:10px;color:#7A8794;font-weight:400;line-height:1.6}
+.request-table-wrap{width:100%;overflow-x:auto;border:1px solid #E1E7ED;border-radius:12px;background:#fff}
+.request-table{width:100%;border-collapse:separate;border-spacing:0;direction:rtl;min-width:680px;color:#293541;font-size:12px}
+.request-table thead th{background:#F4F7FA;color:#5B6977;font-weight:800;font-size:11px;padding:14px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid #E1E7ED}
+.request-table tbody td{padding:14px 12px;text-align:right;vertical-align:middle;border-bottom:1px solid #EDF0F4;background:#fff}
+.request-table tbody tr:last-child td{border-bottom:0}
+.request-row{cursor:pointer;transition:background .15s}
+.request-row:hover td{background:#F7FAFD}
+.request-row.selected td{background:#EDF5FC}
+.request-row.selected td:first-child{box-shadow:inset -3px 0 #398BC5}
+.request-code{font-weight:800;color:#245B88;white-space:nowrap;font-variant-numeric:tabular-nums}
+.request-title-cell{min-width:180px}
+.request-title-cell strong{display:block;color:#263746;font-size:12px;line-height:1.6}
+.request-title-cell small{display:block;color:#8994A0;font-size:10px;margin-top:3px}
+.request-date{white-space:nowrap;color:#687584;font-variant-numeric:tabular-nums}
+.request-ops{white-space:nowrap;text-align:left!important}
+.request-ops .btn{font-size:10px;padding:7px 10px;border-color:#D8E3ED;color:#245B88;background:#F7FAFD}
+.request-detail-column .flow{flex-wrap:wrap;overflow:visible;justify-content:center;background:#F7F9FB;border-radius:10px;padding:8px}
+.request-detail-column .flow-step{min-width:70px;max-width:90px}
+.request-detail-column .flow-lbl{white-space:normal}
+.request-detail-column .stitle{margin-top:15px}
+.request-detail-column .actions{flex-direction:column}
+.request-detail-column .actions .btn{width:100%}
+.detail-empty{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:9px;color:#687584;padding:24px}
+.detail-empty .empty-icon{font-size:38px;color:#9AA8B5}
+.detail-empty strong{color:#344454;font-size:14px}
+.detail-empty p{font-size:11px;line-height:1.8}
+.request-mobile-detail{display:none}
+@media(max-width:760px){
+ .request-workspace{display:flex;flex-direction:column;gap:12px}
+ .request-list-column,.request-detail-column{width:100%;position:static;max-height:none}
+ .request-detail-column{display:none}
+ .request-mobile-detail{display:block;margin-top:14px;padding:15px;background:#fff;border:1px solid #DCE2E9;border-radius:13px;box-shadow:0 3px 12px rgba(30,50,70,.05)}
+ .request-mobile-detail:empty{display:none}
+ .request-table{min-width:640px}
+}
+@media(min-width:761px){.request-mobile-detail{display:none!important}}
+@media print{.request-workspace{display:block}.request-detail-column{display:none}.request-list-column{border:0;box-shadow:none}.request-table-wrap{overflow:visible}.request-table{min-width:0;font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -596,7 +641,7 @@ body{background:#F1F3F6!important;color:#202833!important}
 <section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="profile-panel"><div class="profile-avatar" id="hero-avatar" aria-label="نشان حساب کاربری">م</div><div class="profile-meta"><strong id="hero-user">کاربر سامانه</strong><span id="hero-role">واحد فنی</span></div><span class="online-dot"></span></div></section><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span>▣</span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span>↗</span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
-  <div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div>
+  <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
 </div>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
@@ -900,22 +945,31 @@ function renderList(){
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
   else if(currentView==="inprogress") list=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status));
-  else{
-    list=requests;
-  }
-
-  if(!list.length){
-    document.getElementById("req-list").innerHTML=`
-      <div class="empty"><div class="empty-icon">${currentView==="inbox"?"🎉":"📋"}</div>
-      <div>${currentView==="inbox"?"صندوق ورودی خالی است — همه چیز روی روال!":"درخواستی یافت نشد"}</div></div>`;
-    ensureRequestPrintButton();
-    return;
-  }
+  else list=requests;
 
   const label={"inbox":"نیاز به اقدام شما","all":"همه درخواست‌ها","inprogress":"در جریان","done":"تکمیل شده"};
+  const selected=list.find(r=>String(r.id)===String(window.selectedRequestId))||list[0]||null;
+  if(selected) window.selectedRequestId=selected.id;
+  const rows=list.map(r=>{
+    const isSelected=selected&&String(selected.id)===String(r.id);
+    return `<tr class="request-row${isSelected?" selected":""}" onclick="openRequest('${r.id}')" tabindex="0" onkeydown="if(event.key==='Enter'){openRequest('${r.id}')}">
+      <td class="request-code">${r.id}</td>
+      <td class="request-title-cell"><strong>${r.title}</strong>${r.prio?'<small>'+r.prio+'</small>':''}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td class="request-date">${r.date||"—"}</td>
+      <td class="request-ops"><button type="button" class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openRequest('${r.id}')">مشاهده جزئیات ←</button></td>
+    </tr>`;
+  }).join("");
   document.getElementById("req-list").innerHTML=`
-    <div class="stitle">${label[currentView]||""}</div>
-    ${list.map(r=>reqCard(r)).join("")}`;
+    <div class="stitle">${label[currentView]||"درخواست‌ها"}</div>
+    ${list.length?`<div class="request-table-wrap"><table class="request-table">
+      <thead><tr><th>کد درخواست</th><th>عنوان درخواست</th><th>وضعیت</th><th>تاریخ ثبت</th><th>عملیات</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`:'<div class="empty"><div class="empty-icon">'+(currentView==="inbox"?"🎉":"📋")+'</div><div>'+(currentView==="inbox"?"صندوق ورودی خالی است — همه چیز روی روال!":"درخواستی یافت نشد")+'</div></div>'}
+    <div id="request-mobile-detail" class="request-mobile-detail"></div>`;
+  const panel=document.getElementById("request-detail-panel");
+  if(panel) panel.innerHTML=selected?requestDetail(selected):'<div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div>';
+  if(selected) drawerData=selected;
   ensureRequestPrintButton();
 }
 
@@ -954,9 +1008,21 @@ function reqCard(r){
 
 // ════ OPEN REQUEST DETAIL ════
 function openRequest(id){
-  const r=requests.find(x=>x.id===id);
+  const r=requests.find(x=>String(x.id)===String(id));
   if(!r) return;
   drawerData=r;
+  window.selectedRequestId=r.id;
+  const panel=document.getElementById("request-detail-panel");
+  if(panel){
+    document.querySelectorAll(".request-row").forEach(el=>el.classList.remove("selected"));
+    const row=[...document.querySelectorAll(".request-row")].find(el=>el.querySelector(".request-code")?.textContent===String(r.id));
+    if(row) row.classList.add("selected");
+    panel.innerHTML=requestDetail(r);
+    const mobile=document.getElementById("request-mobile-detail");
+    if(mobile) mobile.innerHTML=requestDetail(r);
+    if(window.matchMedia("(max-width:760px)").matches && mobile) mobile.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
   document.getElementById("drawer-content").innerHTML=requestDetail(r);
   openDrawer();
 }
