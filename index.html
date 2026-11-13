@@ -643,6 +643,30 @@ body{background:#F1F3F6!important;color:#202833!important}
  .request-ops .btn{min-height:30px!important;padding:6px 9px!important}
 }
 
+
+/* LIGHT THEME — new request drawer and form */
+#overlay{background:rgba(25,42,58,.42)!important;backdrop-filter:blur(2px)}
+#drawer.drawer{
+ background:#FFFFFF!important;color:#263746!important;
+ border:1px solid #DCE4EB!important;
+ box-shadow:0 18px 55px rgba(25,45,65,.18)!important
+}
+#drawer .drawer-handle{background:#D7E0E8!important}
+#drawer .close-btn{color:#647486!important}
+#drawer h2{color:#263746!important}
+#drawer .field label{color:#526273!important}
+#drawer .field input,#drawer .field select,#drawer .field textarea{
+ background:#F8FAFC!important;color:#263746!important;
+ border:1px solid #D7E0E8!important;border-radius:9px!important
+}
+#drawer .field input::placeholder,#drawer .field textarea::placeholder{color:#98A4B0!important}
+#drawer .field input:focus,#drawer .field select:focus,#drawer .field textarea:focus{
+ background:#FFFFFF!important;border-color:#5B9BCB!important;
+ box-shadow:0 0 0 3px rgba(65,139,190,.12)!important
+}
+#drawer .frow{gap:12px}
+@media(min-width:640px){#drawer.drawer{border-radius:16px!important}}
+
 </style>
 </head>
 <body>
