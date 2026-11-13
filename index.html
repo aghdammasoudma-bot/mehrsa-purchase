@@ -1611,39 +1611,43 @@ setInterval(addPrintButtons,1200);
  #req-list .req-card-bot{padding:5px 11px!important}
 }
 
-/* Banner: image-sized frame and compact title */
+/* Banner: frame hugs the banner image */
 .management-hero{
-  max-width:1160px!important;
+  display:block!important;
+  width:fit-content!important;
+  max-width:calc(100% - 28px)!important;
   margin:18px auto 14px!important;
-  padding:0 14px!important;
+  padding:0!important;
 }
 .hero-industrial{
   position:relative!important;
-  width:100%!important;
+  display:block!important;
+  width:auto!important;
+  min-width:0!important;
   min-height:0!important;
   height:auto!important;
-  aspect-ratio:1107 / 1110!important;
+  aspect-ratio:auto!important;
   padding:0!important;
   border:0!important;
   border-radius:12px!important;
   overflow:hidden!important;
-  background:#fff!important;
-  box-shadow:0 4px 16px rgba(30,50,70,.07)!important;
+  background:transparent!important;
+  box-shadow:none!important;
 }
 .mehrsa-hero-logo{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
+  position:static!important;
+  display:block!important;
+  width:auto!important;
+  max-width:100%!important;
+  height:auto!important;
   object-fit:contain!important;
   object-position:center!important;
   padding:0!important;
   margin:0!important;
-  background:#fff!important;
+  background:transparent!important;
   border:0!important;
-  border-radius:0!important;
+  border-radius:12px!important;
   box-shadow:none!important;
-  z-index:2!important;
 }
 .hero-copy,.hero-glow{display:none!important}
 .hero-caption{
@@ -1660,7 +1664,7 @@ setInterval(addPrintButtons,1200);
   box-shadow:none;
 }
 @media(max-width:640px){
-  .management-hero{padding:0 10px!important;margin:12px auto 10px!important}
+  .management-hero{max-width:calc(100% - 20px)!important;margin:12px auto 10px!important}
   .hero-caption{padding:4px 10px 6px;font-size:13px}
 }
 </style>
