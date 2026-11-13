@@ -795,16 +795,28 @@ function renderAll(){
   const cnt=inboxItems().length;
 }
 
+function setKpiView(view){
+  currentView=view;
+  renderList();
+  const target=document.getElementById("req-list");
+  if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
+}
 function renderKPIs(){
   const total=requests.length;
   const inbox=inboxItems().length;
-  const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status)).length;
-  const done=requests.filter(r=>["delivered","closed"].includes(r.status)).length;  document.getElementById("dashboard-kpis").innerHTML=`
+  const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status));
+  const done=requests.filter(r=>["delivered","closed"].includes(r.status));
+  const tiles=[
+    {view:"all",count:total,label:"کل درخواست‌ها",color:"var(--steel)"},
+    {view:"inbox",count:inbox,label:"نیاز به اقدام",color:"var(--red)"},
+    {view:"inprogress",count:inprog.length,label:"در جریان",color:"var(--amber)"},
+    {view:"done",count:done.length,label:"تکمیل شده",color:"var(--green)"}
+  ];
+  document.getElementById("dashboard-kpis").innerHTML=`
     <div class="kpi-row">
-      <div class="kpi"><div class="kpi-n" style="color:var(--steel)">${total}</div><div class="kpi-l">کل درخواست‌ها</div></div>
-      <div class="kpi"><div class="kpi-n" style="color:var(--red)">${inbox}</div><div class="kpi-l">نیاز به اقدام</div></div>
-      <div class="kpi"><div class="kpi-n" style="color:var(--amber)">${inprog}</div><div class="kpi-l">در جریان</div></div>
-      <div class="kpi"><div class="kpi-n" style="color:var(--green)">${done}</div><div class="kpi-l">تکمیل شده</div></div>
+      ${tiles.map(t=>`<div class="kpi" role="button" tabindex="0" aria-label="نمایش ${t.label}" onclick="setKpiView('${t.view}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setKpiView('${t.view}')}">
+        <div class="kpi-n" style="color:${t.color}">${t.count}</div><div class="kpi-l">${t.label}</div>
+      </div>`).join("")}
     </div>`;
 }
 
@@ -821,6 +833,7 @@ function renderList(){
   let list;
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
+  else if(currentView==="inprogress") list=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status));
   else{
     list=requests;
   }
@@ -833,7 +846,7 @@ function renderList(){
     return;
   }
 
-  const label={"inbox":"نیاز به اقدام شما","all":"همه درخواست‌ها","done":"تکمیل شده"};
+  const label={"inbox":"نیاز به اقدام شما","all":"همه درخواست‌ها","inprogress":"در جریان","done":"تکمیل شده"};
   document.getElementById("req-list").innerHTML=`
     <div class="stitle">${label[currentView]||""}</div>
     ${list.map(r=>reqCard(r)).join("")}`;
