@@ -500,6 +500,71 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
 
 .mobile-bottom-nav .nav-primary{margin-top:-24px;background:linear-gradient(145deg,#56b5c2,#287d9a);color:#061724;border:4px solid #0b1928;border-radius:17px;width:53px;height:53px;justify-content:center;box-shadow:0 5px 18px rgba(47,151,177,.28)}
 .mobile-bottom-nav .nav-primary span{font-size:26px}
+
+/* ─── LIGHT ENTERPRISE DASHBOARD (approved visual direction) ─── */
+:root{color-scheme:light;--bg:#F1F3F6;--card:#FFFFFF;--text:#202833;--sub:#687584;--line:#DCE2E9;--pale:#EAF2FA;--steel:#245B88;--blue:#244E72;--sky:#3996D8;--green:#168653;--green-bg:#E5F5EC;--amber:#B96A08;--amber-bg:#FFF3DD;--red:#B42332;--red-bg:#FCEBED;--shadow:0 3px 14px rgba(30,50,70,.07)}
+@media(prefers-color-scheme:dark){:root{color-scheme:light;--bg:#F1F3F6;--card:#FFFFFF;--text:#202833;--sub:#687584;--line:#DCE2E9;--pale:#EAF2FA;--steel:#245B88}}
+body{background:#F1F3F6!important;color:#202833!important}
+.top{background:linear-gradient(110deg,#183B5B,#285F83)!important}
+.pipeline{background:#FFFFFF!important;border-bottom:1px solid #DCE2E9!important;box-shadow:0 3px 12px rgba(30,50,70,.045)!important}
+.pipe-step{color:#687584!important;border-bottom:3px solid transparent!important}
+.pipe-step.active{color:#245B88!important;background:#EEF5FB!important;border-bottom-color:#3996D8!important}
+.pipe-count{background:#E7EFF7!important;color:#245B88!important}
+.pipe-count.alert{background:#FCEBED!important;color:#B42332!important}
+.content{max-width:1160px!important}
+.management-hero{display:block!important;max-width:1160px!important;margin:18px auto 16px!important;padding:0 14px}
+.hero-industrial{min-height:220px!important;width:100%!important;border:1px solid #D8E1E9!important;border-radius:18px!important;overflow:hidden!important;
+ background-image:linear-gradient(90deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.35) 38%,rgba(255,255,255,.90) 100%),url('https://dms.licdn.com/playlist/vid/v2/D4D05AQEtcIVVHtw8Ag/thumbnail-high/B4DZc1BSZhGUDQ-/0/1748941524658?e=2147483647&t=ciblYR8Dyh9xKtkenvLFFiH8hf97AYYedC9gyhcT3hw&v=beta')!important;
+ background-size:cover!important;background-position:center 50%!important;padding:24px 30px!important;box-shadow:0 5px 18px rgba(30,50,70,.08)!important}
+.hero-copy{position:absolute!important;right:34px!important;top:50%!important;transform:translateY(-50%)!important;text-align:right!important;max-width:58%;z-index:3!important}
+.hero-eyebrow{color:#42657F!important}
+.hero-copy h2{color:#172B3A!important;text-shadow:none!important;font-size:clamp(22px,3vw,32px)!important}
+.hero-copy p{color:#42586A!important;font-size:13px!important}
+.mehrsa-hero-logo{position:absolute!important;left:22px!important;right:auto!important;top:16px!important;bottom:16px!important;inset-block:auto!important;width:clamp(130px,19vw,220px)!important;height:calc(100% - 32px)!important;object-fit:contain!important;object-position:center!important;padding:10px!important;background:rgba(255,255,255,.94)!important;border:1px solid rgba(210,222,231,.9)!important;border-radius:14px!important;box-shadow:0 5px 16px rgba(30,50,70,.12)!important;z-index:2!important}
+.hero-glow{display:none!important}
+.profile-panel{display:flex!important;max-width:1160px!important;margin:10px auto 0!important;background:#FFFFFF!important;color:#202833!important;border:1px solid #DCE2E9!important;border-radius:15px!important;box-shadow:0 3px 12px rgba(30,50,70,.06)!important}
+.profile-meta strong{color:#202833!important}.profile-meta span{color:#687584!important}
+.kpi-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;margin:8px 0 22px!important}
+.kpi{appearance:none!important;width:100%!important;min-height:132px!important;display:flex!important;align-items:center!important;gap:13px!important;text-align:right!important;padding:18px 16px!important;background:#FFFFFF!important;color:#202833!important;border:1px solid #DCE2E9!important;border-radius:15px!important;box-shadow:0 4px 16px rgba(30,50,70,.075)!important;cursor:pointer!important;overflow:hidden!important}
+.kpi:before{right:0!important;left:auto!important;top:auto!important;bottom:0!important;width:100%!important;height:5px!important;background:var(--kpi-accent)!important;box-shadow:none!important}
+.kpi:after{display:none!important}
+.kpi-blue{--kpi-accent:#245B88;--kpi-soft:#E8F0F8;--kpi-icon:#245B88}
+.kpi-amber{--kpi-accent:#E59A20;--kpi-soft:#FFF3DD;--kpi-icon:#D1840D}
+.kpi-sky{--kpi-accent:#3996D8;--kpi-soft:#E8F3FC;--kpi-icon:#2787C9}
+.kpi-green{--kpi-accent:#20A56A;--kpi-soft:#E5F5EC;--kpi-icon:#168653}
+.kpi-icon{display:grid!important;place-items:center!important;flex:0 0 48px!important;width:48px!important;height:48px!important;border-radius:50%!important;background:var(--kpi-soft)!important;color:var(--kpi-icon)!important;font-size:27px!important;font-weight:800!important}
+.kpi-copy{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important;flex:1!important}
+.kpi-l{font-size:14px!important;color:#303B47!important;font-weight:800!important;margin:0!important}
+.kpi-n{font-size:30px!important;color:#111B26!important;line-height:1.2!important;text-shadow:none!important}
+.kpi-hint{font-size:10px!important;color:#74808D!important}
+.kpi-arrow{display:grid!important;place-items:center!important;flex:0 0 30px!important;width:30px!important;height:30px!important;border-radius:50%!important;background:#EDF2F6!important;color:#42657F!important;font-size:18px!important}
+.kpi:hover{transform:translateY(-2px)!important;box-shadow:0 8px 22px rgba(30,50,70,.11)!important}
+.req-card,.drawer,.comment-box{background:#FFFFFF!important;color:#202833!important;border-color:#DCE2E9!important}
+.req-card-title,.kpi-n,#work-orders section.req-card h2{color:#202833!important}
+.req-card-id,.req-card-bot-left,.kpi-l,.tl-meta{color:#687584!important}
+.req-card-top{background:#FFFFFF!important}
+.req-card-bot{background:#F7F9FB!important}
+.quick-action{background:#FFFFFF!important;color:#243747!important;border:1px solid #DCE2E9!important;box-shadow:0 3px 12px rgba(30,50,70,.06)!important}
+.quick-action>span{background:#EAF2FA!important;color:#245B88!important}
+.quick-action small{color:#687584!important}
+.mobile-bottom-nav{background:rgba(255,255,255,.97)!important;border-top:1px solid #DCE2E9!important;box-shadow:0 -4px 16px rgba(30,50,70,.06)!important}
+.mobile-bottom-nav button{color:#687584!important}
+.mobile-bottom-nav button.active{color:#245B88!important}
+.mobile-bottom-nav .nav-primary{background:#245B88!important;color:#FFFFFF!important;border-color:#F1F3F6!important}
+@media(max-width:640px){
+ .management-hero{padding:0 10px!important;margin:12px auto!important}
+ .hero-industrial{min-height:170px!important;padding:16px!important}
+ .hero-copy{right:16px!important;max-width:55%!important}
+ .hero-copy h2{font-size:20px!important}
+ .hero-copy p{font-size:10px!important}
+ .mehrsa-hero-logo{left:12px!important;width:112px!important;padding:6px!important}
+ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .kpi{min-height:112px!important;padding:13px 11px!important;gap:9px!important}
+ .kpi-icon{flex-basis:38px!important;width:38px!important;height:38px!important;font-size:22px!important}
+ .kpi-l{font-size:12px!important}.kpi-n{font-size:25px!important}.kpi-hint{font-size:9px!important}
+}
+@media(max-width:380px){.kpi{gap:7px!important;padding:11px 8px!important}.kpi-icon{flex-basis:32px!important;width:32px!important;height:32px!important}}
+
 </style>
 </head>
 <body>
@@ -807,19 +872,20 @@ function renderKPIs(){
   const inprog=requests.filter(r=>!["closed","delivered","planner_rejected"].includes(r.status));
   const done=requests.filter(r=>["delivered","closed"].includes(r.status));
   const tiles=[
-    {view:"all",count:total,label:"کل درخواست‌ها",color:"var(--steel)"},
-    {view:"inbox",count:inbox,label:"نیاز به اقدام",color:"var(--red)"},
-    {view:"inprogress",count:inprog.length,label:"در جریان",color:"var(--amber)"},
-    {view:"done",count:done.length,label:"تکمیل شده",color:"var(--green)"}
+    {view:"all",count:total,label:"کل درخواست‌ها",icon:"▤",tone:"blue",hint:"مشاهده همه درخواست‌ها"},
+    {view:"inbox",count:inbox,label:"نیاز به اقدام",icon:"!",tone:"amber",hint:"موارد منتظر اقدام"},
+    {view:"inprogress",count:inprog.length,label:"در جریان",icon:"↻",tone:"sky",hint:"در حال پیگیری"},
+    {view:"done",count:done.length,label:"تکمیل شده",icon:"✓",tone:"green",hint:"درخواست‌های خاتمه‌یافته"}
   ];
   document.getElementById("dashboard-kpis").innerHTML=`
     <div class="kpi-row">
-      ${tiles.map(t=>`<div class="kpi" role="button" tabindex="0" aria-label="نمایش ${t.label}" onclick="setKpiView('${t.view}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setKpiView('${t.view}')}">
-        <div class="kpi-n" style="color:${t.color}">${t.count}</div><div class="kpi-l">${t.label}</div>
-      </div>`).join("")}
+      ${tiles.map(t=>`<button type="button" class="kpi kpi-${t.tone}" role="button" aria-label="نمایش ${t.label}" aria-pressed="false" onclick="setKpiView('${t.view}')">
+        <span class="kpi-icon" aria-hidden="true">${t.icon}</span>
+        <span class="kpi-copy"><span class="kpi-l">${t.label}</span><strong class="kpi-n">${t.count}</strong><span class="kpi-hint">${t.hint}</span></span>
+        <span class="kpi-arrow" aria-hidden="true">←</span>
+      </button>`).join("")}
     </div>`;
 }
-
 function ensureRequestPrintButton(){
   const req=document.getElementById("req-list");
   if(!req || req.querySelector(".print-toolbar")) return;
