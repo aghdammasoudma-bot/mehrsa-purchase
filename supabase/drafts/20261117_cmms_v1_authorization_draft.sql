@@ -117,21 +117,6 @@ using (
   )
 );
 
--- Meter readings inherit access from their asset location.
-create policy cmms_meter_readings_read_scope
-on public.cmms_asset_meter_readings for select to authenticated
-using (
-  exists (
-    select 1
-    from public.cmms_assets a
-    where a.id = cmms_asset_meter_readings.asset_id
-      and (select cmms_private.cmms_has_role_at_location(
-        array['technician','technical_expert','technical_supervisor','responsible_manager'],
-        a.location_id
-      ))
-  )
-);
-
 -- Failure reports inherit access from their asset location.
 create policy cmms_failures_read_scope
 on public.cmms_failure_reports for select to authenticated
