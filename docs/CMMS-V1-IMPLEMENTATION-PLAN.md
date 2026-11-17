@@ -137,7 +137,7 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 ## 14. Authorization and role-seed drafts
 - `supabase/drafts/20261117_cmms_v1_authorization_draft.sql` adds a dedicated non-API helper schema, role/scope helper functions, location-ancestor access checks, SELECT-only RLS policies for all 15 CMMS tables, and explicit least-privilege table grants. Client-side direct writes are deliberately denied; state changes must go through narrowly scoped RPCs.
 - `supabase/drafts/20261117_cmms_v1_role_seed_draft.sql` maps the four confirmed usernames using a query against `user_profiles`: masoud → technical_supervisor; biabani → responsible_manager; reza → technical_expert; hamid → technician. It does not alter legacy roles and leaves mohammadi/karami without CMMS access.
-- These are draft SQL files only. The authorization policies have not been executed or tested against a staging database. RPCs for failure intake, triage, work-order lifecycle, assignment, actions, approvals, PM task generation/completion, audit writes and purchase linking remain to be implemented before any write workflow is enabled.
+- Role mapping and read-only RLS are drafted. Workflow RPCs are now drafted in `supabase/drafts/20261117_cmms_v1_workflow_rpc_draft.sql`; they have passed a rolled-back SQL/dependency validation transaction but have not been tested in an isolated staging project. No write workflow is enabled in production.
 
 
 ## 15. SECURITY DEFINER function review — read-only detail
@@ -151,30 +151,24 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - The current project has the `pg_cron` extension available but not installed. Server-side PM generation will use a controlled scheduled database job or Supabase scheduled function only after the extension/scheduling choice is validated in staging; browser timers are not acceptable.
 
 
-## 16. Workflow RPCs and transactional SQL validation — 2026-11-17
+## 16. Workflow, PM and transactional SQL validation — 2026-11-17
 - Added `supabase/drafts/20261117_cmms_v1_workflow_rpc_draft.sql` with private, fixed-search-path SECURITY DEFINER implementations and public SECURITY INVOKER entry points for:
-  - failure reporting;
-  - technical triage and conversion/rejection;
-  - work-order release and assignment;
-  - execution progress and action logging;
-  - test result and return-to-service submission;
-  - two-stage work-order decisions;
-  - PM task completion.
-- No broad client UPDATE/DELETE grants are included. The authorization layer remains read-only; writes are intended to pass through the narrow RPC surface only.
-- Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduler, attachments, audit/reporting, regression and rollback.
-- Ran the complete base schema + hardening + authorization + role-seed + workflow-RPC SQL as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed SELECT. The returned mapping was exactly:
+  - failure reporting and technical triage/conversion/rejection;
+  - work-order release, assignment, progress and action logging;
+  - test submission and explicit return-to-service decision;
+  - two-stage approval (technical supervisor, then responsible manager);
+  - PM task assignment/completion and manual meter readings;
+  - idempotent, row-locked server-side calendar/meter PM task generation.
+- Added a `trigger_type` to PM tasks and separate source-of-truth meter readings. V1 supports calendar OR meter-based PM. Hybrid scheduling is deferred because one shared interval cannot safely represent independent date and meter frequencies.
+- The PM generator is restricted to `service_role`; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
+- The earlier public SECURITY DEFINER RPC draft and duplicate PM scheduler draft were removed. The current workflow draft uses private implementations and public SECURITY INVOKER wrappers; no broad client UPDATE/DELETE grants are included.
+- Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduling, attachments, audit/reporting, regression and rollback.
+- Ran the complete current base schema + hardening + authorization + role-seed + workflow-RPC SQL as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed verification query. The returned mapping was exactly:
   - masoud → technical_supervisor
   - biabani → responsible_manager
   - reza → technical_expert
   - hamid → technician
-- Immediately after rollback, a read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining. The pre-existing `private_backup.snapshots` table remained present. Therefore this was a syntax/dependency validation only; it did not install CMMS tables, roles, policies or functions in production.
-- This is not a substitute for isolated staging tests, security tests, browser tests or restore testing. No CMMS production migration or deployment has occurred.
-- Remaining implementation before release: schedule the PM generator (pg_cron is available but not installed), cancellation/reassignment, controlled purchase linking, private Storage policies, full lifecycle integration tests, and wiring UI screens to live data.
-
-
-## 16. Controlled workflow RPCs and PM scheduler drafts
-- `supabase/drafts/20261117_cmms_v1_rpc_draft.sql` now drafts controlled operations for failure intake, failure triage/conversion, work-order release, action/labor/evidence logging, test + return-to-service submission, two-stage approval, PM completion and meter readings. Direct client table writes remain denied by the authorization draft.
-- `supabase/drafts/20261117_cmms_v1_pm_scheduler_draft.sql` drafts an idempotent, row-locked PM task generator for calendar- and meter-based plans. It is restricted to `service_role`; scheduling itself is not configured.
-- V1 intentionally supports calendar OR meter-based PM, not hybrid, because one shared frequency interval cannot safely represent two independent trigger units. Hybrid can be added later with separate calendar and meter interval fields if required.
-- `pg_cron` is available but not installed in the current project. The choice between installing it and using a scheduled Edge Function is deferred until staging.
-- RPC and scheduler drafts are not yet tested against a disposable database. They must be reviewed for SQL syntax, trigger ordering, RLS bypass behavior, idempotency and role-specific edge cases before any migration is applied.
+- A subsequent read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining; the pre-existing `private_backup.snapshots` table remained present. This was syntax/dependency validation only; no CMMS tables, roles, policies, functions or grants remain in production.
+- All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
+- No CMMS production migration or deployment has occurred. `main` remains untouched.
+- Remaining release blockers: external restorable backup and restore test; isolated staging execution; full RLS/RPC negative and positive tests; actual scheduled PM job; cancellation/reassignment and controlled purchase-link RPCs; private Storage policies; UI data binding and browser/iPhone tests; purchase-module regression.
