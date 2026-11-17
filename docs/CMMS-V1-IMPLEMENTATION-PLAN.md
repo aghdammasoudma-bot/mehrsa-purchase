@@ -106,14 +106,15 @@ Supabase's current Data API guidance distinguishes grants from RLS: both must be
 ## 11. Production baseline re-check — 2026-11-17
 Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 - Project status: `ACTIVE_HEALTHY`; PostgreSQL 17.11.
-- Current public tables: `pr_requests` (46 rows), `user_profiles` (6 rows), `technical_work_orders` (3 rows). RLS is enabled on all three.
+- Existing operational tables: `pr_requests` (46 rows), `user_profiles` (6 rows), `technical_work_orders` (3 rows). RLS is enabled on all three.
+- CMMS production state, verified again on 2026-11-17: 15 new CMMS tables, all with RLS; 15 SELECT-only policies; four active global role rows; four audit rows from role seeding; all asset/failure/work-order/PM operational tables remain empty.
 - `private_backup.snapshots` contains snapshot `pre_cmms_2026_11_17`, captured at 2026-11-17 18:03:09 UTC. Snapshot sections include public table rows, table definitions, policies, functions, Auth user metadata, Storage bucket metadata and Storage object metadata. It is still an in-project JSON snapshot, not an external restorable backup.
 - Supabase migration history currently returns zero tracked migrations. The live schema therefore must be treated as an existing baseline, not assumed to be reproducible from migration files.
-- Supabase Security Advisor flags `private_backup.snapshots` because RLS is disabled. Catalog checks show the `private_backup` schema has no USAGE grant for `anon` or `authenticated`, and neither role has SELECT on the snapshot table; the table ACL currently lists only `postgres`. This reduces current Data API reachability, but the RLS warning remains a hardening item. Do not change it without explicit user decision. Suggested remediation from the advisor:
+- Supabase's current table-security advisory flags `private_backup.snapshots` as a CRITICAL RLS-disabled exposure and warns that anon/authenticated client roles can read or modify rows. Do not assume the schema name `private_backup` is a sufficient security boundary. The table contains an in-project JSON snapshot of operational records and metadata. No automatic remediation was applied; this needs explicit user approval. Suggested remediation from the advisor:
   ```sql
   ALTER TABLE "private_backup"."snapshots" ENABLE ROW LEVEL SECURITY;
   ```
-  With RLS enabled and no policies, normal client roles remain blocked; preserve postgres/service administrative access and verify catalog grants after any change.
+  With RLS enabled and no policies, normal client roles will be blocked. Preserve administrative recovery access and verify grants and table access after the change.
 - Performance Advisor findings on existing tables: one unindexed FK on `technical_work_orders.created_by`; four RLS init-plan warnings on existing policies; one unused index on `pr_requests`. These are existing-app tuning items, not reasons to alter purchase behavior during CMMS work. Review separately with regression tests.
 - The CMMS base schema draft now defaults new work orders to `triage`, not `approved_for_execution`, to prevent bypassing the assessment gate.
 - The hardening draft now requires explicit passed test, return-to-service timestamp, two distinct approvers and approval timestamps before a work order can be closed.
@@ -172,7 +173,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
   - biabani → responsible_manager
   - reza → technical_expert
   - hamid → technician
-- A subsequent read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining; the pre-existing `private_backup.snapshots` table remained present. This was syntax/dependency validation only; no CMMS tables, roles, policies, functions or grants remain in production.
+- At the immediate post-rollback checkpoint, a read-only catalog check showed zero `cmms_*` relations. A later production action installed the additive CMMS schema and role seed; the exact originating deployment action cannot be established from the current tool history. The live state is now installed but write-locked, as documented in section 18.
 - All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
 - After the rollback validation, additional asset/location CRUD, PM-plan management, asset-status, cancellation/reassignment and Storage policy drafts were added. The latest RPC/Storage changes have passed static structural checks (balanced SQL dollar quotes, no duplicate function names, all app inline scripts compile) but have not been rerun through PostgreSQL or isolated staging. They remain unvalidated release inputs.
 - The latest production catalog check shows the CMMS schema is present in production; the earlier note that no CMMS objects remained was incorrect/outdated. Current production state and safety lockdown are documented in section 18 below. The `main` app branch remains untouched.
@@ -186,13 +187,13 @@ Read-only production inventory after the rollback validation:
 - `public.technical_work_orders`: 3 rows.
 - `auth.users`: 6 users.
 - `storage.buckets` and `storage.objects`: both currently 0.
-- Public base tables: 3. No CMMS relations remain in production.
+- CMMS: 15 tables with RLS enabled; four global role rows; four audit rows; all operational CMMS tables remain empty. All public CMMS RPC wrappers are non-executable by anon/authenticated/service_role; authenticated direct INSERT/UPDATE/DELETE on CMMS tables is absent.
 - No Supabase migration history was returned by the Supabase migration-list tool.
 
 The existing `private_backup.snapshots` record is still an in-project snapshot. It is not an external restorable backup. Supabase's current backup documentation says Free projects should regularly export data using the Supabase CLI; database backups also do not include Storage object bytes. Current Storage inventory is zero, but Auth and application data still need an external backup and isolated restore test. The connected Supabase actions do not expose a downloadable `db dump` operation in this session. No backup export has been fabricated or claimed complete.
 
 
-## 18. Evidence storage policy draft
+## 19. Evidence storage policy draft
 - Added `supabase/drafts/20261117_cmms_v1_storage_policy_draft.sql` for a private `cmms-evidence` bucket with file-size/MIME restrictions, asset-location scoped read access, record-linked upload checks and no update/delete policy.
 - Object paths are constrained to `cmms/{asset_uuid}/{record_type}/{record_uuid}/{filename}`; reads require a real linked asset/failure/work-order/PM record and the caller's CMMS location role.
 - This is a draft only. Bucket creation and Storage policies have not been applied or tested. Signed URLs and upload/download flows must be verified in staging.
@@ -219,7 +220,7 @@ Safety action taken after discovering the live schema:
 - Release remains blocked on an external restorable backup/restore test, isolated staging validation, re-enabling only approved RPCs after tests, Storage policy deployment, PM scheduling and UI integration.
 
 
-## 19. Reporting layer draft
+## 20. Reporting layer draft
 - Added `supabase/drafts/20261117_cmms_v1_reporting_draft.sql` with SECURITY INVOKER views for dashboard counts, per-asset work/failure/PM KPIs, a unified asset timeline, and PM completion compliance.
 - Downtime metrics derive only from recorded `downtime_started_at` and `returned_to_service_at`; no MTBF/MTTR estimate is shown where source data is insufficient.
 - The failure-intake RPC now accepts an optional downtime start timestamp and carries it into the resulting work order, allowing downtime reporting to use source timestamps rather than inference.
