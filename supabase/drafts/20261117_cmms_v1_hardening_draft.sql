@@ -462,7 +462,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_before jsonb;
   v_after jsonb;
