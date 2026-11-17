@@ -1048,7 +1048,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_id uuid;
 begin
@@ -1071,7 +1071,7 @@ begin
   returning id into v_id;
   return v_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_create_asset(
   p_asset_code text,
@@ -1089,13 +1089,13 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_id uuid;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if not cmms_private.cmms_has_any_role(array['technical_supervisor']) then
-    raise exception 'Only the technical supervisor may register assets';
+  if not cmms_private.cmms_has_any_role(array['technical_supervisor','technical_expert']) then
+    raise exception 'Only technical supervisor or expert may register assets';
   end if;
   if nullif(btrim(coalesce(p_asset_code,'')),'') is null
      or nullif(btrim(coalesce(p_name,'')),'') is null then
@@ -1121,146 +1121,7 @@ begin
 
   return v_id;
 end;
-$;
-
-create or replace function cmms_private.cmms_create_pm_plan(
-  p_asset_id uuid,
-  p_title text,
-  p_frequency_basis text,
-  p_frequency_unit text,
-  p_frequency_value numeric,
-  p_next_due_at timestamptz default null,
-  p_meter_code text default null,
-  p_meter_unit text default null,
-  p_next_due_meter_value numeric default null,
-  p_checklist jsonb default '[]'::jsonb
-)
-returns uuid
-language plpgsql
-security definer
-set search_path = ''
-as $
-declare
-  v_location_id uuid;
-  v_id uuid;
-begin
-  if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if nullif(btrim(coalesce(p_title,'')),'') is null then raise exception 'PM title is required'; end if;
-  if p_checklist is null or jsonb_typeof(p_checklist)<>'array' or jsonb_array_length(p_checklist)=0 then
-    raise exception 'PM checklist must be a non-empty array';
-  end if;
-
-  select a.location_id into v_location_id
-  from public.cmms_assets a where a.id=p_asset_id and a.operational_status<>'retired';
-  if not found then raise exception 'Asset not found or retired'; end if;
-  if not cmms_private.cmms_has_role_at_location(
-    array['technical_expert','technical_supervisor'],v_location_id
-  ) then
-    raise exception 'Only technical expert or supervisor may create PM plans';
-  end if;
-
-  insert into public.cmms_pm_plans(
-    asset_id,title,frequency_basis,frequency_unit,frequency_value,
-    next_due_at,meter_code,meter_unit,next_due_meter_value,checklist,created_by
-  ) values (
-    p_asset_id,btrim(p_title),p_frequency_basis,p_frequency_unit,p_frequency_value,
-    p_next_due_at,nullif(btrim(p_meter_code),''),nullif(btrim(p_meter_unit),''),
-    p_next_due_meter_value,p_checklist,auth.uid()
-  ) returning id into v_id;
-
-  return v_id;
-end;
-$;
-
-create or replace function cmms_private.cmms_deactivate_pm_plan(p_pm_plan_id uuid)
-returns uuid
-language plpgsql
-security definer
-set search_path = ''
-as $
-declare
-  v_location_id uuid;
-begin
-  if auth.uid() is null then raise exception 'Authentication required'; end if;
-  select a.location_id into v_location_id
-  from public.cmms_pm_plans p join public.cmms_assets a on a.id=p.asset_id
-  where p.id=p_pm_plan_id for update of p;
-  if not found then raise exception 'PM plan not found'; end if;
-  if not cmms_private.cmms_has_role_at_location(
-    array['technical_expert','technical_supervisor'],v_location_id
-  ) then raise exception 'Only technical expert or supervisor may deactivate PM plans'; end if;
-
-  update public.cmms_pm_plans set is_active=false where id=p_pm_plan_id;
-  return p_pm_plan_id;
-end;
-$;
-
-create or replace function cmms_private.cmms_unassign_work_order(
-  p_work_order_id uuid,
-  p_assignee_id uuid,
-  p_reason text
-)
-returns uuid
-language plpgsql
-security definer
-set search_path = ''
-as $
-declare
-  v_location_id uuid;
-  v_assignment_id uuid;
-begin
-  if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if nullif(btrim(coalesce(p_reason,'')),'') is null then raise exception 'Unassignment reason is required'; end if;
-
-  select a.location_id into v_location_id
-  from public.cmms_work_orders w join public.cmms_assets a on a.id=w.asset_id
-  where w.id=p_work_order_id and w.status='assigned'
-  for update of w;
-  if not found then raise exception 'Only assigned work orders can be unassigned'; end if;
-  if not cmms_private.cmms_has_role_at_location(
-    array['technical_expert','technical_supervisor'],v_location_id
-  ) then raise exception 'Only technical expert or supervisor may unassign work'; end if;
-
-  update public.cmms_work_order_assignments
-  set unassigned_at=now(),unassign_reason=btrim(p_reason)
-  where work_order_id=p_work_order_id and user_id=p_assignee_id and unassigned_at is null
-  returning id into v_assignment_id;
-
-  if v_assignment_id is null then raise exception 'Active assignment not found'; end if;
-  return v_assignment_id;
-end;
-$;
-
-create or replace function cmms_private.cmms_cancel_work_order(
-  p_work_order_id uuid,
-  p_reason text
-)
-returns text
-language plpgsql
-security definer
-set search_path = ''
-as $
-declare
-  v_location_id uuid;
-begin
-  if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if nullif(btrim(coalesce(p_reason,'')),'') is null then raise exception 'Cancellation reason is required'; end if;
-
-  select a.location_id into v_location_id
-  from public.cmms_work_orders w join public.cmms_assets a on a.id=w.asset_id
-  where w.id=p_work_order_id for update of w;
-  if not found then raise exception 'Work order not found'; end if;
-  if not cmms_private.cmms_has_role_at_location(
-    array['technical_expert','technical_supervisor'],v_location_id
-  ) then raise exception 'Only technical expert or supervisor may cancel work orders'; end if;
-
-  update public.cmms_work_orders
-  set status='cancelled',cancel_reason=btrim(p_reason),updated_at=now()
-  where id=p_work_order_id and status not in ('closed','cancelled');
-  if not found then raise exception 'Closed or cancelled work orders cannot be cancelled'; end if;
-  return 'cancelled';
-end;
-$;
+$$;
 
 -- Public API wrappers are SECURITY INVOKER, not SECURITY DEFINER.
 create or replace function public.cmms_report_failure(
@@ -1325,28 +1186,13 @@ create or replace function public.cmms_start_pm_task(p_pm_task_id uuid)
 returns uuid as $$ select cmms_private.cmms_start_pm_task($1); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_create_location(p_code text,p_name text,p_discipline text,p_parent_id uuid default null)
-returns uuid as $ select cmms_private.cmms_create_location($1,$2,$3,$4); $ language sql security invoker set search_path = '';
+returns uuid as $$ select cmms_private.cmms_create_location($1,$2,$3,$4); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_create_asset(
   p_asset_code text,p_name text,p_location_id uuid,p_criticality text default 'medium',
   p_category_id uuid default null,p_manufacturer text default null,p_model text default null,
   p_serial_number text default null,p_technical_specs jsonb default '{}'::jsonb,p_equipment_owner text default null
-) returns uuid as $ select cmms_private.cmms_create_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path = '';
-
-create or replace function public.cmms_create_pm_plan(
-  p_asset_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,p_frequency_value numeric,
-  p_next_due_at timestamptz default null,p_meter_code text default null,p_meter_unit text default null,
-  p_next_due_meter_value numeric default null,p_checklist jsonb default '[]'::jsonb
-) returns uuid as $ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path = '';
-
-create or replace function public.cmms_deactivate_pm_plan(p_pm_plan_id uuid)
-returns uuid as $ select cmms_private.cmms_deactivate_pm_plan($1); $ language sql security invoker set search_path = '';
-
-create or replace function public.cmms_unassign_work_order(p_work_order_id uuid,p_assignee_id uuid,p_reason text)
-returns uuid as $ select cmms_private.cmms_unassign_work_order($1,$2,$3); $ language sql security invoker set search_path = '';
-
-create or replace function public.cmms_cancel_work_order(p_work_order_id uuid,p_reason text)
-returns text as $ select cmms_private.cmms_cancel_work_order($1,$2); $ language sql security invoker set search_path = '';
+) returns uuid as $$ select cmms_private.cmms_create_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
