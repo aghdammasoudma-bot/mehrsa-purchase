@@ -41,6 +41,18 @@ create table if not exists public.cmms_assets (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.cmms_asset_meter_readings (
+  id uuid primary key default gen_random_uuid(),
+  asset_id uuid not null references public.cmms_assets(id) on delete restrict,
+  meter_code text not null,
+  meter_unit text not null,
+  meter_value numeric(14,3) not null check (meter_value >= 0),
+  reading_at timestamptz not null default now(),
+  recorded_by uuid not null references auth.users(id) on delete restrict,
+  source text not null default 'manual' check (source in ('manual','work_order','import')),
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.cmms_user_roles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -146,6 +158,7 @@ create table if not exists public.cmms_pm_plans (
   frequency_basis text not null default 'calendar' check (frequency_basis in ('calendar','meter','hybrid')),
   frequency_unit text not null check (frequency_unit in ('day','week','month','year','hour','cycle')),
   frequency_value numeric(14,3) not null check (frequency_value > 0),
+  meter_code text,
   meter_unit text,
   next_due_meter_value numeric(14,3),
   last_meter_value numeric(14,3),
@@ -155,7 +168,7 @@ create table if not exists public.cmms_pm_plans (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   check (frequency_basis not in ('calendar','hybrid') or next_due_at is not null),
-  check (frequency_basis not in ('meter','hybrid') or (meter_unit is not null and next_due_meter_value is not null))
+  check (frequency_basis not in ('meter','hybrid') or (meter_code is not null and meter_unit is not null and next_due_meter_value is not null))
 );
 
 create table if not exists public.cmms_pm_tasks (
@@ -206,6 +219,7 @@ create table if not exists public.cmms_work_order_purchase_links (
 
 create index if not exists cmms_assets_location_idx on public.cmms_assets(location_id);
 create index if not exists cmms_assets_category_idx on public.cmms_assets(category_id);
+create index if not exists cmms_meter_readings_asset_time_idx on public.cmms_asset_meter_readings(asset_id,meter_code,reading_at desc);
 create index if not exists cmms_failure_reports_asset_status_idx on public.cmms_failure_reports(asset_id,status);
 create index if not exists cmms_work_orders_asset_status_idx on public.cmms_work_orders(asset_id,status);
 create index if not exists cmms_work_orders_priority_idx on public.cmms_work_orders(priority,status);
@@ -217,6 +231,7 @@ create index if not exists cmms_audit_entity_idx on public.cmms_audit_logs(entit
 alter table public.cmms_locations enable row level security;
 alter table public.cmms_asset_categories enable row level security;
 alter table public.cmms_assets enable row level security;
+alter table public.cmms_asset_meter_readings enable row level security;
 alter table public.cmms_user_roles enable row level security;
 alter table public.cmms_failure_reports enable row level security;
 alter table public.cmms_work_orders enable row level security;
