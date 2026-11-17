@@ -365,6 +365,7 @@ begin
       and ur.is_active
       and ur.location_id is null
       and ur.role in ('technical_supervisor','technical_expert')
+      and exists (select 1 from public.user_profiles up where up.user_id=ur.user_id and up.is_active)
   ) into v_is_governance;
 
   select exists (
@@ -372,6 +373,7 @@ begin
     where wa.work_order_id=new.id
       and wa.user_id=auth.uid()
       and wa.unassigned_at is null
+      and exists (select 1 from public.user_profiles up where up.user_id=wa.user_id and up.is_active)
   ) into v_is_assigned;
 
   -- Approval-trigger transitions are allowed only when the latest decision is current.
@@ -458,8 +460,6 @@ begin
     v_transition_allowed := v_is_assigned or v_is_governance;
   elsif old.status in ('testing','rework') and new.status='pending_supervisor_approval' then
     v_transition_allowed := v_is_assigned or v_is_governance;
-  elsif new.status='cancelled' and old.status not in ('closed','cancelled') then
-    v_transition_allowed := v_is_governance;
   end if;
 
   if not v_transition_allowed then
@@ -468,6 +468,7 @@ begin
 
   if new.status='pending_supervisor_approval' then
     if new.test_result is distinct from 'passed'
+       or new.return_to_service_status is null
        or new.return_to_service_status not in ('returned','not_required')
        or (new.return_to_service_status='returned' and new.returned_to_service_at is null) then
       raise exception 'Cannot request approval before successful test and explicit return-to-service decision';
