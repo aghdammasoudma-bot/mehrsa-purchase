@@ -1316,6 +1316,30 @@ returns uuid as $$ select cmms_private.cmms_set_pm_plan_active($1,$2); $$ langua
 create or replace function public.cmms_start_pm_task(p_pm_task_id uuid)
 returns uuid as $$ select cmms_private.cmms_start_pm_task($1); $$ language sql security invoker set search_path='';
 
+create or replace function public.cmms_create_location(p_code text,p_name text,p_discipline text,p_parent_id uuid default null)
+returns uuid as $ select cmms_private.cmms_create_location($1,$2,$3,$4); $ language sql security invoker set search_path = '';
+
+create or replace function public.cmms_create_asset(
+  p_asset_code text,p_name text,p_location_id uuid,p_criticality text default 'medium',
+  p_category_id uuid default null,p_manufacturer text default null,p_model text default null,
+  p_serial_number text default null,p_technical_specs jsonb default '{}'::jsonb,p_equipment_owner text default null
+) returns uuid as $ select cmms_private.cmms_create_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path = '';
+
+create or replace function public.cmms_create_pm_plan(
+  p_asset_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,p_frequency_value numeric,
+  p_next_due_at timestamptz default null,p_meter_code text default null,p_meter_unit text default null,
+  p_next_due_meter_value numeric default null,p_checklist jsonb default '[]'::jsonb
+) returns uuid as $ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path = '';
+
+create or replace function public.cmms_deactivate_pm_plan(p_pm_plan_id uuid)
+returns uuid as $ select cmms_private.cmms_deactivate_pm_plan($1); $ language sql security invoker set search_path = '';
+
+create or replace function public.cmms_unassign_work_order(p_work_order_id uuid,p_assignee_id uuid,p_reason text)
+returns uuid as $ select cmms_private.cmms_unassign_work_order($1,$2,$3); $ language sql security invoker set search_path = '';
+
+create or replace function public.cmms_cancel_work_order(p_work_order_id uuid,p_reason text)
+returns text as $ select cmms_private.cmms_cancel_work_order($1,$2); $ language sql security invoker set search_path = '';
+
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
@@ -1334,6 +1358,13 @@ grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,n
 grant execute on function cmms_private.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function cmms_private.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_create_location(text,text,text,uuid) to authenticated;
+grant execute on function cmms_private.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) to authenticated;
+grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_deactivate_pm_plan(uuid) to authenticated;
+grant execute on function cmms_private.cmms_unassign_work_order(uuid,uuid,text) to authenticated;
+grant execute on function cmms_private.cmms_cancel_work_order(uuid,text) to authenticated;
+
 grant execute on function cmms_private.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
 grant execute on function cmms_private.cmms_assign_pm_task(uuid,uuid) to authenticated;
 grant execute on function cmms_private.cmms_cancel_work_order(uuid,text) to authenticated;
@@ -1356,6 +1387,12 @@ revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from p
 revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) from public, anon;
 revoke all on function public.cmms_set_pm_plan_active(uuid,boolean) from public, anon;
 revoke all on function public.cmms_start_pm_task(uuid) from public, anon;
+revoke all on function public.cmms_create_location(text,text,text,uuid) from public, anon;
+revoke all on function public.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) from public, anon;
+revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) from public, anon;
+revoke all on function public.cmms_deactivate_pm_plan(uuid) from public, anon;
+revoke all on function public.cmms_unassign_work_order(uuid,uuid,text) from public, anon;
+revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
 revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
 revoke all on function public.cmms_reassign_work_order(uuid,uuid,text) from public, anon;
@@ -1376,6 +1413,13 @@ grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric
 grant execute on function public.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function public.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function public.cmms_create_location(text,text,text,uuid) to authenticated;
+grant execute on function public.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) to authenticated;
+grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) to authenticated;
+grant execute on function public.cmms_deactivate_pm_plan(uuid) to authenticated;
+grant execute on function public.cmms_unassign_work_order(uuid,uuid,text) to authenticated;
+grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
+
 grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
 grant execute on function public.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
 grant execute on function public.cmms_link_purchase_request(uuid,text) to authenticated;
