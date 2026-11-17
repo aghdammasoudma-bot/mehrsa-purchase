@@ -455,6 +455,8 @@ begin
     v_transition_allowed := v_is_assigned or v_is_governance;
   elsif old.status in ('testing','rework') and new.status='pending_supervisor_approval' then
     v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif new.status='cancelled' and old.status not in ('closed','cancelled') then
+    v_transition_allowed := v_is_governance;
   end if;
 
   if not v_transition_allowed then
