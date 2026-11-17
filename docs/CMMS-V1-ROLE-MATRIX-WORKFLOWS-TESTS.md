@@ -1,6 +1,6 @@
 # CMMS v1 — Role Matrix, Workflow & Acceptance Tests
 
-Status: design specification only. No production database changes have been made.
+Status: design specification plus a provisioned, write-locked production role scaffold; CMMS is not operational or released.
 
 ## 1. Confirmed operating boundary
 - The module belongs to the Technical Department.
@@ -23,7 +23,7 @@ The current application has six active profiles. The CMMS uses a separate role m
 | mohammadi | planner | none by default | No CMMS access unless explicitly requested |
 | karami | procurement | none by default | Procurement continues through existing purchase module |
 
-All six remain unchanged in `user_profiles`. These are proposed rows for `cmms_user_roles`, not applied permissions. The user confirmed on 2026-11-17 that `biabani` approves all CMMS equipment and locations in v1; no separate area-manager approval roles are required. Users may receive more than one CMMS role only where explicitly justified. A person must not approve both stages of the same work order.
+All six remain unchanged in `user_profiles`. These four global role rows are now present in production `cmms_user_roles`: masoud = `technical_supervisor`, biabani = `responsible_manager`, reza = `technical_expert`, hamid = `technician`. No CMMS role is assigned to mohammadi or karami. The rows currently enable read access only; public CMMS RPCs are not executable by authenticated users and direct table writes are denied. The user confirmed on 2026-11-17 that `biabani` approves all CMMS equipment and locations in v1; no separate area-manager approval roles are required. Users may receive more than one CMMS role only where explicitly justified. A person must not approve both stages of the same work order.
 
 ### Authorization principles
 - Every CMMS operation requires an authenticated user and an active CMMS role.
@@ -104,9 +104,9 @@ Priority labels must be calibrated against the plant's actual escalation and res
 Decision confirmed by the user (2026-11-17): biabani is the responsible-manager approver for all equipment and locations in CMMS v1, including production, electrical, mechanical and utilities. Do not create separate area-manager approval roles in v1. Keep the role mapping separate from the legacy `user_profiles.role` field. The proposed mapping remains masoud = `technical_supervisor` and biabani = `responsible_manager`; it is a design decision, not yet provisioned in production.
 
 ## 9. Implementation artifacts and known gates
-- `supabase/drafts/20261117_cmms_v1_draft.sql`: additive base schema, not applied.
-- `supabase/drafts/20261117_cmms_v1_hardening_draft.sql`: hardening layer for NULL-safe role uniqueness, active assignment uniqueness, location cycle guard, PM completion integrity, approval ordering/identity, append-only approval/audit records and asset status history. Not applied; requires staging tests and review.
-- External restorable backup remains the mandatory release gate. The in-project snapshot is not a disaster-recovery backup.
+- `supabase/drafts/20261117_cmms_v1_draft.sql`: additive base schema; corresponding tables are present in production but write-locked.
+- `supabase/drafts/20261117_cmms_v1_hardening_draft.sql`: hardening design for NULL-safe role uniqueness, active assignment uniqueness, location-cycle guard, PM completion integrity, approval ordering/identity, append-only approval/audit records and asset status history. Production contains related triggers and constraints, but exact live-vs-draft reconciliation and staging tests remain mandatory.
+- External restorable backup remains the mandatory release gate. The in-project snapshot is not a disaster-recovery backup. Production now contains the CMMS schema and four role rows, but remains write-locked.
 - Data API exposure must be explicitly reviewed: Supabase changed defaults so newly created public tables are not automatically exposed; never infer API accessibility from table existence.
 
 
