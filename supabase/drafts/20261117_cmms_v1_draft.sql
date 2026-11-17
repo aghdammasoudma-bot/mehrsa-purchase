@@ -168,6 +168,7 @@ create table if not exists public.cmms_pm_plans (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   check (frequency_basis not in ('calendar','hybrid') or next_due_at is not null),
+  check (frequency_basis not in ('calendar','hybrid') or frequency_value = trunc(frequency_value)),
   check (frequency_basis not in ('meter','hybrid') or (meter_code is not null and meter_unit is not null and next_due_meter_value is not null))
 );
 
