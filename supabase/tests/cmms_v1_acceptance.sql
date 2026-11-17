@@ -1,5 +1,7 @@
 -- CMMS v1 integration acceptance tests.
--- Run ONLY in a disposable staging project after applying all CMMS drafts.
+-- Run ONLY in a disposable staging project after reconciling and applying the final migration.
+-- Execute with psql/a PostgreSQL client that preserves transaction boundaries; do NOT run through
+-- the connected SQL execution action, which may commit DDL statements despite an explicit ROLLBACK.
 -- The enclosing transaction must be rolled back; fixtures are not production data.
 -- This script validates workflow RPCs/trigger logic with request JWT claims while
 -- executed by the database owner. It does NOT prove anon/authenticated RLS isolation;
