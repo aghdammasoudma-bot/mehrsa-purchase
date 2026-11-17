@@ -643,11 +643,8 @@ begin
   select a.location_id into v_location_id
   from public.cmms_assets a where a.id=v_task.asset_id;
 
-  if v_task.assigned_to is distinct from auth.uid()
-     and not cmms_private.cmms_has_role_at_location(
-       array['technical_expert','technical_supervisor'],v_location_id
-     ) then
-    raise exception 'Only assigned user or technical governance role can start this PM task';
+  if v_task.assigned_to is distinct from auth.uid() then
+    raise exception 'Only the assigned user can start this PM task';
   end if;
 
   update public.cmms_pm_tasks set status='in_progress' where id=p_pm_task_id;
