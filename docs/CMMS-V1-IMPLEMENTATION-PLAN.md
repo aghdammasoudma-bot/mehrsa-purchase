@@ -175,7 +175,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - A subsequent read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining; the pre-existing `private_backup.snapshots` table remained present. This was syntax/dependency validation only; no CMMS tables, roles, policies, functions or grants remain in production.
 - All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
 - After the rollback validation, additional asset/location CRUD, PM-plan management, asset-status, cancellation/reassignment and Storage policy drafts were added. The latest RPC/Storage changes have passed static structural checks (balanced SQL dollar quotes, no duplicate function names, all app inline scripts compile) but have not been rerun through PostgreSQL or isolated staging. They remain unvalidated release inputs.
-- No CMMS production migration or deployment has occurred. `main` remains untouched.
+- The latest production catalog check shows the CMMS schema is present in production; the earlier note that no CMMS objects remained was incorrect/outdated. Current production state and safety lockdown are documented in section 18 below. The `main` app branch remains untouched.
 - Remaining release blockers: external restorable backup and restore test; isolated staging execution; full RLS/RPC negative and positive tests; actual scheduled PM job; cancellation/reassignment and controlled purchase-link RPCs; private Storage policies; UI data binding and browser/iPhone tests; purchase-module regression.
 
 
@@ -196,3 +196,24 @@ The existing `private_backup.snapshots` record is still an in-project snapshot. 
 - Added `supabase/drafts/20261117_cmms_v1_storage_policy_draft.sql` for a private `cmms-evidence` bucket with file-size/MIME restrictions, asset-location scoped read access, record-linked upload checks and no update/delete policy.
 - Object paths are constrained to `cmms/{asset_uuid}/{record_type}/{record_uuid}/{filename}`; reads require a real linked asset/failure/work-order/PM record and the caller's CMMS location role.
 - This is a draft only. Bucket creation and Storage policies have not been applied or tested. Signed URLs and upload/download flows must be verified in staging.
+
+
+## 18. Verified production state and safety lockdown — 2026-11-17
+A fresh read-only catalog inspection shows the following CMMS objects are currently present in the production Supabase project:
+- 15 CMMS tables, all 15 with RLS enabled.
+- 15 CMMS row policies; all are SELECT policies. No INSERT/UPDATE/DELETE policies exist.
+- 58 CMMS-named functions across `public` and `cmms_private`, and 24 CMMS triggers.
+- Active global role assignments: masoud = technical_supervisor; biabani = responsible_manager; reza = technical_expert; hamid = technician.
+- Four audit rows record those four role-seed inserts, with system actor `NULL`.
+- No locations, assets, failure reports, work orders, assignments, actions, approvals, PM plans/tasks, meter readings or purchase links have been created; those operational tables are empty.
+- No `cmms-evidence` Storage bucket exists.
+- Existing purchase baseline remains `pr_requests` 46 rows, `user_profiles` 6 rows and `technical_work_orders` 3 rows.
+
+Safety action taken after discovering the live schema:
+- Revoked EXECUTE on every `public.cmms_*` function from `PUBLIC`, `anon`, `authenticated` and `service_role`.
+- Revoked EXECUTE on all `cmms_private` workflow functions from client/service roles; only the three read-authorization helper functions remain executable by `authenticated` for RLS evaluation.
+- Verified every public CMMS function is non-executable by authenticated/anon/service_role; direct authenticated table INSERT/UPDATE/DELETE privileges are absent.
+- RLS read access remains available for the four mapped roles, but no operational rows exist. The CMMS UI is not in `main`; no live workflow is enabled.
+- The production schema should be treated as **installed but write-locked**, not as an uninstalled draft. Do not drop these tables or attempt a rollback cleanup without a verified external backup and a reviewed recovery plan.
+- The precise originating deployment action cannot be established from the current tool history. The prior assumption that the rollback validation had left no persistent objects was wrong; the live catalog is the source of truth.
+- Release remains blocked on an external restorable backup/restore test, isolated staging validation, re-enabling only approved RPCs after tests, Storage policy deployment, PM scheduling and UI integration.
