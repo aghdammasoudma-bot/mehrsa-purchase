@@ -177,6 +177,7 @@ create table if not exists public.cmms_pm_tasks (
   asset_id uuid not null references public.cmms_assets(id) on delete restrict,
   due_at timestamptz,
   due_meter_value numeric(14,3),
+  trigger_type text not null check (trigger_type in ('calendar','meter')),
   status text not null default 'due' check (status in ('due','assigned','in_progress','completed','overdue','cancelled')),
   assigned_to uuid references auth.users(id) on delete set null,
   completed_by uuid references auth.users(id) on delete set null,
