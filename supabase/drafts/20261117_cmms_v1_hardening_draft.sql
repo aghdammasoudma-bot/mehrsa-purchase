@@ -23,6 +23,7 @@ create index if not exists cmms_pm_plans_due_idx
   on public.cmms_pm_plans(is_active, next_due_at);
 
 -- 4) Hierarchical location cycle protection.
+-- UNION (not UNION ALL) prevents infinite recursion if legacy bad data exists.
 create or replace function public.cmms_guard_location_hierarchy()
 returns trigger
 language plpgsql
@@ -40,7 +41,7 @@ begin
 
   with recursive descendants(id) as (
     select l.id from public.cmms_locations l where l.id = new.id
-    union all
+    union
     select child.id
     from public.cmms_locations child
     join descendants d on child.parent_id = d.id
@@ -60,7 +61,7 @@ create trigger cmms_locations_hierarchy_guard
 before insert or update of parent_id on public.cmms_locations
 for each row execute function public.cmms_guard_location_hierarchy();
 
--- 5) PM completion must have executor, timestamp and checklist result.
+-- 5) PM completion must have executor, timestamp and a structured checklist result.
 alter table public.cmms_pm_tasks
   drop constraint if exists cmms_pm_completion_integrity;
 alter table public.cmms_pm_tasks
@@ -74,8 +75,8 @@ alter table public.cmms_pm_tasks
     )
   );
 
--- 5b) Work-order closure integrity: never close before a passed test,
--- explicit return-to-service, both current approvals, and two distinct approvers.
+-- 5b) A closed work order must have an explicit return-to-service decision,
+-- successful test and both distinct, timestamped approvals.
 alter table public.cmms_work_orders
   drop constraint if exists cmms_work_order_closeout_integrity;
 alter table public.cmms_work_orders
@@ -85,7 +86,8 @@ alter table public.cmms_work_orders
       status <> 'closed'
       or (
         test_result = 'passed'
-        and returned_to_service_at is not null
+        and return_to_service_status in ('returned','not_required')
+        and (return_to_service_status <> 'returned' or returned_to_service_at is not null)
         and supervisor_approved_by is not null
         and supervisor_approved_at is not null
         and manager_approved_by is not null
@@ -104,68 +106,101 @@ alter table public.cmms_work_orders
     and (manager_approved_by is null or supervisor_approved_by is not null)
   );
 
--- 6) Approval identity and stage-order guard. Decisions remain append-only history.
+-- 6) Enforce approval identity, stage, role and work-order readiness in the database.
+-- Trigger-only SECURITY DEFINER functions are revoked from all API roles below.
 create or replace function public.cmms_guard_work_order_approval()
 returns trigger
 language plpgsql
-set search_path = pg_catalog, public
+security definer
+set search_path = ''
 as $$
 declare
-  wo public.cmms_work_orders%rowtype;
-  prior_supervisor uuid;
-  latest_supervisor_decision text;
-  latest_manager_decision text;
+  v_wo public.cmms_work_orders%rowtype;
+  v_asset_location uuid;
+  v_prior_supervisor uuid;
+  v_prior_decision text;
+  v_required_role text;
 begin
-  select * into wo
-  from public.cmms_work_orders
-  where id = new.work_order_id
+  if auth.uid() is null or new.approver_id is distinct from auth.uid() then
+    raise exception 'Approval identity must match the authenticated user';
+  end if;
+
+  select wo.* into v_wo
+  from public.cmms_work_orders wo
+  where wo.id = new.work_order_id
   for update;
 
   if not found then
     raise exception 'Work order not found';
   end if;
 
-  if new.approver_id = wo.opened_by then
+  select a.location_id into v_asset_location
+  from public.cmms_assets a
+  where a.id = v_wo.asset_id;
+
+  if new.approver_id = v_wo.opened_by then
     raise exception 'Work-order creator cannot approve their own work order';
   end if;
 
   if exists (
-    select 1 from public.cmms_work_order_assignments a
-    where a.work_order_id = new.work_order_id
-      and a.user_id = new.approver_id
+    select 1 from public.cmms_work_order_assignments wa
+    where wa.work_order_id = new.work_order_id
+      and wa.user_id = new.approver_id
   ) then
-    raise exception 'Assigned worker cannot approve the same work order';
+    raise exception 'A person assigned to this work order cannot approve it';
   end if;
 
-  if new.stage = 'responsible_manager' then
-    select a.approver_id, a.decision into prior_supervisor, latest_supervisor_decision
-    from public.cmms_work_order_approvals a
-    where a.work_order_id = new.work_order_id
-      and a.stage = 'technical_supervisor'
-    order by a.decided_at desc, a.id desc
+  if v_wo.test_result is distinct from 'passed'
+     or v_wo.return_to_service_status not in ('returned','not_required')
+     or (v_wo.return_to_service_status = 'returned' and v_wo.returned_to_service_at is null) then
+    raise exception 'Successful test and explicit return-to-service decision are required';
+  end if;
+
+  if new.stage = 'technical_supervisor' then
+    v_required_role := 'technical_supervisor';
+    if v_wo.status <> 'pending_supervisor_approval' then
+      raise exception 'Work order is not waiting for technical supervisor approval';
+    end if;
+  elsif new.stage = 'responsible_manager' then
+    v_required_role := 'responsible_manager';
+    if v_wo.status <> 'pending_manager_approval' then
+      raise exception 'Work order is not waiting for responsible manager approval';
+    end if;
+
+    select ap.approver_id, ap.decision
+      into v_prior_supervisor, v_prior_decision
+    from public.cmms_work_order_approvals ap
+    where ap.work_order_id = new.work_order_id
+      and ap.stage = 'technical_supervisor'
+    order by ap.decided_at desc, ap.id desc
     limit 1;
 
-    if prior_supervisor is null or latest_supervisor_decision <> 'approved' then
+    if v_prior_decision is distinct from 'approved' then
       raise exception 'Latest technical supervisor decision must be approved first';
     end if;
-    if prior_supervisor = new.approver_id then
+    if v_prior_supervisor = new.approver_id then
       raise exception 'The two approval stages require different people';
     end if;
-  elsif new.stage = 'technical_supervisor' then
-    select a.approver_id, a.decision into prior_supervisor, latest_manager_decision
-    from public.cmms_work_order_approvals a
-    where a.work_order_id = new.work_order_id
-      and a.stage = 'responsible_manager'
-    order by a.decided_at desc, a.id desc
-    limit 1;
-    if latest_manager_decision = 'approved' and prior_supervisor = new.approver_id then
-      raise exception 'The two approval stages require different people';
-    end if;
+  else
+    raise exception 'Unknown approval stage';
   end if;
 
-  if new.decision = 'rejected' and nullif(btrim(coalesce(new.note,'')), '') is null then
+  if not exists (
+    select 1
+    from public.cmms_user_roles ur
+    where ur.user_id = new.approver_id
+      and ur.role = v_required_role
+      and ur.is_active
+      and ur.location_id is null
+  ) then
+    raise exception 'User does not hold the required CMMS approval role';
+  end if;
+
+  if new.decision = 'rejected'
+     and nullif(btrim(coalesce(new.note,'')), '') is null then
     raise exception 'A rejection reason is mandatory';
   end if;
+
   return new;
 end;
 $$;
@@ -174,6 +209,107 @@ drop trigger if exists cmms_work_order_approval_guard on public.cmms_work_order_
 create trigger cmms_work_order_approval_guard
 before insert on public.cmms_work_order_approvals
 for each row execute function public.cmms_guard_work_order_approval();
+
+-- 6b) Approval history is authoritative; denormalized columns are synchronized
+-- only by this trigger. Rejection returns the order to rework and clears current approvals.
+create or replace function public.cmms_apply_work_order_approval()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.stage = 'technical_supervisor' and new.decision = 'approved' then
+    update public.cmms_work_orders
+    set supervisor_approved_by = new.approver_id,
+        supervisor_approved_at = new.decided_at,
+        manager_approved_by = null,
+        manager_approved_at = null,
+        status = 'pending_manager_approval',
+        updated_at = now()
+    where id = new.work_order_id;
+  elsif new.stage = 'responsible_manager' and new.decision = 'approved' then
+    update public.cmms_work_orders
+    set manager_approved_by = new.approver_id,
+        manager_approved_at = new.decided_at,
+        status = 'closed',
+        closed_at = now(),
+        updated_at = now()
+    where id = new.work_order_id;
+  else
+    update public.cmms_work_orders
+    set supervisor_approved_by = null,
+        supervisor_approved_at = null,
+        manager_approved_by = null,
+        manager_approved_at = null,
+        status = 'rework',
+        closed_at = null,
+        updated_at = now()
+    where id = new.work_order_id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists cmms_apply_work_order_approval on public.cmms_work_order_approvals;
+create trigger cmms_apply_work_order_approval
+after insert on public.cmms_work_order_approvals
+for each row execute function public.cmms_apply_work_order_approval();
+
+-- 6c) Prevent direct status changes from skipping approval gates.
+create or replace function public.cmms_guard_work_order_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_supervisor public.cmms_work_order_approvals%rowtype;
+  v_manager public.cmms_work_order_approvals%rowtype;
+begin
+  if new.status = 'pending_supervisor_approval' and old.status is distinct from new.status then
+    if new.test_result is distinct from 'passed'
+       or new.return_to_service_status not in ('returned','not_required')
+       or (new.return_to_service_status = 'returned' and new.returned_to_service_at is null) then
+      raise exception 'Cannot request approval before successful test and return-to-service decision';
+    end if;
+  end if;
+
+  if new.status in ('pending_manager_approval','closed') and old.status is distinct from new.status then
+    select ap.* into v_supervisor
+    from public.cmms_work_order_approvals ap
+    where ap.work_order_id = new.id and ap.stage = 'technical_supervisor'
+    order by ap.decided_at desc, ap.id desc limit 1;
+
+    if v_supervisor.decision is distinct from 'approved'
+       or new.supervisor_approved_by is distinct from v_supervisor.approver_id then
+      raise exception 'Current technical supervisor approval is required';
+    end if;
+  end if;
+
+  if new.status = 'closed' and old.status is distinct from new.status then
+    select ap.* into v_manager
+    from public.cmms_work_order_approvals ap
+    where ap.work_order_id = new.id and ap.stage = 'responsible_manager'
+    order by ap.decided_at desc, ap.id desc limit 1;
+
+    if v_manager.decision is distinct from 'approved'
+       or new.manager_approved_by is distinct from v_manager.approver_id
+       or new.manager_approved_by = new.supervisor_approved_by
+       or new.test_result is distinct from 'passed'
+       or new.closed_at is null then
+      raise exception 'Current, distinct responsible-manager approval is required before closure';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists cmms_work_order_status_guard on public.cmms_work_orders;
+create trigger cmms_work_order_status_guard
+before update of status on public.cmms_work_orders
+for each row execute function public.cmms_guard_work_order_status();
 
 -- 7) Append-only protections for audit and approval history.
 create or replace function public.cmms_reject_history_mutation()
@@ -219,6 +355,12 @@ drop trigger if exists cmms_assets_status_history on public.cmms_assets;
 create trigger cmms_assets_status_history
 before update on public.cmms_assets
 for each row execute function public.cmms_record_asset_status_change();
+
+
+-- Trigger functions are not RPC endpoints. Remove default/API execution privileges.
+revoke all on function public.cmms_guard_work_order_approval() from public, anon, authenticated;
+revoke all on function public.cmms_apply_work_order_approval() from public, anon, authenticated;
+revoke all on function public.cmms_guard_work_order_status() from public, anon, authenticated;
 
 -- 9) No grants or RLS policies are added here. Authorization must be implemented
 -- via reviewed role/location predicates and narrowly-scoped server-side RPCs.
