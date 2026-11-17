@@ -2070,7 +2070,34 @@ function printSection(elementId,title){
  #management-hero .top-quick-nav button>span{width:20px!important;height:20px!important;flex-basis:20px!important}
 }
 </style>
-</body></html>');
+
+<style id="force-horizontal-hero-navigation">
+/* Force all five navigation items into one horizontal row inside the hero */
+#management-hero .hero-industrial{position:relative!important;padding-bottom:78px!important;min-height:250px!important}
+#management-hero nav.top-quick-nav{
+ position:absolute!important;display:grid!important;
+ grid-template-columns:repeat(5,minmax(0,1fr))!important;
+ grid-auto-flow:column!important;flex-direction:row!important;flex-wrap:nowrap!important;
+ align-items:stretch!important;gap:8px!important;
+ right:16px!important;left:16px!important;bottom:12px!important;
+ width:auto!important;height:auto!important;max-height:none!important;
+ margin:0!important;padding:8px!important;box-sizing:border-box!important;
+ border:1px solid rgba(255,255,255,.24)!important;border-radius:12px!important;
+ background:rgba(8,20,38,.82)!important;backdrop-filter:blur(12px)!important;
+ direction:rtl!important;overflow:visible!important
+}
+#management-hero nav.top-quick-nav button{
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-width:0!important;min-height:40px!important;height:40px!important;
+ white-space:nowrap!important;gap:6px!important;padding:5px 7px!important;
+ font-size:12px!important;border-radius:8px!important;box-sizing:border-box!important
+}
+@media(max-width:700px){
+ #management-hero .hero-industrial{min-height:270px!important;padding-bottom:112px!important}
+ #management-hero nav.top-quick-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important;gap:6px!important;right:9px!important;left:9px!important;bottom:9px!important}
+ #management-hero nav.top-quick-nav button{height:36px!important;min-height:36px!important;font-size:10px!important}
+}
+</style></body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
  w.onload=function(){w.focus();setTimeout(function(){w.print();},350);};
