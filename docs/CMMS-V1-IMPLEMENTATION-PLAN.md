@@ -164,9 +164,9 @@ The production function definitions and ACLs were inspected, not just the Adviso
   - reason-coded work-order cancellation and reassignment, including automatic closure of active assignments on cancellation/final approval;
   - controlled links from work orders to existing purchase requests.
 - Added a `trigger_type` to PM tasks and separate source-of-truth meter readings. V1 supports calendar OR meter-based PM. Hybrid scheduling is deferred because one shared interval cannot safely represent independent date and meter frequencies.
-- The PM generator is restricted to `service_role`; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
+- The PM generator is currently revoked from all client/service roles as part of the production write-lock; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
 - The earlier public SECURITY DEFINER RPC draft and duplicate PM scheduler draft were removed. Location and asset master-data operations are now exposed through narrowly scoped public SECURITY INVOKER wrappers; master-data permissions are checked in the private implementation. The current workflow draft uses private implementations and public SECURITY INVOKER wrappers; no broad client UPDATE/DELETE grants are included.
-- Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduling, attachments, audit/reporting, regression and rollback.
+- Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` and `supabase/tests/cmms_v1_acceptance.sql` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduling, attachments, audit/reporting, regression and rollback. The acceptance suite is authored but has not been run in isolated staging.
 - Ran the complete current base schema + hardening + authorization + role-seed + workflow-RPC SQL (approximately 107 KB) as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed verification query. The returned mapping was exactly:
   - masoud → technical_supervisor
   - biabani → responsible_manager
@@ -211,7 +211,7 @@ A fresh read-only catalog inspection shows the following CMMS objects are curren
 
 Safety action taken after discovering the live schema:
 - Revoked EXECUTE on every `public.cmms_*` function from `PUBLIC`, `anon`, `authenticated` and `service_role`.
-- Revoked EXECUTE on all `cmms_private` workflow functions from client/service roles; only the three read-authorization helper functions remain executable by `authenticated` for RLS evaluation.
+- Revoked EXECUTE on all `cmms_private` workflow functions from client/service roles; only the two read-authorization helper functions (`cmms_has_any_role`, `cmms_has_role_at_location`) remain executable by `authenticated` for RLS evaluation; the unused user-role lookup helper is also revoked.
 - Verified every public CMMS function is non-executable by authenticated/anon/service_role; direct authenticated table INSERT/UPDATE/DELETE privileges are absent.
 - RLS read access remains available for the four mapped roles, but no operational rows exist. The CMMS UI is not in `main`; no live workflow is enabled.
 - The production schema should be treated as **installed but write-locked**, not as an uninstalled draft. Do not drop these tables or attempt a rollback cleanup without a verified external backup and a reviewed recovery plan.
