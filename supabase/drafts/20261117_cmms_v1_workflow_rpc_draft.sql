@@ -746,6 +746,157 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_cancel_work_order(
+  p_work_order_id uuid,
+  p_reason text
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_wo public.cmms_work_orders%rowtype;
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_reason,'')), '') is null then
+    raise exception 'Cancellation reason is mandatory';
+  end if;
+
+  select w.* into v_wo
+  from public.cmms_work_orders w where w.id=p_work_order_id
+  for update;
+  if not found or v_wo.status in ('closed','cancelled') then
+    raise exception 'Work order is not open';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_wo.asset_id;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_supervisor','technical_expert'],v_location_id
+  ) then
+    raise exception 'Only technical supervisor or expert can cancel a work order';
+  end if;
+
+  update public.cmms_work_orders
+  set status='cancelled',cancel_reason=btrim(p_reason),updated_at=now()
+  where id=p_work_order_id;
+
+  return 'cancelled';
+end;
+$;
+
+create or replace function cmms_private.cmms_reassign_work_order(
+  p_assignment_id uuid,
+  p_new_assignee_id uuid,
+  p_reason text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_assignment public.cmms_work_order_assignments%rowtype;
+  v_wo public.cmms_work_orders%rowtype;
+  v_location_id uuid;
+  v_new_assignment_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_reason,'')), '') is null then
+    raise exception 'Reassignment reason is mandatory';
+  end if;
+
+  select wa.* into v_assignment
+  from public.cmms_work_order_assignments wa
+  where wa.id=p_assignment_id and wa.unassigned_at is null
+  for update;
+  if not found then raise exception 'Active assignment not found'; end if;
+  if v_assignment.user_id=p_new_assignee_id then
+    raise exception 'New assignee must be different from current assignee';
+  end if;
+
+  select w.* into v_wo
+  from public.cmms_work_orders w where w.id=v_assignment.work_order_id
+  for update;
+  if not found or v_wo.status in ('closed','cancelled') then
+    raise exception 'Work order is not open for reassignment';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_wo.asset_id;
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_supervisor','technical_expert'],v_location_id
+  ) then
+    raise exception 'Only technical supervisor or expert can reassign work';
+  end if;
+
+  if not exists (
+    select 1 from public.cmms_user_roles ur
+    where ur.user_id=p_new_assignee_id and ur.is_active
+      and ur.location_id is null and ur.role in ('technician','technical_expert')
+  ) then
+    raise exception 'New assignee has no active technician CMMS role';
+  end if;
+
+  insert into public.cmms_work_order_assignments(work_order_id,user_id,assigned_by)
+  values(v_assignment.work_order_id,p_new_assignee_id,auth.uid())
+  returning id into v_new_assignment_id;
+
+  update public.cmms_work_order_assignments
+  set unassigned_at=now(),unassign_reason=btrim(p_reason)
+  where id=p_assignment_id;
+
+  return v_new_assignment_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_link_purchase_request(
+  p_work_order_id uuid,
+  p_purchase_request_id text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_wo public.cmms_work_orders%rowtype;
+  v_location_id uuid;
+  v_link_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+
+  select w.* into v_wo
+  from public.cmms_work_orders w where w.id=p_work_order_id
+  for key share;
+  if not found or v_wo.status in ('closed','cancelled') then
+    raise exception 'Only an open work order can be linked to a purchase request';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_wo.asset_id;
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_supervisor','technical_expert'],v_location_id
+  ) then
+    raise exception 'Only technical supervisor or expert can link a purchase request';
+  end if;
+
+  if not exists (select 1 from public.pr_requests pr where pr.id=p_purchase_request_id) then
+    raise exception 'Purchase request not found';
+  end if;
+
+  insert into public.cmms_work_order_purchase_links(
+    work_order_id,purchase_request_id,created_by
+  ) values(p_work_order_id,p_purchase_request_id,auth.uid())
+  returning id into v_link_id;
+
+  return v_link_id;
+end;
+$;
+
 -- Public API wrappers are SECURITY INVOKER, not SECURITY DEFINER.
 create or replace function public.cmms_report_failure(
   p_asset_id uuid,p_priority text,p_description text,p_symptoms text default null,
@@ -787,6 +938,15 @@ create or replace function public.cmms_record_meter_reading(
 create or replace function public.cmms_assign_pm_task(p_pm_task_id uuid,p_assignee_id uuid)
 returns uuid as $$ select cmms_private.cmms_assign_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
+create or replace function public.cmms_cancel_work_order(p_work_order_id uuid,p_reason text)
+returns text as $ select cmms_private.cmms_cancel_work_order($1,$2); $ language sql security invoker set search_path='';
+
+create or replace function public.cmms_reassign_work_order(p_assignment_id uuid,p_new_assignee_id uuid,p_reason text)
+returns uuid as $ select cmms_private.cmms_reassign_work_order($1,$2,$3); $ language sql security invoker set search_path='';
+
+create or replace function public.cmms_link_purchase_request(p_work_order_id uuid,p_purchase_request_id text)
+returns uuid as $ select cmms_private.cmms_link_purchase_request($1,$2); $ language sql security invoker set search_path='';
+
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
@@ -804,6 +964,10 @@ grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,tex
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
 grant execute on function cmms_private.cmms_assign_pm_task(uuid,uuid) to authenticated;
+grant execute on function cmms_private.cmms_cancel_work_order(uuid,text) to authenticated;
+grant execute on function cmms_private.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
+grant execute on function cmms_private.cmms_link_purchase_request(uuid,text) to authenticated;
+
 revoke all on function cmms_private.cmms_generate_due_pm_tasks() from public,anon,authenticated;
 grant execute on function cmms_private.cmms_generate_due_pm_tasks() to service_role;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
@@ -818,6 +982,10 @@ revoke all on function public.cmms_submit_work_order_test(uuid,text,text,timesta
 revoke all on function public.cmms_set_work_order_progress(uuid,text) from public, anon;
 revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
+revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
+revoke all on function public.cmms_reassign_work_order(uuid,uuid,text) from public, anon;
+revoke all on function public.cmms_link_purchase_request(uuid,text) from public, anon;
+
 revoke all on function public.cmms_record_meter_reading(uuid,text,text,numeric) from public, anon;
 revoke all on function public.cmms_assign_pm_task(uuid,uuid) from public, anon;
 
@@ -830,6 +998,10 @@ grant execute on function public.cmms_submit_work_order_test(uuid,text,text,time
 grant execute on function public.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
+grant execute on function public.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
+grant execute on function public.cmms_link_purchase_request(uuid,text) to authenticated;
+
 grant execute on function public.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
 grant execute on function public.cmms_assign_pm_task(uuid,uuid) to authenticated;
 
