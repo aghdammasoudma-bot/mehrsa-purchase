@@ -99,5 +99,5 @@ Priority labels must be calibrated against the plant's actual escalation and res
 - Existing application regression tests pass.
 - Only then may the additive migration be applied and a release candidate deployed.
 
-## 8. Open governance decision
-The current active profile list has one production-manager profile (biabani) and one technical-supervisor profile (masoud), both with the legacy application role `admin`. The proposal maps them to separate CMMS roles. Confirm whether the production manager is the responsible approver for every asset/location, or whether electrical, mechanical and utility areas require different manager approvers.
+## 8. Confirmed governance decision
+Decision confirmed by the user (2026-11-17): biabani is the responsible-manager approver for all equipment and locations in CMMS v1, including production, electrical, mechanical and utilities. Do not create separate area-manager approval roles in v1. Keep the role mapping separate from the legacy `user_profiles.role` field. The proposed mapping remains masoud = `technical_supervisor` and biabani = `responsible_manager`; it is a design decision, not yet provisioned in production.
