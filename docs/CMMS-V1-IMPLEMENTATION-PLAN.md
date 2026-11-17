@@ -159,7 +159,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
   - two-stage approval (technical supervisor, then responsible manager);
   - PM plan creation/activation, task assignment/start/completion and manual meter readings;
   - idempotent, row-locked server-side calendar/meter PM task generation;
-  - reason-coded work-order cancellation and reassignment;
+  - reason-coded work-order cancellation and reassignment, including automatic closure of active assignments;
   - controlled links from work orders to existing purchase requests.
 - Added a `trigger_type` to PM tasks and separate source-of-truth meter readings. V1 supports calendar OR meter-based PM. Hybrid scheduling is deferred because one shared interval cannot safely represent independent date and meter frequencies.
 - The PM generator is restricted to `service_role`; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
