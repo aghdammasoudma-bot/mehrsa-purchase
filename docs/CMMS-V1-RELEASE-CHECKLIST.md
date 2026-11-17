@@ -67,12 +67,13 @@ Status: production schema is installed but write-locked. Verified: 15 CMMS table
 
 ## F. Preventive maintenance
 - [ ] Calendar-based and meter-based plans have separate, unambiguous units and next-due logic; hybrid plans are explicitly deferred from v1.
+- [ ] Apply and test `supabase/drafts/20261117_cmms_v1_scheduler_draft.sql` in staging; verify one named pg_cron job, correct owner, successful runs, idempotency and missed-run recovery.
 - [ ] Scheduled generation is server-side, idempotent and recovers missed runs.
 - [ ] Confirm whether `pg_cron` or Supabase scheduled Edge Functions will be used; `pg_cron` is available but not currently installed in production.
 - [ ] Meter readings have source, unit, timestamp and recorder identity.
 - [ ] PM task completion requires assigned executor, timestamp and non-empty checklist.
 - [ ] Failed checklist items can create/link a corrective work order.
-- [ ] Overdue/escalation notifications are verified end-to-end; no assumed delivery.
+- [ ] Overdue/escalation notifications are designed and verified end-to-end; the PM scheduler draft does not send notifications.
 
 ## G. Attachments, audit and reporting
 - [ ] Create a private Storage bucket and policies; no public object URLs. Draft: `supabase/drafts/20261117_cmms_v1_storage_policy_draft.sql` (not applied).
