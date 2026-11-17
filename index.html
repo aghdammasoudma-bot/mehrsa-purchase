@@ -1099,9 +1099,20 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 <div class="content" id="main-content" style="display:none">
   <div id="quick-actions" class="quick-actions" aria-hidden="true" style="display:none"></div>
   <div id="dashboard-kpis"></div>
-  <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
+  <div class="request-workspace"><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
 </div>
 
+<div class="request-modal" id="request-modal" aria-hidden="true">
+ <div class="request-modal-backdrop" data-modal-close></div>
+ <section class="request-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="request-modal-title" tabindex="-1">
+  <div class="request-modal-handle" aria-hidden="true"><span></span></div>
+  <header class="request-modal-header">
+   <div><strong id="request-modal-title">جزئیات درخواست</strong><small id="request-modal-number"></small></div>
+   <button type="button" class="request-modal-close" aria-label="بستن پنجره" data-modal-close>×</button>
+  </header>
+  <div class="request-modal-scroll"><div id="request-detail-panel"></div></div>
+ </section>
+</div>
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
 
 <!-- DRAWER -->
@@ -1432,10 +1443,9 @@ function renderList(){
   else list=requests;
 
   const label={"inbox":"نیاز به اقدام شما","all":"همه درخواست‌ها","inprogress":"در جریان","done":"تکمیل شده"};
-  const selected=list.find(r=>String(r.id)===String(window.selectedRequestId))||list[0]||null;
-  if(selected) window.selectedRequestId=selected.id;
+  const selected=null;
   const rows=list.map(r=>{
-    const isSelected=selected&&String(selected.id)===String(r.id);
+    const isSelected=false;
     return `<tr class="request-row${isSelected?" selected":""}" onclick="openRequest('${r.id}')" tabindex="0" onkeydown="if(event.key==='Enter'){openRequest('${r.id}')}">
       <td class="request-code">${r.id}</td>
       <td class="request-title-cell"><strong>${r.title}</strong>${r.prio?'<small>'+r.prio+'</small>':''}</td>
@@ -1451,9 +1461,6 @@ function renderList(){
       <tbody>${rows}</tbody>
     </table></div>`:'<div class="empty"><div class="empty-icon">'+(currentView==="inbox"?"🎉":"📋")+'</div><div>'+(currentView==="inbox"?"صندوق ورودی خالی است — همه چیز روی روال!":"درخواستی یافت نشد")+'</div></div>'}
     <div id="request-mobile-detail" class="request-mobile-detail"></div>`;
-  const panel=document.getElementById("request-detail-panel");
-  if(panel) panel.innerHTML=selected?requestDetail(selected):'<div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div>';
-  if(selected) drawerData=selected;
   ensureRequestPrintButton();
 }
 
@@ -1496,19 +1503,23 @@ function openRequest(id){
   if(!r) return;
   drawerData=r;
   window.selectedRequestId=r.id;
+  const row=[...document.querySelectorAll(".request-row")].find(el=>el.querySelector(".request-code")?.textContent===String(r.id));
+  document.querySelectorAll(".request-row").forEach(el=>el.classList.toggle("selected",el===row));
   const panel=document.getElementById("request-detail-panel");
-  if(panel){
-    document.querySelectorAll(".request-row").forEach(el=>el.classList.remove("selected"));
-    const row=[...document.querySelectorAll(".request-row")].find(el=>el.querySelector(".request-code")?.textContent===String(r.id));
-    if(row) row.classList.add("selected");
-    panel.innerHTML=requestDetail(r);
-    const mobile=document.getElementById("request-mobile-detail");
-    if(mobile) mobile.innerHTML=requestDetail(r);
-    if(window.matchMedia("(max-width:760px)").matches && mobile) mobile.scrollIntoView({behavior:"smooth",block:"start"});
-    return;
+  if(panel) panel.innerHTML=requestDetail(r);
+  const modal=document.getElementById("request-modal");
+  const sheet=modal?.querySelector(".request-modal-sheet");
+  const title=document.getElementById("request-modal-title");
+  const number=document.getElementById("request-modal-number");
+  if(title) title.textContent=r.title||"جزئیات درخواست";
+  if(number) number.textContent="شماره درخواست: "+r.id+" · "+statusLabel(r.status);
+  if(modal){
+    window.__requestModalReturnFocus=document.activeElement;
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+    document.body.classList.add("request-modal-open");
+    setTimeout(()=>sheet?.focus(),30);
   }
-  document.getElementById("drawer-content").innerHTML=requestDetail(r);
-  openDrawer();
 }
 
 function requestDetail(r){
@@ -2146,7 +2157,110 @@ function printSection(elementId,title){
  #topbar .topbar-brand{width:100%!important;text-align:center!important}
 }
 </style>
-</body></html>');
+<style id="request-modal-accessible-theme">
+:root{
+ --app-bg:#0A1226;--app-surface:#121C38;--app-surface-2:#182544;--app-border:#344363;
+ --app-text:#F1F5FF;--app-muted:#A9B4D0;--app-accent:#4F8CFF;
+ --app-green:#32C58A;--app-amber:#F3BE52;--app-red:#FF727C;--app-blue:#70A7FF;
+ --app-font:"Vazirmatn","IRANSansX",Tahoma,sans-serif
+}
+html,body{background:var(--app-bg)!important;color:var(--app-text)!important;font-family:var(--app-font)!important;line-height:1.7}
+body{font-size:15px!important}
+#main-content.content{background:transparent!important;color:var(--app-text)!important}
+.request-workspace{display:block!important;direction:rtl!important;margin-top:8px!important}
+.request-list-column{width:100%!important;max-width:none!important;background:var(--app-surface)!important;color:var(--app-text)!important;border:1px solid var(--app-border)!important;border-radius:16px!important;box-shadow:0 12px 32px rgba(0,0,0,.22)!important}
+#req-list{color:var(--app-text)!important;padding:16px!important}
+.request-table-wrap{background:var(--app-surface)!important;border:1px solid var(--app-border)!important;border-radius:12px!important;overflow-x:auto!important}
+.request-table{min-width:690px!important;background:var(--app-surface)!important;color:var(--app-text)!important;font-size:15px!important}
+.request-table thead th{background:#1B2949!important;color:#DCE6FF!important;font-size:13px!important;font-weight:600!important;border-bottom:1px solid var(--app-border)!important}
+.request-table tbody td{background:var(--app-surface)!important;color:var(--app-text)!important;font-size:15px!important;border-bottom:1px solid rgba(169,180,208,.17)!important}
+.request-row:hover td{background:#1B2A4B!important}
+.request-row.selected td{background:#20365F!important}
+.request-code,.request-date{color:#C7D7FF!important;font-variant-numeric:tabular-nums}
+.request-title-cell strong{color:var(--app-text)!important;font-size:15px!important}
+.request-title-cell small{color:var(--app-muted)!important;font-size:13px!important}
+.stitle{color:var(--app-text)!important;font-size:18px!important}
+.b{font-weight:700!important}
+.b-blue{background:#193A68!important;color:#D7E8FF!important}
+.b-green,.b-success{background:#124B3A!important;color:#D7FFED!important}
+.b-amber,.b-yellow{background:#574118!important;color:#FFF0C5!important}
+.b-red{background:#5B2631!important;color:#FFE0E3!important}
+.b-grey{background:#303D59!important;color:#E3E9F7!important}
+.btn{font-family:var(--app-font)!important;min-height:40px!important}
+.btn-primary{background:var(--app-accent)!important;border-color:var(--app-accent)!important;color:#07152E!important}
+.btn-ghost{background:#1B2949!important;border-color:#526487!important;color:#F1F5FF!important}
+input,select,textarea,.field input,.field select,.field textarea,.comment-box textarea{background:#101A32!important;color:var(--app-text)!important;border:1px solid #526487!important;font:inherit!important}
+input::placeholder,textarea::placeholder{color:var(--app-muted)!important}
+input:focus,select:focus,textarea:focus,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--app-accent)!important;outline-offset:2px!important}
+.request-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;visibility:hidden;pointer-events:none}
+.request-modal.is-open{visibility:visible;pointer-events:auto}
+.request-modal-backdrop{position:absolute;inset:0;background:rgba(2,7,19,.76);backdrop-filter:blur(5px);opacity:0;transition:opacity .24s ease}
+.request-modal.is-open .request-modal-backdrop{opacity:1}
+.request-modal-sheet{position:relative;z-index:1;width:min(720px,100%);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;background:var(--app-surface);color:var(--app-text);border:1px solid #405174;border-radius:20px;box-shadow:0 28px 90px rgba(0,0,0,.48);transform:translateY(16px) scale(.985);opacity:0;transition:transform .24s ease,opacity .24s ease}
+.request-modal.is-open .request-modal-sheet{transform:translateY(0) scale(1);opacity:1}
+.request-modal-handle{display:none}
+.request-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--app-border);background:#15213D}
+.request-modal-header>div{display:flex;flex-direction:column;min-width:0}
+.request-modal-header strong{font-size:17px;color:var(--app-text);overflow-wrap:anywhere}
+.request-modal-header small{font-size:13px;color:var(--app-muted)}
+.request-modal-close{width:40px;height:40px;flex:0 0 40px;border:1px solid #596B8E;border-radius:11px;background:#263655;color:#fff;font-size:25px;line-height:1;cursor:pointer}
+.request-modal-scroll{overflow-y:auto;overscroll-behavior:contain;padding:20px;min-height:0;flex:1}
+#request-detail-panel{color:var(--app-text)!important;font-size:15px!important;line-height:1.8!important}
+#request-detail-panel>div:first-child{border-color:var(--app-border)!important}
+#request-detail-panel>div:first-child>div>div:first-child{color:var(--app-muted)!important}
+#request-detail-panel>div:first-child>div>div:nth-child(2){color:var(--app-text)!important;font-size:18px!important}
+#request-detail-panel .flow{background:#0E1930!important;border:1px solid var(--app-border)!important}
+#request-detail-panel .flow-step{color:var(--app-text)!important}
+#request-detail-panel .flow-lbl,#request-detail-panel label,#request-detail-panel small{color:var(--app-muted)!important}
+#request-detail-panel .actions{position:sticky;bottom:-20px;z-index:3;display:flex!important;flex-wrap:wrap;gap:9px!important;padding:13px 0 4px;margin:16px -20px -20px!important;background:linear-gradient(180deg,rgba(18,28,56,.92),#121C38 28%)!important;border-top:1px solid var(--app-border)!important}
+#request-detail-panel .actions .btn{flex:1 1 150px;width:auto!important;min-height:44px!important}
+#request-detail-panel .comment-box{background:#172544!important;color:var(--app-text)!important;border:1px solid var(--app-border)!important;border-radius:12px;padding:12px}
+body.request-modal-open{overflow:hidden!important;touch-action:none}
+@media(max-width:760px){
+ .request-modal{align-items:flex-end;padding:0}
+ .request-modal-sheet{width:100%;max-width:none;max-height:90dvh;height:auto;border-radius:20px 20px 0 0;border-bottom:0;transform:translateY(100%);opacity:1;transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+ .request-modal.is-open .request-modal-sheet{transform:translateY(0)}
+ .request-modal-handle{display:flex;justify-content:center;padding:9px 0 5px}
+ .request-modal-handle span{width:42px;height:5px;border-radius:9px;background:#8090B0}
+ .request-modal-header{padding:10px 16px}
+ .request-modal-scroll{padding:14px 16px calc(20px + env(safe-area-inset-bottom))}
+ #request-detail-panel .actions{bottom:calc(-14px - env(safe-area-inset-bottom));margin:14px -16px calc(-20px - env(safe-area-inset-bottom))!important;padding:12px 16px calc(12px + env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){.request-modal-backdrop,.request-modal-sheet{transition:none!important}}
+</style>
+<script id="request-modal-controls">
+(()=>{
+ const modal=document.getElementById("request-modal");
+ if(!modal)return;
+ const sheet=modal.querySelector(".request-modal-sheet");
+ const close=()=>{
+  if(!modal.classList.contains("is-open"))return;
+  modal.classList.remove("is-open");modal.setAttribute("aria-hidden","true");
+  document.body.classList.remove("request-modal-open");
+  drawerData=null;
+  const target=window.__requestModalReturnFocus;
+  if(target&&target.isConnected)setTimeout(()=>target.focus(),30);
+ };
+ modal.querySelectorAll("[data-modal-close]").forEach(el=>el.addEventListener("click",close));
+ document.addEventListener("keydown",e=>{
+  if(!modal.classList.contains("is-open"))return;
+  if(e.key==="Escape"){e.preventDefault();close();return}
+  if(e.key==="Tab"){
+   const items=[...sheet.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
+   if(!items.length){e.preventDefault();sheet.focus();return}
+   const first=items[0],last=items[items.length-1];
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+  }
+ });
+ let touchStart=0,touchLast=0;
+ const handle=modal.querySelector(".request-modal-handle");
+ handle.addEventListener("touchstart",e=>{touchStart=e.touches[0].clientY;touchLast=touchStart},{passive:true});
+ handle.addEventListener("touchmove",e=>{touchLast=e.touches[0].clientY},{passive:true});
+ handle.addEventListener("touchend",()=>{if(touchLast-touchStart>75)close();touchStart=touchLast=0},{passive:true});
+ window.closeRequestModal=close;
+})();
+</script></body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
  w.onload=function(){w.focus();setTimeout(function(){w.print();},350);};
