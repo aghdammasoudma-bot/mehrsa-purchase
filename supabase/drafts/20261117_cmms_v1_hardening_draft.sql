@@ -526,7 +526,7 @@ begin
       (asset_id, old_status, new_status, changed_by, reason)
     values
       (new.id, old.operational_status, new.operational_status, auth.uid(),
-       'Automatic status-change history');
+       coalesce(nullif(current_setting('cmms.status_change_reason', true),''),'Status updated without supplied reason'));
   end if;
   new.updated_at := now();
   return new;
