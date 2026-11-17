@@ -2008,6 +2008,41 @@ function printSection(elementId,title){
 
 
 
+
+<style id="profile-nav-and-banner-final-fix">
+@media(min-width:701px){
+ #topbar .top-profile .top-quick-nav{display:flex!important;flex-direction:column!important;gap:5px!important;padding-top:8px!important}
+ #topbar .top-profile .top-quick-nav button{min-height:34px!important;height:34px!important;padding:5px 9px!important;font-size:11px!important;gap:7px!important;border-radius:9px!important}
+ #topbar .top-profile .top-quick-nav button>span{width:23px!important;height:23px!important;flex:0 0 23px!important}
+}
+@media(max-width:700px){
+ #topbar .top-profile .top-quick-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;padding-top:8px!important}
+ #topbar .top-profile .top-quick-nav button{min-height:34px!important;height:34px!important;padding:5px 7px!important;font-size:10px!important;border-radius:9px!important}
+ #topbar .top-profile .top-quick-nav button>span{width:21px!important;height:21px!important;flex:0 0 21px!important}
+ #topbar .top-profile .top-quick-nav button.top-nav-primary{min-height:34px!important;height:34px!important}
+}
+/* Make the actual banner logo prominent; previous declarations were overridden */
+#management-hero .hero-industrial{min-height:205px!important;display:flex!important;align-items:center!important}
+#management-hero .hero-industrial img.mehrsa-hero-logo{
+ display:block!important;position:relative!important;inset:auto!important;flex:0 0 auto!important;
+ width:clamp(250px,28vw,340px)!important;height:150px!important;
+ max-width:340px!important;max-height:150px!important;object-fit:contain!important;
+ margin:0 24px 0 0!important;padding:0!important;background:transparent!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;opacity:1!important
+}
+#management-hero .hero-industrial .hero-copy{max-width:calc(100% - 390px)!important}
+@media(max-width:700px){
+ #management-hero .hero-industrial{min-height:190px!important;padding:14px!important;gap:8px!important}
+ #management-hero .hero-industrial img.mehrsa-hero-logo{
+  width:150px!important;height:82px!important;max-width:150px!important;max-height:82px!important;
+  margin:0 4px 0 0!important;align-self:flex-start!important
+ }
+ #management-hero .hero-industrial .hero-copy{max-width:calc(100% - 160px)!important;padding:0!important}
+ #management-hero .hero-industrial .hero-copy h2{font-size:18px!important}
+ #management-hero .hero-industrial .hero-copy p{font-size:10px!important}
+}
+</style>
+
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
