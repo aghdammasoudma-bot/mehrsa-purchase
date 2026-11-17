@@ -112,6 +112,7 @@ create table if not exists public.cmms_work_orders (
   manager_approved_by uuid references auth.users(id) on delete set null,
   manager_approved_at timestamptz,
   closed_at timestamptz,
+  cancel_reason text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (manager_approved_by is null or supervisor_approved_by is not null),
@@ -124,7 +125,9 @@ create table if not exists public.cmms_work_order_assignments (
   user_id uuid not null references auth.users(id) on delete restrict,
   assigned_by uuid not null references auth.users(id) on delete restrict,
   assigned_at timestamptz not null default now(),
-  unassigned_at timestamptz
+  unassigned_at timestamptz,
+  unassign_reason text,
+  check ((unassigned_at is null) = (unassign_reason is null))
 );
 
 create table if not exists public.cmms_work_order_actions (
