@@ -196,6 +196,7 @@ begin
       and ur.role = v_required_role
       and ur.is_active
       and ur.location_id is null
+      and exists (select 1 from public.user_profiles up where up.user_id=ur.user_id and up.is_active)
   ) then
     raise exception 'User does not hold the required CMMS approval role';
   end if;
