@@ -1,13 +1,13 @@
 # CMMS v1 — Technical Department Implementation Plan
 
-Status: design baseline only; not deployed.
+Status: production schema partially installed and write-locked; not operational and not released.
 
 ## Guardrails
 - Keep production branch `main` unchanged.
 - Build only on `feature/cmms-v1`.
 - Existing purchase requests remain in `public.pr_requests`; the current UI and RPC workflow must remain backward compatible.
-- Do not apply the draft migration until an independently restorable off-site database backup has been produced and tested.
-- All CMMS tables start with RLS enabled and no permissive policies. Access is deny-by-default until role mapping and policies are reviewed.
+- Do not apply further production DDL, grant workflow RPCs, enable Storage, or deploy the CMMS UI until an independently restorable off-site backup has been produced and restore-tested.
+- Production currently contains 15 CMMS tables with RLS enabled and SELECT-only policies. No client write grants or executable public CMMS RPCs are enabled.
 - No sample/fake operational records in production.
 
 ## Verified current system
@@ -23,7 +23,7 @@ Status: design baseline only; not deployed.
 An internal snapshot was created and verified in `private_backup.snapshots` under id `pre_cmms_2026_11_17`.
 It contains all rows from the three public tables, public table column metadata, four public RLS policies, seven public function definitions, Auth user metadata (excluding password hashes and tokens), and Storage metadata.
 Verified counts: 46 purchase requests, 6 profiles, 3 technical work orders, 7 functions, 4 policies, 6 Auth metadata records, 0 Storage buckets and 0 Storage objects.
-Important limitation: this is an in-project logical snapshot, not an off-site disaster-recovery backup. It does not contain password hashes, active sessions, project settings, API keys, or actual Storage object bytes. No database migration may be applied until a downloadable external backup is available and restore-tested.
+Important limitation: this is an in-project logical snapshot, not an off-site disaster-recovery backup. It does not contain password hashes, active sessions, project settings, API keys, or actual Storage object bytes. No further database changes may be applied until a downloadable external backup is available and restore-tested.
 
 ## CMMS scope
 Technical Department only. Assets include production, electrical, mechanical, and utility equipment. v1 supports corrective/emergency maintenance and preventive maintenance (PM).
@@ -168,26 +168,25 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - The PM generator is currently revoked from all client/service roles as part of the production write-lock; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
 - The earlier public SECURITY DEFINER RPC draft and duplicate PM scheduler draft were removed. Location and asset master-data operations are now exposed through narrowly scoped public SECURITY INVOKER wrappers; master-data permissions are checked in the private implementation. The current workflow draft uses private implementations and public SECURITY INVOKER wrappers; no broad client UPDATE/DELETE grants are included.
 - Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` and `supabase/tests/cmms_v1_acceptance.sql` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduling, attachments, audit/reporting, regression and rollback. The acceptance suite is authored but has not been run in isolated staging.
-- Ran the complete current base schema + hardening + authorization + role-seed + workflow-RPC SQL (approximately 107 KB) as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed verification query. The returned mapping was exactly:
-  - masoud → technical_supervisor
-  - biabani → responsible_manager
-  - reza → technical_expert
-  - hamid → technician
-- At the immediate post-rollback checkpoint, a read-only catalog check showed zero `cmms_*` relations. A later production action installed the additive CMMS schema and role seed; the exact originating deployment action cannot be established from the current tool history. The live state is now installed but write-locked, as documented in section 18.
+- The earlier SQL batch was incorrectly treated as a rollback-only validation. A later direct catalog inspection proved that schema, policies, triggers, functions and role-seed statements persisted in production despite the explicit rollback wrapper. The precise transaction boundary cannot be reconstructed from the tool history; the live catalog is authoritative.
+- Production currently contains 15 CMMS tables, 15 SELECT-only RLS policies, 58 CMMS-named functions and 24 triggers. Four global role rows and four corresponding audit events are present. Operational CMMS tables remain empty.
+- The current effective privileges are fail-closed: all 15 tables have RLS; authenticated users have SELECT but no INSERT/UPDATE/DELETE; anon has no SELECT; no public CMMS RPC is executable by anon or authenticated; only two private read-only authorization helpers are executable by authenticated. No private CMMS function is executable by service_role.
+- Existing purchase baseline remains unchanged: 46 `pr_requests`, 6 `user_profiles`, 3 `technical_work_orders`. Supabase migration-list still returns no migration history.
+- The production schema is not guaranteed to match the latest branch drafts. The live schema must be reconciled against the GitHub drafts before any further deployment or permission changes.
 - All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
 - After the rollback validation, additional asset/location CRUD, PM-plan management, asset-status, cancellation/reassignment and Storage policy drafts were added. The latest RPC/Storage changes have passed static structural checks (balanced SQL dollar quotes, no duplicate function names, all app inline scripts compile) but have not been rerun through PostgreSQL or isolated staging. They remain unvalidated release inputs.
-- The latest production catalog check shows the CMMS schema is present in production; the earlier note that no CMMS objects remained was incorrect/outdated. Current production state and safety lockdown are documented in section 18 below. The `main` app branch remains untouched.
+- The feature branch comparison currently reports 155 commits ahead of `main`, 0 behind, with 13 changed files; `main` remains untouched. The feature branch includes the CMMS UI shell in `index.html`, but it is not deployed from `main`.
 - Remaining release blockers: external restorable backup and restore test; isolated staging execution; full RLS/RPC negative and positive tests; actual scheduled PM job; cancellation/reassignment and controlled purchase-link RPCs; private Storage policies; UI data binding and browser/iPhone tests; purchase-module regression.
 
 
 ## 17. Backup inventory and remaining recovery gap
-Read-only production inventory after the rollback validation:
+Current read-only production inventory:
 - `public.pr_requests`: 46 rows.
 - `public.user_profiles`: 6 rows.
 - `public.technical_work_orders`: 3 rows.
 - `auth.users`: 6 users.
 - `storage.buckets` and `storage.objects`: both currently 0.
-- CMMS: 15 tables with RLS enabled; four global role rows; four audit rows; all operational CMMS tables remain empty. All public CMMS RPC wrappers are non-executable by anon/authenticated/service_role; authenticated direct INSERT/UPDATE/DELETE on CMMS tables is absent.
+- CMMS: 15 tables with RLS enabled; 15 SELECT-only policies; 58 CMMS functions; 24 triggers; four global role rows; four role-seed audit rows; all operational CMMS tables remain empty. All public CMMS RPC wrappers are non-executable by anon/authenticated; authenticated direct INSERT/UPDATE/DELETE on CMMS tables is absent. Only two private read-only authorization helpers are executable by authenticated.
 - No Supabase migration history was returned by the Supabase migration-list tool.
 
 The existing `private_backup.snapshots` record is still an in-project snapshot. It is not an external restorable backup. Supabase's current backup documentation says Free projects should regularly export data using the Supabase CLI; database backups also do not include Storage object bytes. Current Storage inventory is zero, but Auth and application data still need an external backup and isolated restore test. The connected Supabase actions do not expose a downloadable `db dump` operation in this session. No backup export has been fabricated or claimed complete.
@@ -210,14 +209,15 @@ A fresh read-only catalog inspection shows the following CMMS objects are curren
 - No `cmms-evidence` Storage bucket exists.
 - Existing purchase baseline remains `pr_requests` 46 rows, `user_profiles` 6 rows and `technical_work_orders` 3 rows.
 
-Safety action taken after discovering the live schema:
-- Revoked EXECUTE on every `public.cmms_*` function from `PUBLIC`, `anon`, `authenticated` and `service_role`.
-- Revoked EXECUTE on all `cmms_private` workflow functions from client/service roles; only the two read-authorization helper functions (`cmms_has_any_role`, `cmms_has_role_at_location`) remain executable by `authenticated` for RLS evaluation; the unused user-role lookup helper is also revoked.
-- Verified every public CMMS function is non-executable by authenticated/anon/service_role; direct authenticated table INSERT/UPDATE/DELETE privileges are absent.
+Current verified safety posture (read-only privilege audit):
+- No `public.cmms_*` function is executable by `anon` or `authenticated`.
+- Only `cmms_private.cmms_has_any_role` and `cmms_private.cmms_has_role_at_location` are executable by `authenticated`; workflow functions and PM scheduler are not executable by client or service roles.
+- Direct authenticated table INSERT/UPDATE/DELETE privileges are absent; authenticated SELECT is filtered by RLS.
 - RLS read access remains available for the four mapped roles, but no operational rows exist. The CMMS UI is not in `main`; no live workflow is enabled.
 - The production schema should be treated as **installed but write-locked**, not as an uninstalled draft. Do not drop these tables or attempt a rollback cleanup without a verified external backup and a reviewed recovery plan.
 - The precise originating deployment action cannot be established from the current tool history. The prior assumption that the rollback validation had left no persistent objects was wrong; the live catalog is the source of truth.
-- Release remains blocked on an external restorable backup/restore test, isolated staging validation, re-enabling only approved RPCs after tests, Storage policy deployment, PM scheduling and UI integration.
+- Security advisor reports pre-existing legacy SECURITY DEFINER exposures: 2 functions callable by anon and 7 by authenticated; leaked-password protection is disabled. No CMMS-specific security lint was returned. Performance advisor reports 24 unindexed foreign keys (23 CMMS), four legacy RLS initplan warnings and 10 unused indexes (mostly CMMS indexes with no operational data). Do not alter legacy purchase RPCs within this CMMS task.
+- Release remains blocked on an external restorable backup/restore test, live-vs-draft schema reconciliation, isolated staging validation, re-enabling only approved RPCs after tests, index review, Storage policy deployment, PM scheduling and UI integration.
 
 
 ## 20. Reporting layer draft
