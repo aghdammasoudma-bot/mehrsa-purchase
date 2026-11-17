@@ -979,11 +979,27 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 
 <!-- TOP BAR -->
 <div class="top" id="topbar" style="display:none">
-  <div>
-    <div class="h1" id="top-name" style="font-size:14px;font-weight:700;color:#fff"></div>
-    <div class="top-sub" id="top-role"></div>
+  <div class="top-profile" id="top-profile">
+    <button class="top-profile-trigger" id="top-profile-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="top-profile-menu" onclick="toggleProfileMenu(event)">
+      <span class="top-profile-avatar" id="top-profile-avatar">؟</span>
+      <span class="top-profile-identity"><strong id="top-name"></strong><small id="top-role"></small></span>
+      <span class="top-profile-chevron">⌄</span>
+    </button>
+    <div class="top-profile-menu" id="top-profile-menu" hidden>
+      <div class="top-profile-menu-title">دسترسی سریع</div>
+      <button type="button" data-view="inbox" onclick="selectProfileView('inbox')"><span>▣</span> صندوق ورودی</button>
+      <button type="button" data-view="all" onclick="selectProfileView('all')"><span>▤</span> درخواست‌ها</button>
+      <button type="button" class="profile-menu-primary" onclick="closeProfileMenu();openNewRequest()"><span>＋</span> ثبت درخواست جدید</button>
+      <button type="button" data-view="work" onclick="selectProfileView('work')"><span>⚙</span> مأموریت‌ها</button>
+      <button type="button" data-view="done" onclick="selectProfileView('done')"><span>✓</span> تکمیل‌شده</button>
+      <div class="top-profile-menu-divider"></div>
+      <button type="button" class="profile-menu-logout" onclick="closeProfileMenu();cloudLogout()"><span>↩</span> خروج از حساب</button>
+    </div>
   </div>
-  <button class="role-tag" onclick="cloudLogout()">خروج از حساب ↩</button>
+  <div class="topbar-brand">
+    <div class="h1">سامانه عملیات فنی مهرسا</div>
+    <div class="top-sub">مدیریت درخواست‌ها و مأموریت‌ها</div>
+  </div>
 </div>
 
 <!-- CONTENT -->
@@ -1205,7 +1221,7 @@ function setRole(role,user,title){
   document.getElementById("main-content").style.display="block";
   document.getElementById("management-hero").style.display="block";
   document.getElementById("quick-actions").style.display="flex";
-  document.getElementById("mobile-bottom-nav").style.display="flex";
+  document.getElementById("mobile-bottom-nav").style.display="none";
   const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
   setText("hero-user",user);
   setText("hero-role",title);
@@ -1221,6 +1237,32 @@ function setRole(role,user,title){
   setText("top-role",title);
   renderAll();
 }
+
+function toggleProfileMenu(event){
+  if(event) event.stopPropagation();
+  const menu=document.getElementById("top-profile-menu");
+  const trigger=document.getElementById("top-profile-trigger");
+  if(!menu||!trigger)return;
+  const opening=menu.hidden;
+  menu.hidden=!opening;
+  trigger.setAttribute("aria-expanded",String(opening));
+}
+function closeProfileMenu(){
+  const menu=document.getElementById("top-profile-menu");
+  const trigger=document.getElementById("top-profile-trigger");
+  if(menu)menu.hidden=true;
+  if(trigger)trigger.setAttribute("aria-expanded","false");
+}
+function selectProfileView(view){
+  closeProfileMenu();
+  switchView(view);
+}
+document.addEventListener("click",function(event){
+  const profile=document.getElementById("top-profile");
+  if(profile&&!profile.contains(event.target))closeProfileMenu();
+});
+document.addEventListener("keydown",function(event){if(event.key==="Escape")closeProfileMenu();});
+
 function showRoleScreen(){
   document.getElementById("role-screen").style.display="flex";
   document.getElementById("topbar").style.display="none";
@@ -2056,6 +2098,43 @@ setInterval(addPrintButtons,1200);
  .request-workspace{grid-template-columns:1fr!important}
  .request-detail-column{padding:12px!important}
  #request-detail-panel .flow{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+
+/* TOP RIGHT PROFILE NAVIGATION */
+#topbar.top{direction:rtl!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important}
+.top-profile{position:relative!important;display:flex!important;align-items:center!important;flex:0 0 auto!important;z-index:120!important}
+.top-profile-trigger{display:flex!important;align-items:center!important;gap:9px!important;padding:5px 10px 5px 7px!important;border:1px solid #E4E7EC!important;border-radius:10px!important;background:#fff!important;color:#344054!important;cursor:pointer!important;min-width:190px!important;text-align:right!important}
+.top-profile-avatar{width:36px!important;height:36px!important;flex:0 0 36px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#EAF2FF!important;color:#3157A4!important;font-size:13px!important;font-weight:800!important;border:1px solid #D6E2FF!important}
+.top-profile-identity{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important;flex:1!important}
+.top-profile-identity strong{font-size:11px!important;font-weight:750!important;color:#202939!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:145px!important}
+.top-profile-identity small{font-size:9px!important;color:#667085!important}
+.top-profile-chevron{font-size:17px!important;color:#667085!important;line-height:1!important}
+.top-profile-menu{position:absolute!important;top:calc(100% + 9px)!important;right:0!important;width:230px!important;padding:7px!important;background:#fff!important;border:1px solid #E4E7EC!important;border-radius:12px!important;box-shadow:0 12px 32px rgba(16,24,40,.14)!important;z-index:500!important}
+.top-profile-menu[hidden]{display:none!important}
+.top-profile-menu-title{padding:8px 10px 9px!important;font-size:10px!important;font-weight:750!important;color:#98A2B3!important}
+.top-profile-menu button{width:100%!important;display:flex!important;align-items:center!important;gap:10px!important;padding:10px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#344054!important;text-align:right!important;font-size:11px!important;font-weight:600!important;cursor:pointer!important}
+.top-profile-menu button:hover{background:#F2F4F7!important}
+.top-profile-menu button>span{width:25px!important;height:25px!important;display:grid!important;place-items:center!important;border-radius:7px!important;background:#F2F4F7!important;color:#475467!important;font-size:14px!important}
+.top-profile-menu button.profile-menu-primary{color:#3157A4!important;background:#F3F6FF!important}
+.top-profile-menu button.profile-menu-primary>span{background:#E1E9FF!important;color:#3157A4!important}
+.top-profile-menu-divider{height:1px!important;background:#EAECF0!important;margin:6px 3px!important}
+.top-profile-menu button.profile-menu-logout{color:#B42332!important}
+.top-profile-menu button.profile-menu-logout>span{background:#FEF3F2!important;color:#B42332!important}
+.topbar-brand{display:flex!important;flex-direction:column!important;gap:3px!important;text-align:left!important;margin-right:auto!important}
+#topbar .topbar-brand .h1{font-size:14px!important;font-weight:750!important;color:#202939!important}
+#topbar .topbar-brand .top-sub{font-size:10px!important;color:#98A2B3!important}
+#mobile-bottom-nav{display:none!important}
+#main-content.content{padding-bottom:28px!important}
+@media(max-width:700px){
+ #topbar.top{height:58px!important;min-height:58px!important;padding:0 10px!important;gap:8px!important}
+ .top-profile-trigger{min-width:0!important;padding:4px 7px 4px 5px!important;gap:6px!important}
+ .top-profile-avatar{width:32px!important;height:32px!important;flex-basis:32px!important}
+ .top-profile-identity strong{max-width:105px!important;font-size:10px!important}
+ .topbar-brand .h1{font-size:11px!important}
+ .topbar-brand .top-sub{font-size:8px!important}
+ .top-profile-menu{width:215px!important}
+ #main-content.content{padding-bottom:24px!important}
 }
 
 </style>
