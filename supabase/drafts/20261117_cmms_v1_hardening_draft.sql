@@ -94,7 +94,8 @@ alter table public.cmms_work_orders
     and (
       status <> 'closed'
       or (
-        test_result = 'passed'
+        test_result is not distinct from 'passed'
+        and return_to_service_status is not null
         and return_to_service_status in ('returned','not_required')
         and (return_to_service_status <> 'returned' or returned_to_service_at is not null)
         and supervisor_approved_by is not null
@@ -162,6 +163,7 @@ begin
   end if;
 
   if v_wo.test_result is distinct from 'passed'
+     or v_wo.return_to_service_status is null
      or v_wo.return_to_service_status not in ('returned','not_required')
      or (v_wo.return_to_service_status = 'returned' and v_wo.returned_to_service_at is null) then
     raise exception 'Successful test and explicit return-to-service decision are required';
@@ -404,6 +406,7 @@ begin
        or new.manager_approved_by is distinct from v_manager.approver_id
        or new.manager_approved_by = new.supervisor_approved_by
        or new.test_result is distinct from 'passed'
+       or new.return_to_service_status is null
        or new.return_to_service_status not in ('returned','not_required')
        or (new.return_to_service_status='returned' and new.returned_to_service_at is null)
        or new.closed_at is null then
