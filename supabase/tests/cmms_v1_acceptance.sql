@@ -16,6 +16,8 @@ declare
   v_wo uuid;
   v_pm_plan uuid;
   v_pm_task uuid;
+  v_assignment uuid;
+  v_new_assignment uuid;
   v_rejected boolean;
   v_status text;
 begin
@@ -70,6 +72,11 @@ begin
   perform set_config('request.jwt.claim.sub',v_supervisor::text,true);
   perform public.cmms_decide_work_order(v_wo,'technical_supervisor','approved','Technical inspection passed');
 
+  -- Temporarily grant the supervisor the manager role in this disposable test only.
+  -- This proves the distinct-person guard, not merely the role check.
+  insert into public.cmms_user_roles(user_id,role,location_id,is_active)
+  values(v_supervisor,'responsible_manager',null,true);
+
   v_rejected := false;
   begin
     perform public.cmms_decide_work_order(v_wo,'responsible_manager','approved','Must be denied: same person');
@@ -77,6 +84,9 @@ begin
     v_rejected := true;
   end;
   if not v_rejected then raise exception 'Negative test failed: same-person dual approval was accepted'; end if;
+
+  delete from public.cmms_user_roles
+  where user_id=v_supervisor and role='responsible_manager' and location_id is null;
 
   perform set_config('request.jwt.claim.sub',v_manager::text,true);
   v_status := public.cmms_decide_work_order(v_wo,'responsible_manager','approved','Manager final approval');
@@ -98,6 +108,25 @@ begin
   perform set_config('request.jwt.claim.sub',v_supervisor::text,true);
   v_status := public.cmms_decide_work_order(v_wo,'technical_supervisor','rejected','Alignment still outside tolerance');
   if v_status <> 'rework' then raise exception 'Supervisor rejection did not return order to rework'; end if;
+
+  -- Reassignment must preserve the old assignment with a reason.
+  select id into v_assignment from public.cmms_work_order_assignments
+  where work_order_id=v_wo and user_id=v_technician and unassigned_at is null;
+  perform set_config('request.jwt.claim.sub',v_expert::text,true);
+  v_new_assignment := public.cmms_reassign_work_order(v_assignment,v_expert,'Technician handover test');
+  if not exists (
+    select 1 from public.cmms_work_order_assignments
+    where id=v_assignment and unassigned_at is not null and unassign_reason='Technician handover test'
+  ) then raise exception 'Reassignment did not preserve prior assignment history'; end if;
+
+  -- Cancellation must close every active assignment and preserve the reason.
+  perform public.cmms_cancel_work_order(v_wo,'Disposable acceptance-test cancellation');
+  select status into v_status from public.cmms_work_orders where id=v_wo;
+  if v_status <> 'cancelled' then raise exception 'Work order cancellation failed'; end if;
+  if exists (
+    select 1 from public.cmms_work_order_assignments
+    where work_order_id=v_wo and unassigned_at is null
+  ) then raise exception 'Cancellation left an active assignment'; end if;
 
   -- Location hierarchy must reject self-parenting.
   v_rejected := false;
