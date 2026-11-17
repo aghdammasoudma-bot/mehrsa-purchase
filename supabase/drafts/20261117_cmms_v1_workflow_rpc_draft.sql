@@ -684,10 +684,21 @@ begin
   select a.location_id into v_location_id
   from public.cmms_assets a where a.id=v_task.asset_id;
 
-  if v_task.assigned_to is distinct from auth.uid()
-     and not cmms_private.cmms_has_role_at_location(
-       array['technical_expert','technical_supervisor'],v_location_id
-     ) then
+  if v_task.assigned_to=auth.uid() then
+    if not exists (
+      select 1 from public.cmms_user_roles ur
+      join public.user_profiles up on up.user_id=ur.user_id
+      where ur.user_id=auth.uid()
+        and ur.is_active
+        and ur.location_id is null
+        and ur.role in ('technician','technical_expert')
+        and up.is_active
+    ) then
+      raise exception 'Assigned user no longer has an active CMMS execution role';
+    end if;
+  elsif not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then
     raise exception 'Only the assigned technician or technical supervisor/expert can complete this PM task';
   end if;
 
