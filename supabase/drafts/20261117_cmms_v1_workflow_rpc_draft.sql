@@ -495,8 +495,7 @@ create or replace function public.cmms_report_failure(
   p_asset_id uuid,p_priority text,p_description text,p_symptoms text default null,
   p_production_impact text default null,p_safety_impact text default null,
   p_environmental_impact text default null,p_attachment_paths text[] default '{}'::text[]
-) returns uuid language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8); $$;
+) returns uuid as $$ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_triage_failure(p_failure_report_id uuid,p_decision text,p_note text default null)
 returns uuid language sql security invoker set search_path=''
@@ -514,8 +513,7 @@ create or replace function public.cmms_record_work_order_action(
   p_work_order_id uuid,p_action_type text,p_description text,p_duration_minutes integer default null,
   p_quantity numeric default null,p_unit text default null,p_meter_reading numeric default null,
   p_attachment_paths text[] default '{}'::text[]
-) returns uuid language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_record_work_order_action($1,$2,$3,$4,$5,$6,$7,$8); $$;
+) returns uuid as $$ select cmms_private.cmms_record_work_order_action($1,$2,$3,$4,$5,$6,$7,$8); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_set_work_order_progress(p_work_order_id uuid,p_next_status text)
 returns text language sql security invoker set search_path=''
@@ -524,13 +522,11 @@ as $$ select cmms_private.cmms_set_work_order_progress($1,$2); $$;
 create or replace function public.cmms_submit_work_order_test(
   p_work_order_id uuid,p_test_result text,p_return_to_service_status text,
   p_returned_to_service_at timestamptz,p_test_description text,p_attachment_paths text[] default '{}'::text[]
-) returns text language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_submit_work_order_test($1,$2,$3,$4,$5,$6); $$;
+) returns text as $$ select cmms_private.cmms_submit_work_order_test($1,$2,$3,$4,$5,$6); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_decide_work_order(
   p_work_order_id uuid,p_stage text,p_decision text,p_note text default null
-) returns text language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_decide_work_order($1,$2,$3,$4); $$;
+) returns text as $$ select cmms_private.cmms_decide_work_order($1,$2,$3,$4); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid language sql security invoker set search_path=''
