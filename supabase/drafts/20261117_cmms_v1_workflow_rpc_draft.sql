@@ -697,10 +697,10 @@ create or replace function public.cmms_decide_work_order(
 
 create or replace function public.cmms_record_meter_reading(
   p_asset_id uuid,p_meter_code text,p_meter_unit text,p_meter_value numeric
-) returns uuid as $ select cmms_private.cmms_record_meter_reading($1,$2,$3,$4); $ language sql security invoker set search_path = '';
+) returns uuid as $$ select cmms_private.cmms_record_meter_reading($1,$2,$3,$4); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_assign_pm_task(p_pm_task_id uuid,p_assignee_id uuid)
-returns uuid as $ select cmms_private.cmms_assign_pm_task($1,$2); $ language sql security invoker set search_path = '';
+returns uuid as $$ select cmms_private.cmms_assign_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
