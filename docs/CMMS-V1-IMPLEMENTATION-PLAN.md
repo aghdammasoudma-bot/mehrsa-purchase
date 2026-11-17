@@ -149,3 +149,24 @@ The production function definitions and ACLs were inspected, not just the Adviso
 
 - A dedicated asset-meter-reading table was added so meter- and hybrid-based PM plans have an auditable source for hour/cycle readings; its location-scoped read policy and grants are included in the authorization draft.
 - The current project has the `pg_cron` extension available but not installed. Server-side PM generation will use a controlled scheduled database job or Supabase scheduled function only after the extension/scheduling choice is validated in staging; browser timers are not acceptable.
+
+
+## 16. Workflow RPCs and transactional SQL validation — 2026-11-17
+- Added `supabase/drafts/20261117_cmms_v1_workflow_rpc_draft.sql` with private, fixed-search-path SECURITY DEFINER implementations and public SECURITY INVOKER entry points for:
+  - failure reporting;
+  - technical triage and conversion/rejection;
+  - work-order release and assignment;
+  - execution progress and action logging;
+  - test result and return-to-service submission;
+  - two-stage work-order decisions;
+  - PM task completion.
+- No broad client UPDATE/DELETE grants are included. The authorization layer remains read-only; writes are intended to pass through the narrow RPC surface only.
+- Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduler, attachments, audit/reporting, regression and rollback.
+- Ran the complete base schema + hardening + authorization + role-seed + workflow-RPC SQL as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed SELECT. The returned mapping was exactly:
+  - masoud → technical_supervisor
+  - biabani → responsible_manager
+  - reza → technical_expert
+  - hamid → technician
+- Immediately after rollback, a read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining. The pre-existing `private_backup.snapshots` table remained present. Therefore this was a syntax/dependency validation only; it did not install CMMS tables, roles, policies or functions in production.
+- This is not a substitute for isolated staging tests, security tests, browser tests or restore testing. No CMMS production migration or deployment has occurred.
+- Remaining implementation before release: PM task scheduler and meter-reading RPCs, cancellation/reassignment, controlled purchase linking, private Storage policies, full lifecycle integration tests, and wiring UI screens to live data.
