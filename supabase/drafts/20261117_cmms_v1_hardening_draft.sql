@@ -274,48 +274,13 @@ create trigger cmms_apply_work_order_approval
 after insert on public.cmms_work_order_approvals
 for each row execute function public.cmms_apply_work_order_approval();
 
--- 6c) Prevent direct status changes from skipping approval gates.
-create or replace function public.cmms_prevent_location_cycle()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $
-begin
-  if new.parent_id is null then return new; end if;
-  if new.parent_id = new.id then
-    raise exception 'A location cannot be its own parent';
-  end if;
-
-  if exists (
-    with recursive ancestors(id) as (
-      select new.parent_id
-      union
-      select l.parent_id
-      from public.cmms_locations l
-      join ancestors a on l.id=a.id
-      where l.parent_id is not null
-    )
-    select 1 from ancestors where id=new.id
-  ) then
-    raise exception 'Location hierarchy cycle detected';
-  end if;
-
-  return new;
-end;
-$;
-
-drop trigger if exists cmms_location_cycle_guard on public.cmms_locations;
-create trigger cmms_location_cycle_guard
-before insert or update of parent_id on public.cmms_locations
-for each row execute function public.cmms_prevent_location_cycle();
-
+-- PM task integrity guard.
 create or replace function public.cmms_guard_pm_task()
 returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_plan public.cmms_pm_plans%rowtype;
 begin
@@ -367,7 +332,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists cmms_pm_task_guard on public.cmms_pm_tasks;
 create trigger cmms_pm_task_guard
@@ -581,6 +546,7 @@ revoke all on function public.cmms_record_asset_status_change() from public, ano
 revoke all on function public.cmms_reject_history_mutation() from public, anon, authenticated;
 revoke all on function public.cmms_apply_work_order_approval() from public, anon, authenticated;
 revoke all on function public.cmms_guard_work_order_status() from public, anon, authenticated;
+revoke all on function public.cmms_guard_pm_task() from public, anon, authenticated;
 
 -- 8b) Immutable audit trail for operational CMMS entities.
 create or replace function public.cmms_write_audit_log()
