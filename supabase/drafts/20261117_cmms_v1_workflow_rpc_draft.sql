@@ -425,21 +425,104 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_status text;
+  v_wo public.cmms_work_orders%rowtype;
+  v_location_id uuid;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if p_stage not in ('technical_supervisor','responsible_manager') then raise exception 'Invalid approval stage'; end if;
-  if p_decision not in ('approved','rejected') then raise exception 'Invalid approval decision'; end if;
+  if p_stage not in ('technical_supervisor','responsible_manager') then
+    raise exception 'Invalid approval stage';
+  end if;
+  if p_decision not in ('approved','rejected') then
+    raise exception 'Invalid approval decision';
+  end if;
+  if p_decision='rejected' and nullif(btrim(coalesce(p_note,'')),'') is null then
+    raise exception 'A rejection reason is mandatory';
+  end if;
+
+  select w.* into v_wo
+  from public.cmms_work_orders w
+  where w.id=p_work_order_id
+  for update;
+
+  if not found then raise exception 'Work order not found'; end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_wo.asset_id;
+
+  if p_stage='technical_supervisor' then
+    if v_wo.status <> 'pending_supervisor_approval' then
+      raise exception 'Work order is not awaiting technical-supervisor approval';
+    end if;
+    if not cmms_private.cmms_has_role_at_location(
+      array['technical_supervisor'],v_location_id
+    ) then
+      raise exception 'Only the technical supervisor may make this decision';
+    end if;
+
+    insert into public.cmms_work_order_approvals(
+      work_order_id,stage,approver_id,decision,note
+    ) values(p_work_order_id,p_stage,auth.uid(),p_decision,nullif(btrim(p_note),''));
+
+    if p_decision='approved' then
+      update public.cmms_work_orders
+      set supervisor_approved_by=auth.uid(),
+          supervisor_approved_at=now(),
+          status='pending_manager_approval',
+          updated_at=now()
+      where id=p_work_order_id;
+      return 'pending_manager_approval';
+    else
+      update public.cmms_work_orders
+      set supervisor_approved_by=null,
+          supervisor_approved_at=null,
+          manager_approved_by=null,
+          manager_approved_at=null,
+          closed_at=null,
+          status='rework',
+          updated_at=now()
+      where id=p_work_order_id;
+      return 'rework';
+    end if;
+  end if;
+
+  if v_wo.status <> 'pending_manager_approval' then
+    raise exception 'Work order is not awaiting responsible-manager approval';
+  end if;
+  if v_wo.supervisor_approved_by is null
+     or v_wo.supervisor_approved_by=auth.uid() then
+    raise exception 'Responsible-manager approval must be by a different person after supervisor approval';
+  end if;
+  if not cmms_private.cmms_has_role_at_location(
+    array['responsible_manager'],v_location_id
+  ) then
+    raise exception 'Only the responsible manager may make this decision';
+  end if;
 
   insert into public.cmms_work_order_approvals(
     work_order_id,stage,approver_id,decision,note
-  )
-  values(p_work_order_id,p_stage,auth.uid(),p_decision,p_note);
+  ) values(p_work_order_id,p_stage,auth.uid(),p_decision,nullif(btrim(p_note),''));
 
-  select w.status into v_status
-  from public.cmms_work_orders w where w.id=p_work_order_id;
-
-  return v_status;
+  if p_decision='approved' then
+    update public.cmms_work_orders
+    set manager_approved_by=auth.uid(),
+        manager_approved_at=now(),
+        closed_at=now(),
+        status='closed',
+        updated_at=now()
+    where id=p_work_order_id;
+    return 'closed';
+  else
+    update public.cmms_work_orders
+    set supervisor_approved_by=null,
+        supervisor_approved_at=null,
+        manager_approved_by=null,
+        manager_approved_at=null,
+        closed_at=null,
+        status='rework',
+        updated_at=now()
+    where id=p_work_order_id;
+    return 'rework';
+  end if;
 end;
 $$;
 
