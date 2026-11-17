@@ -129,7 +129,7 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 - Locations now support discipline classification (production, electrical, mechanical, utilities, general).
 - Assets and failure reports support evidence paths; failure reports capture production, safety and environmental impact.
 - Work orders capture work type, scope, root cause, planned/due dates, estimated duration, permit and isolation requirements, test result and explicit return-to-service status.
-- PM plans support calendar, meter and hybrid triggers; PM tasks can be generated from date or meter thresholds with a uniqueness guard for meter-based due points.
+- PM plans support calendar or meter triggers; PM tasks can be generated from date or meter thresholds with a uniqueness guard for meter-based due points.
 - New work orders default to `triage`, not an execution-approved state.
 - Closeout hardening requires a passed test, return-to-service timestamp, both approval identities/timestamps and distinct approvers.
 
@@ -170,3 +170,11 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - Immediately after rollback, a read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining. The pre-existing `private_backup.snapshots` table remained present. Therefore this was a syntax/dependency validation only; it did not install CMMS tables, roles, policies or functions in production.
 - This is not a substitute for isolated staging tests, security tests, browser tests or restore testing. No CMMS production migration or deployment has occurred.
 - Remaining implementation before release: PM task scheduler and meter-reading RPCs, cancellation/reassignment, controlled purchase linking, private Storage policies, full lifecycle integration tests, and wiring UI screens to live data.
+
+
+## 16. Controlled workflow RPCs and PM scheduler drafts
+- `supabase/drafts/20261117_cmms_v1_rpc_draft.sql` now drafts controlled operations for failure intake, failure triage/conversion, work-order release, action/labor/evidence logging, test + return-to-service submission, two-stage approval, PM completion and meter readings. Direct client table writes remain denied by the authorization draft.
+- `supabase/drafts/20261117_cmms_v1_pm_scheduler_draft.sql` drafts an idempotent, row-locked PM task generator for calendar- and meter-based plans. It is restricted to `service_role`; scheduling itself is not configured.
+- V1 intentionally supports calendar OR meter-based PM, not hybrid, because one shared frequency interval cannot safely represent two independent trigger units. Hybrid can be added later with separate calendar and meter interval fields if required.
+- `pg_cron` is available but not installed in the current project. The choice between installing it and using a scheduled Edge Function is deferred until staging.
+- RPC and scheduler drafts are not yet tested against a disposable database. They must be reviewed for SQL syntax, trigger ordering, RLS bypass behavior, idempotency and role-specific edge cases before any migration is applied.
