@@ -453,6 +453,9 @@ for each row execute function public.cmms_record_asset_status_change();
 
 -- Trigger functions are not RPC endpoints. Remove default/API execution privileges.
 revoke all on function public.cmms_guard_work_order_approval() from public, anon, authenticated;
+revoke all on function public.cmms_guard_location_hierarchy() from public, anon, authenticated;
+revoke all on function public.cmms_record_asset_status_change() from public, anon, authenticated;
+revoke all on function public.cmms_reject_history_mutation() from public, anon, authenticated;
 revoke all on function public.cmms_apply_work_order_approval() from public, anon, authenticated;
 revoke all on function public.cmms_guard_work_order_status() from public, anon, authenticated;
 
