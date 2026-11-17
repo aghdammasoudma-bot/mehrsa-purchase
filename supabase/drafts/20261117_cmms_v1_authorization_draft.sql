@@ -277,6 +277,7 @@ grant select on table
   public.cmms_locations,
   public.cmms_asset_categories,
   public.cmms_assets,
+  public.cmms_asset_meter_readings,
   public.cmms_user_roles,
   public.cmms_failure_reports,
   public.cmms_work_orders,
