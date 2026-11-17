@@ -15,12 +15,13 @@ Status: in development. All boxes below are release gates, not claims of complet
 
 ## B. Schema and migration
 - [ ] Review base schema and hardening SQL with a second technical reviewer.
-- [x] Run all CMMS DDL drafts together in a single production transaction and explicitly roll back; PostgreSQL accepted the statements and role-seed query. Verified no CMMS relations or `cmms_private` schema remained afterward.
+- [x] An earlier cut of the base schema, hardening, authorization, role-seed and workflow RPC SQL passed a single explicit PostgreSQL transaction that was rolled back; a subsequent catalog check found no CMMS relations or `cmms_private` schema remaining.
+- [ ] Revalidate the latest workflow RPC additions (asset/location CRUD, cancellation guard and latest approval logic) and the new Storage policy draft in isolated staging; they were added after the rollback syntax test.
 - [ ] Re-run the same scripts on an isolated staging project and commit a versioned migration.
 - [ ] Verify foreign keys, unique indexes, identity sequences and delete restrictions.
 - [ ] Verify location hierarchy cycle guard under insert, update and concurrent update.
 - [ ] Verify duplicate active work-order-per-failure protection.
-- [ ] Verify meter-based PM uniqueness and calendar/hybrid task semantics.
+- [ ] Verify meter-based PM uniqueness and separate calendar-versus-meter task semantics.
 - [ ] Verify work-order status transition graph, rework cycles and closure checks.
 - [ ] Verify append-only action, approval, asset-status and audit history.
 
@@ -69,7 +70,7 @@ Status: in development. All boxes below are release gates, not claims of complet
 - [ ] Overdue/escalation notifications are verified end-to-end; no assumed delivery.
 
 ## G. Attachments, audit and reporting
-- [ ] Create a private Storage bucket and policies; no public object URLs.
+- [ ] Create a private Storage bucket and policies; no public object URLs. Draft: `supabase/drafts/20261117_cmms_v1_storage_policy_draft.sql` (not applied).
 - [ ] Validate file type, size, path ownership and asset/work-order association.
 - [ ] Confirm unauthorized users cannot download evidence.
 - [ ] Audit all create/update/approval/status/assignment/PM/purchase-link actions.
