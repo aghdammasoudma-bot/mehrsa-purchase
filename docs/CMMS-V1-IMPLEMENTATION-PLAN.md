@@ -217,3 +217,10 @@ Safety action taken after discovering the live schema:
 - The production schema should be treated as **installed but write-locked**, not as an uninstalled draft. Do not drop these tables or attempt a rollback cleanup without a verified external backup and a reviewed recovery plan.
 - The precise originating deployment action cannot be established from the current tool history. The prior assumption that the rollback validation had left no persistent objects was wrong; the live catalog is the source of truth.
 - Release remains blocked on an external restorable backup/restore test, isolated staging validation, re-enabling only approved RPCs after tests, Storage policy deployment, PM scheduling and UI integration.
+
+
+## 19. Reporting layer draft
+- Added `supabase/drafts/20261117_cmms_v1_reporting_draft.sql` with SECURITY INVOKER views for dashboard counts, per-asset work/failure/PM KPIs, a unified asset timeline, and PM completion compliance.
+- Downtime metrics derive only from recorded `downtime_started_at` and `returned_to_service_at`; no MTBF/MTTR estimate is shown where source data is insufficient.
+- The failure-intake RPC now accepts an optional downtime start timestamp and carries it into the resulting work order, allowing downtime reporting to use source timestamps rather than inference.
+- Reporting views are not applied or tested. Verify the PostgreSQL 17 view options, RLS behavior, Data API grants and aggregate accuracy in staging.
