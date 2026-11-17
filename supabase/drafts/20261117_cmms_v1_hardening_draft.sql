@@ -248,6 +248,12 @@ begin
         closed_at = now(),
         updated_at = now()
     where id = new.work_order_id;
+
+    update public.cmms_work_order_assignments
+    set unassigned_at = now(),
+        unassign_reason = 'Work order closed after final approval'
+    where work_order_id = new.work_order_id
+      and unassigned_at is null;
   else
     update public.cmms_work_orders
     set supervisor_approved_by = null,
