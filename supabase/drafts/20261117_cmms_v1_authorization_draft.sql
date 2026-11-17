@@ -18,7 +18,9 @@ stable
 security definer
 set search_path = ''
 as $$
-  select auth.uid() is not null and exists (
+  select auth.uid() is not null
+    and exists (select 1 from public.user_profiles up where up.user_id=auth.uid() and up.is_active)
+    and exists (
     select 1
     from public.cmms_user_roles r
     where r.user_id = auth.uid()
