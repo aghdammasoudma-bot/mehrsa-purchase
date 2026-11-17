@@ -304,6 +304,13 @@ begin
        or new.supervisor_approved_by is distinct from v_supervisor.approver_id then
       raise exception 'Current technical supervisor approval is required';
     end if;
+    if new.status='pending_manager_approval' then
+      if old.status <> 'pending_supervisor_approval'
+         or v_supervisor.approver_id is distinct from auth.uid() then
+        raise exception 'Only the current technical supervisor decision may advance the order';
+      end if;
+      return new;
+    end if;
   end if;
 
   if new.status='closed' then
@@ -312,7 +319,9 @@ begin
     where ap.work_order_id=new.id and ap.stage='responsible_manager'
     order by ap.decided_at desc, ap.id desc limit 1;
 
-    if v_manager.decision is distinct from 'approved'
+    if old.status <> 'pending_manager_approval'
+       or v_manager.approver_id is distinct from auth.uid()
+       or v_manager.decision is distinct from 'approved'
        or new.manager_approved_by is distinct from v_manager.approver_id
        or new.manager_approved_by = new.supervisor_approved_by
        or new.test_result is distinct from 'passed'
