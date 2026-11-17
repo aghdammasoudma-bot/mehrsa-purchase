@@ -60,7 +60,7 @@ Status: in development. All boxes below are release gates, not claims of complet
 - [ ] Cancellation and reassignment RPCs require a reason and preserve history.
 
 ## F. Preventive maintenance
-- [ ] Calendar, meter and hybrid plans have unambiguous frequency units and next-due logic.
+- [ ] Calendar-based and meter-based plans have separate, unambiguous units and next-due logic; hybrid plans are explicitly deferred from v1.
 - [ ] Scheduled generation is server-side, idempotent and recovers missed runs.
 - [ ] Confirm whether `pg_cron` or Supabase scheduled Edge Functions will be used; `pg_cron` is available but not currently installed in production.
 - [ ] Meter readings have source, unit, timestamp and recorder identity.
