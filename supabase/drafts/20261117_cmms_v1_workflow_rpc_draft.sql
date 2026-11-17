@@ -335,7 +335,7 @@ begin
 
   return p_next_status;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_submit_work_order_test(
   p_work_order_id uuid,
