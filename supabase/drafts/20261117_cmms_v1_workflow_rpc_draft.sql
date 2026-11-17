@@ -253,13 +253,8 @@ begin
     raise exception 'Only technical expert or supervisor can assign work';
   end if;
 
-  if not exists (
-    select 1 from public.cmms_user_roles r
-    where r.user_id=p_assignee_id
-      and r.is_active
-      and r.location_id is null
-      and r.role in ('technician','technical_expert')
-      and exists (select 1 from public.user_profiles up where up.user_id=r.user_id and up.is_active)
+  if not cmms_private.cmms_user_has_active_role(
+    p_assignee_id,array['technician','technical_expert']
   ) then
     raise exception 'Assignee has no active technician CMMS role';
   end if;
@@ -320,10 +315,14 @@ begin
       and wa.unassigned_at is null
   ) into v_is_assigned;
 
-  if not v_is_assigned and not cmms_private.cmms_has_role_at_location(
+  if v_is_assigned then
+    if not cmms_private.cmms_user_has_active_role(auth.uid(),array['technician','technical_expert']) then
+      raise exception 'Assigned user no longer has an active CMMS execution role';
+    end if;
+  elsif not cmms_private.cmms_has_role_at_location(
     array['technical_expert','technical_supervisor'],v_location_id
   ) then
-    raise exception 'Only assigned workers or technical supervisors/experts can log actions';
+    raise exception 'Only assigned active workers or technical supervisors/experts can log actions';
   end if;
 
   insert into public.cmms_work_order_actions(
@@ -375,10 +374,14 @@ begin
       and wa.unassigned_at is null
   ) into v_is_assigned;
 
-  if not v_is_assigned and not cmms_private.cmms_has_role_at_location(
+  if v_is_assigned then
+    if not cmms_private.cmms_user_has_active_role(auth.uid(),array['technician','technical_expert']) then
+      raise exception 'Assigned user no longer has an active CMMS execution role';
+    end if;
+  elsif not cmms_private.cmms_has_role_at_location(
     array['technical_expert','technical_supervisor'],v_location_id
   ) then
-    raise exception 'Only assigned workers or technical supervisors/experts can change execution status';
+    raise exception 'Only assigned active workers or technical supervisors/experts can change execution status';
   end if;
 
   if not (
@@ -437,10 +440,14 @@ begin
       and wa.unassigned_at is null
   ) into v_is_assigned;
 
-  if not v_is_assigned and not cmms_private.cmms_has_role_at_location(
+  if v_is_assigned then
+    if not cmms_private.cmms_user_has_active_role(auth.uid(),array['technician','technical_expert']) then
+      raise exception 'Assigned user no longer has an active CMMS execution role';
+    end if;
+  elsif not cmms_private.cmms_has_role_at_location(
     array['technical_expert','technical_supervisor'],v_location_id
   ) then
-    raise exception 'Only assigned workers or technical supervisors/experts can submit tests';
+    raise exception 'Only assigned active workers or technical supervisors/experts can submit tests';
   end if;
 
   if p_test_result='passed' then
@@ -882,8 +889,9 @@ begin
   select a.location_id into v_location_id
   from public.cmms_assets a where a.id=v_task.asset_id;
 
-  if v_task.assigned_to is distinct from auth.uid() then
-    raise exception 'Only the assigned user can start this PM task';
+  if v_task.assigned_to is distinct from auth.uid()
+     or not cmms_private.cmms_user_has_active_role(auth.uid(),array['technician','technical_expert']) then
+    raise exception 'Only the assigned active CMMS technician/expert can start this PM task';
   end if;
 
   update public.cmms_pm_tasks set status='in_progress' where id=p_pm_task_id;
@@ -924,14 +932,8 @@ begin
   from public.cmms_assets a where a.id=v_task.asset_id;
 
   if v_task.assigned_to=auth.uid() then
-    if not exists (
-      select 1 from public.cmms_user_roles ur
-      join public.user_profiles up on up.user_id=ur.user_id
-      where ur.user_id=auth.uid()
-        and ur.is_active
-        and ur.location_id is null
-        and ur.role in ('technician','technical_expert')
-        and up.is_active
+    if not cmms_private.cmms_user_has_active_role(
+      auth.uid(),array['technician','technical_expert']
     ) then
       raise exception 'Assigned user no longer has an active CMMS execution role';
     end if;
@@ -1024,11 +1026,8 @@ begin
     raise exception 'Only technical expert or supervisor can assign PM tasks';
   end if;
 
-  if not exists (
-    select 1 from public.cmms_user_roles ur
-    where ur.user_id=p_assignee_id and ur.is_active
-      and ur.location_id is null and ur.role in ('technician','technical_expert')
-      and exists (select 1 from public.user_profiles up where up.user_id=ur.user_id and up.is_active)
+  if not cmms_private.cmms_user_has_active_role(
+    p_assignee_id,array['technician','technical_expert']
   ) then
     raise exception 'PM assignee has no active technician role';
   end if;
@@ -1213,10 +1212,8 @@ begin
     raise exception 'Only technical supervisor or expert can reassign work';
   end if;
 
-  if not exists (
-    select 1 from public.cmms_user_roles ur
-    where ur.user_id=p_new_assignee_id and ur.is_active
-      and ur.location_id is null and ur.role in ('technician','technical_expert')
+  if not cmms_private.cmms_user_has_active_role(
+    p_new_assignee_id,array['technician','technical_expert']
   ) then
     raise exception 'New assignee has no active technician CMMS role';
   end if;
@@ -1491,6 +1488,7 @@ revoke all on function cmms_private.cmms_generate_due_pm_tasks() from public,ano
 grant execute on function cmms_private.cmms_generate_due_pm_tasks() to service_role;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
 grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to authenticated;
+grant execute on function cmms_private.cmms_user_has_active_role(uuid,text[]) to authenticated;
 
 revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) from public, anon;
 revoke all on function public.cmms_triage_failure(uuid,text,text) from public, anon;
