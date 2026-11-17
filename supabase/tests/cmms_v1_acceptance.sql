@@ -23,6 +23,7 @@ declare
   v_new_assignment uuid;
   v_rejected boolean;
   v_status text;
+  v_downtime timestamptz;
 begin
   select user_id into v_supervisor from public.user_profiles where username='masoud' and is_active;
   select user_id into v_manager from public.user_profiles where username='biabani' and is_active;
@@ -50,11 +51,13 @@ begin
   v_report := public.cmms_report_failure(
     v_asset,'high','Integration test: pump vibration detected',
     'Abnormal vibration','Production line affected','No known safety impact',
-    'No known environmental impact','{}'::text[]
+    'No known environmental impact','{}'::text[],now()-interval '1 hour'
   );
 
   perform set_config('request.jwt.claim.sub',v_expert::text,true);
   v_wo := public.cmms_triage_failure(v_report,'convert','Approved for technical repair');
+  select downtime_started_at into v_downtime from public.cmms_work_orders where id=v_wo;
+  if v_downtime is null then raise exception 'Failure downtime start was not copied to work order'; end if;
   perform public.cmms_release_work_order(v_wo);
   perform public.cmms_assign_work_order(v_wo,v_technician);
 
