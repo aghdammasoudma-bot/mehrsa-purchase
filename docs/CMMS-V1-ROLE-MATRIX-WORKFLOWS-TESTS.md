@@ -56,7 +56,8 @@ Suggested priority definitions:
 Priority labels must be calibrated against the plant's actual escalation and response-time policy before go-live.
 
 ## 4. Preventive-maintenance workflow
-- Each plan belongs to one asset and defines interval, checklist, owner and next due date.
+- Each plan belongs to one asset and defines either a calendar interval or a meter interval, checklist, owner and next due threshold.
+- Hybrid calendar+meter plans are deferred from v1 until separate frequency units and cycle semantics are implemented.
 - Due tasks are generated from the plan; a task must not be silently skipped when overdue.
 - Completion requires checklist results, actual completion time and executor identity.
 - Failed checklist items create or link to a corrective work order.
