@@ -79,7 +79,7 @@ alter table public.cmms_pm_tasks
       and checklist_result is not null
       and (
         (jsonb_typeof(checklist_result) = 'array' and jsonb_array_length(checklist_result) > 0)
-        or (jsonb_typeof(checklist_result) = 'object' and jsonb_object_length(checklist_result) > 0)
+        or (jsonb_typeof(checklist_result) = 'object' and checklist_result <> '{}'::jsonb)
       )
     )
   );
