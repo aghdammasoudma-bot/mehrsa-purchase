@@ -132,3 +132,9 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 - PM plans support calendar, meter and hybrid triggers; PM tasks can be generated from date or meter thresholds with a uniqueness guard for meter-based due points.
 - New work orders default to `triage`, not an execution-approved state.
 - Closeout hardening requires a passed test, return-to-service timestamp, both approval identities/timestamps and distinct approvers.
+
+
+## 14. Authorization and role-seed drafts
+- `supabase/drafts/20261117_cmms_v1_authorization_draft.sql` adds a dedicated non-API helper schema, role/scope helper functions, location-ancestor access checks, SELECT-only RLS policies for all 14 CMMS tables, and explicit least-privilege table grants. Client-side direct writes are deliberately denied; state changes must go through narrowly scoped RPCs.
+- `supabase/drafts/20261117_cmms_v1_role_seed_draft.sql` maps the four confirmed usernames using a query against `user_profiles`: masoud → technical_supervisor; biabani → responsible_manager; reza → technical_expert; hamid → technician. It does not alter legacy roles and leaves mohammadi/karami without CMMS access.
+- These are draft SQL files only. The authorization policies have not been executed or tested against a staging database. RPCs for failure intake, triage, work-order lifecycle, assignment, actions, approvals, PM task generation/completion, audit writes and purchase linking remain to be implemented before any write workflow is enabled.
