@@ -1214,14 +1214,10 @@ grant execute on function cmms_private.cmms_start_pm_task(uuid) to authenticated
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_create_location(text,text,text,uuid) to authenticated;
 grant execute on function cmms_private.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) to authenticated;
-grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) to authenticated;
-grant execute on function cmms_private.cmms_deactivate_pm_plan(uuid) to authenticated;
-grant execute on function cmms_private.cmms_unassign_work_order(uuid,uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_cancel_work_order(uuid,text) to authenticated;
 
 grant execute on function cmms_private.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
 grant execute on function cmms_private.cmms_assign_pm_task(uuid,uuid) to authenticated;
-grant execute on function cmms_private.cmms_cancel_work_order(uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_link_purchase_request(uuid,text) to authenticated;
 
@@ -1243,12 +1239,8 @@ revoke all on function public.cmms_set_pm_plan_active(uuid,boolean) from public,
 revoke all on function public.cmms_start_pm_task(uuid) from public, anon;
 revoke all on function public.cmms_create_location(text,text,text,uuid) from public, anon;
 revoke all on function public.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) from public, anon;
-revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) from public, anon;
-revoke all on function public.cmms_deactivate_pm_plan(uuid) from public, anon;
-revoke all on function public.cmms_unassign_work_order(uuid,uuid,text) from public, anon;
 revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
-revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
 revoke all on function public.cmms_reassign_work_order(uuid,uuid,text) from public, anon;
 revoke all on function public.cmms_link_purchase_request(uuid,text) from public, anon;
 
@@ -1269,12 +1261,8 @@ grant execute on function public.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function public.cmms_create_location(text,text,text,uuid) to authenticated;
 grant execute on function public.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text) to authenticated;
-grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,timestamptz,text,text,numeric,jsonb) to authenticated;
-grant execute on function public.cmms_deactivate_pm_plan(uuid) to authenticated;
-grant execute on function public.cmms_unassign_work_order(uuid,uuid,text) to authenticated;
 grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
 
-grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
 grant execute on function public.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
 grant execute on function public.cmms_link_purchase_request(uuid,text) to authenticated;
 
@@ -1285,7 +1273,6 @@ commit;
 
 -- Remaining v1 server-side work before release:
 -- * scheduling cmms_private.cmms_generate_due_pm_tasks() with pg_cron or a service-role scheduler;
--- * cancellation and controlled reassignment/unassignment RPCs;
--- * report export, notification delivery, and purchase-link RPC;
+-- * report export, notification delivery, and PM-failure-to-corrective-work-order RPC;
 -- * integration tests in isolated PostgreSQL/Supabase staging;
 -- * verify every status transition against the hardening trigger and audit log.
