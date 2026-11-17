@@ -549,6 +549,6 @@ for each row execute function public.cmms_write_audit_log();
 
 revoke all on function public.cmms_write_audit_log() from public, anon, authenticated;
 
--- 9) No grants or RLS policies are added here. Authorization must be implemented
--- via reviewed role/location predicates and narrowly-scoped server-side RPCs.
--- Do not expose these tables through the Data API until grants + RLS tests pass.
+-- 9) RLS policies and SELECT-only grants are defined separately in
+-- 20261117_cmms_v1_authorization_draft.sql. No client write grants are intended.
+-- The audited state-changing RPCs are a separate required implementation gate.
