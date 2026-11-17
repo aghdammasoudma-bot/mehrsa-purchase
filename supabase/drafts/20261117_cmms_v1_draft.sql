@@ -155,7 +155,7 @@ create table if not exists public.cmms_pm_plans (
   id uuid primary key default gen_random_uuid(),
   asset_id uuid not null references public.cmms_assets(id) on delete restrict,
   title text not null,
-  frequency_basis text not null default 'calendar' check (frequency_basis in ('calendar','meter','hybrid')),
+  frequency_basis text not null default 'calendar' check (frequency_basis in ('calendar','meter')),
   frequency_unit text not null check (frequency_unit in ('day','week','month','year','hour','cycle')),
   frequency_value numeric(14,3) not null check (frequency_value > 0),
   meter_code text,
@@ -167,9 +167,8 @@ create table if not exists public.cmms_pm_plans (
   is_active boolean not null default true,
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
-  check (frequency_basis not in ('calendar','hybrid') or next_due_at is not null),
-  check (frequency_basis not in ('calendar','hybrid') or frequency_value = trunc(frequency_value)),
-  check (frequency_basis not in ('meter','hybrid') or (meter_code is not null and meter_unit is not null and next_due_meter_value is not null))
+  check ((frequency_basis = 'calendar' and frequency_unit in ('day','week','month','year') and next_due_at is not null and frequency_value = trunc(frequency_value) and meter_code is null and meter_unit is null and next_due_meter_value is null)
+      or (frequency_basis = 'meter' and frequency_unit in ('hour','cycle') and next_due_at is null and meter_code is not null and meter_unit is not null and next_due_meter_value is not null))
 );
 
 create table if not exists public.cmms_pm_tasks (
