@@ -201,7 +201,7 @@ The existing `private_backup.snapshots` record is still an in-project snapshot. 
 ## 18. Verified production state and safety lockdown — 2026-11-17
 A fresh read-only catalog inspection shows the following CMMS objects are currently present in the production Supabase project:
 - 15 CMMS tables, all 15 with RLS enabled; live column-name comparison matches all 15 tables in the current base schema draft.
-- 15 CMMS row policies; all are SELECT policies. No INSERT/UPDATE/DELETE policies exist.
+- 15 CMMS row policies; all are SELECT policies. Policy-name comparison matches all 15 policies in the current authorization draft. No INSERT/UPDATE/DELETE policies exist.
 - 58 CMMS-named functions across `public` and `cmms_private`, and 24 CMMS triggers. Live-vs-branch comparison found exact function-name and trigger-name matches; only the `cmms_report_failure` signature differs (live 8 arguments, branch draft 9 with optional `downtime_started_at`).
 - Active global role assignments: masoud = technical_supervisor; biabani = responsible_manager; reza = technical_expert; hamid = technician.
 - Four audit rows record those four role-seed inserts, with system actor `NULL`.
