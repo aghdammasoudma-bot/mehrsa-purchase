@@ -78,7 +78,7 @@ as $$
       and r.role=any(p_roles)
       and up.is_active
   );
-$;
+$$;
 
 revoke all on function cmms_private.cmms_has_any_role(text[]) from public, anon;
 revoke all on function cmms_private.cmms_has_role_at_location(text[], uuid) from public, anon;
