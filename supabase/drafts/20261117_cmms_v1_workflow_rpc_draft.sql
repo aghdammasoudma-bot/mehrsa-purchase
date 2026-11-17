@@ -542,7 +542,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
   v_plan_id uuid;
@@ -592,7 +592,7 @@ begin
 
   return v_plan_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_set_pm_plan_active(
   p_pm_plan_id uuid,
@@ -602,7 +602,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
 begin
@@ -620,14 +620,14 @@ begin
   update public.cmms_pm_plans set is_active=p_is_active where id=p_pm_plan_id;
   return p_pm_plan_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_start_pm_task(p_pm_task_id uuid)
 returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_task public.cmms_pm_tasks%rowtype;
   v_location_id uuid;
@@ -653,7 +653,7 @@ begin
   update public.cmms_pm_tasks set status='in_progress' where id=p_pm_task_id;
   return p_pm_task_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_complete_pm_task(
   p_pm_task_id uuid,
@@ -883,7 +883,7 @@ returns text
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_wo public.cmms_work_orders%rowtype;
   v_location_id uuid;
@@ -915,7 +915,7 @@ begin
 
   return 'cancelled';
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_reassign_work_order(
   p_assignment_id uuid,
@@ -926,7 +926,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_assignment public.cmms_work_order_assignments%rowtype;
   v_wo public.cmms_work_orders%rowtype;
@@ -980,7 +980,7 @@ begin
 
   return v_new_assignment_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_link_purchase_request(
   p_work_order_id uuid,
@@ -990,7 +990,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_wo public.cmms_work_orders%rowtype;
   v_location_id uuid;
@@ -1024,7 +1024,7 @@ begin
 
   return v_link_id;
 end;
-$;
+$$;
 
 -- Public API wrappers are SECURITY INVOKER, not SECURITY DEFINER.
 create or replace function public.cmms_report_failure(
@@ -1068,25 +1068,25 @@ create or replace function public.cmms_assign_pm_task(p_pm_task_id uuid,p_assign
 returns uuid as $$ select cmms_private.cmms_assign_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_cancel_work_order(p_work_order_id uuid,p_reason text)
-returns text as $ select cmms_private.cmms_cancel_work_order($1,$2); $ language sql security invoker set search_path='';
+returns text as $$ select cmms_private.cmms_cancel_work_order($1,$2); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_reassign_work_order(p_assignment_id uuid,p_new_assignee_id uuid,p_reason text)
-returns uuid as $ select cmms_private.cmms_reassign_work_order($1,$2,$3); $ language sql security invoker set search_path='';
+returns uuid as $$ select cmms_private.cmms_reassign_work_order($1,$2,$3); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_link_purchase_request(p_work_order_id uuid,p_purchase_request_id text)
-returns uuid as $ select cmms_private.cmms_link_purchase_request($1,$2); $ language sql security invoker set search_path='';
+returns uuid as $$ select cmms_private.cmms_link_purchase_request($1,$2); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_create_pm_plan(
   p_asset_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,
   p_frequency_value numeric,p_meter_code text,p_meter_unit text,p_next_due_at timestamptz,
   p_next_due_meter_value numeric,p_checklist jsonb
-) returns uuid as $ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path='';
+) returns uuid as $$ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_set_pm_plan_active(p_pm_plan_id uuid,p_is_active boolean)
-returns uuid as $ select cmms_private.cmms_set_pm_plan_active($1,$2); $ language sql security invoker set search_path='';
+returns uuid as $$ select cmms_private.cmms_set_pm_plan_active($1,$2); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_start_pm_task(p_pm_task_id uuid)
-returns uuid as $ select cmms_private.cmms_start_pm_task($1); $ language sql security invoker set search_path='';
+returns uuid as $$ select cmms_private.cmms_start_pm_task($1); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
