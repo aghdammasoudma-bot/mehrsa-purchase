@@ -991,6 +991,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
         <button type="button" class="profile-menu-logout" onclick="closeProfileMenu();cloudLogout()"><span>↩</span> خروج از حساب</button>
       </div>
     </div>
+    <section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6V4h8v2M3 11h18M10 11v2h4v-2"/></svg></span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span><b>اقدامات من</b><small>صندوق ورودی</small></button></section>
     <div class="topbar-brand">
       <div class="h1">سامانه عملیات فنی مهرسا</div>
       <div class="top-sub">مدیریت درخواست‌ها و مأموریت‌ها</div>
@@ -1006,7 +1007,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 </div>
 
 <!-- CONTENT -->
-<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div><section class="quick-actions" id="quick-actions" style="display:none"><button class="quick-action" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6V4h8v2M3 11h18M10 11v2h4v-2"/></svg></span><b>مأموریت‌ها</b><small>پیگیری اجرا</small></button><button class="quick-action" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span><b>اقدامات من</b><small>صندوق ورودی</small></button></section></div><div class="hero-caption">سامانه عملیات فنی</div></section>
+<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="hero-caption">سامانه عملیات فنی</div></section>
 <div class="content" id="main-content" style="display:none">
   <div id="dashboard-kpis"></div>
   <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
@@ -2532,6 +2533,70 @@ button:disabled{opacity:.48!important;filter:saturate(.55)}
   #management-hero .quick-action>span{width:30px!important;height:30px!important}
   #management-hero .quick-action b{font-size:11px!important}
   #management-hero .quick-action small{font-size:9px!important}
+}
+
+/* PROFILE SIDECARD: user identity + mission/action shortcuts */
+@media(min-width:701px){
+  #topbar .topbar-head{display:block!important;min-height:0!important}
+  #topbar .top-profile{
+    position:fixed!important;top:18px!important;right:18px!important;left:auto!important;
+    z-index:95!important;width:218px!important;max-height:calc(100dvh - 36px)!important;
+    overflow-y:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    gap:13px!important;padding:12px!important;
+    border:1px solid rgba(145,173,224,.25)!important;border-radius:20px!important;
+    background:linear-gradient(155deg,rgba(23,37,61,.97),rgba(13,23,40,.97))!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.07),0 18px 42px rgba(0,0,0,.32)!important;
+    backdrop-filter:blur(22px) saturate(150%)!important;
+  }
+  #topbar .top-profile-trigger{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  #topbar #quick-actions{
+    display:none;width:100%!important;max-width:none!important;grid-template-columns:1fr!important;
+    gap:8px!important;margin:0!important;padding:0!important;
+  }
+  #topbar #quick-actions[style*="flex"],#topbar #quick-actions[style*="grid"]{display:grid!important}
+  #topbar #quick-actions .quick-action{
+    width:100%!important;min-height:58px!important;box-sizing:border-box!important;
+    grid-template-columns:36px 1fr!important;grid-template-rows:auto auto!important;
+    gap:0 9px!important;padding:9px 10px!important;border-radius:13px!important;
+    background:linear-gradient(145deg,rgba(37,57,88,.96),rgba(22,39,64,.98))!important;
+    border:1px solid rgba(150,179,232,.23)!important;color:#EDF3FF!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.07),0 6px 14px rgba(0,0,0,.14)!important;
+  }
+  #topbar #quick-actions .quick-action>span{
+    grid-row:1/3!important;width:34px!important;height:34px!important;
+    background:rgba(79,124,255,.2)!important;color:#B7CAFF!important;border-radius:10px!important;
+  }
+  #topbar #quick-actions .quick-action b{font-size:12px!important;color:#F4F7FF!important}
+  #topbar #quick-actions .quick-action small{font-size:10px!important;color:#A9BBD6!important}
+  #topbar .top-quick-nav{top:250px!important;max-height:calc(100dvh - 270px)!important}
+}
+@media(max-width:700px){
+  #topbar .topbar-head{display:flex!important;flex-wrap:wrap!important;gap:9px!important}
+  #topbar .top-profile{
+    position:relative!important;top:auto!important;right:auto!important;left:auto!important;
+    width:100%!important;max-height:none!important;overflow:visible!important;
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    gap:8px!important;padding:9px!important;border:1px solid rgba(145,173,224,.24)!important;
+    border-radius:15px!important;background:linear-gradient(145deg,rgba(23,37,61,.96),rgba(13,23,40,.96))!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.18)!important;
+  }
+  #topbar .top-profile-trigger{width:100%!important;min-width:0!important}
+  #topbar #quick-actions{
+    display:none;width:100%!important;max-width:none!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;margin:0!important;padding:0!important;
+  }
+  #topbar #quick-actions[style*="flex"],#topbar #quick-actions[style*="grid"]{display:grid!important}
+  #topbar #quick-actions .quick-action{
+    min-width:0!important;min-height:54px!important;grid-template-columns:27px 1fr!important;
+    gap:0 6px!important;padding:7px!important;border-radius:11px!important;
+    background:rgba(37,57,88,.9)!important;border:1px solid rgba(150,179,232,.23)!important;
+    color:#EDF3FF!important;box-shadow:none!important;
+  }
+  #topbar #quick-actions .quick-action>span{width:26px!important;height:26px!important;grid-row:1/3!important}
+  #topbar #quick-actions .quick-action b{font-size:10px!important;color:#F4F7FF!important}
+  #topbar #quick-actions .quick-action small{font-size:9px!important;color:#A9BBD6!important}
+  #topbar .topbar-brand{order:2!important;width:100%!important;text-align:center!important}
+  #topbar .top-profile{order:1!important}
 }
 </style>
 </body>
