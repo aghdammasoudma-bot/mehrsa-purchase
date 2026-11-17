@@ -7,7 +7,7 @@ The CMMS schema is present in the production Supabase database, but the module i
 
 ## Verified database facts
 - 15 `public.cmms_*` tables; RLS enabled on all 15. Live column-name comparison matches all 15 tables in the current base schema draft.
-- 15 RLS policies; every policy is SELECT-only.
+- 15 RLS policies; every policy is SELECT-only. Policy-name comparison matches all 15 policies in the current authorization draft.
 - Authenticated role: SELECT is granted on CMMS tables; INSERT, UPDATE and DELETE are not granted.
 - Anonymous role: no SELECT on CMMS tables.
 - 58 CMMS-named functions and 24 CMMS triggers exist. Live-vs-branch comparison found exact function-name and trigger-name matches; the only signature mismatch is `cmms_report_failure` (live 8 arguments, branch 9 with optional downtime timestamp).
