@@ -61,10 +61,31 @@ as $$
   );
 $$;
 
+create or replace function cmms_private.cmms_user_has_active_role(p_user_id uuid,p_roles text[])
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select p_user_id is not null and exists (
+    select 1
+    from public.cmms_user_roles r
+    join public.user_profiles up on up.user_id=r.user_id
+    where r.user_id=p_user_id
+      and r.is_active
+      and r.location_id is null
+      and r.role=any(p_roles)
+      and up.is_active
+  );
+$;
+
 revoke all on function cmms_private.cmms_has_any_role(text[]) from public, anon;
 revoke all on function cmms_private.cmms_has_role_at_location(text[], uuid) from public, anon;
+revoke all on function cmms_private.cmms_user_has_active_role(uuid,text[]) from public, anon;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
 grant execute on function cmms_private.cmms_has_role_at_location(text[], uuid) to authenticated;
+grant execute on function cmms_private.cmms_user_has_active_role(uuid,text[]) to authenticated;
 
 -- Role roster: users can see their own role rows; governance roles can audit all.
 alter table public.cmms_user_roles enable row level security;
