@@ -2824,5 +2824,465 @@ button:disabled{opacity:.48!important;filter:saturate(.55)}
 }
 #topbar .top-quick-nav .nav-logout{background:rgba(139,45,56,.22)!important;border:1px solid rgba(255,130,140,.3)!important;color:#ffdadd!important}
 </style>
+  <style id="mehrsa-banner-navigation-glass-layout">
+
+/* ================================
+   DESKTOP: PROFILE NAV INSIDE HERO
+   ================================ */
+
+@media (min-width:701px) {
+
+  #topbar .topbar-head {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+  }
+
+  #topbar .topbar-brand {
+    margin-right:0!important;
+    text-align:right!important;
+  }
+
+  #topbar .topbar-brand .h1 {
+    color:#F1F5FF!important;
+    font-size:16px!important;
+    font-weight:800!important;
+    text-shadow:0 1px 8px rgba(79,124,255,.25)!important;
+  }
+
+  #topbar .topbar-brand .top-sub {
+    color:#A9B4D0!important;
+  }
+
+  /* بنر و منو در یک ردیف */
+  #management-hero.has-profile-nav[style*="display: block"] {
+    display:grid!important;
+    grid-template-columns:minmax(245px,27%) minmax(0,1fr)!important;
+    grid-template-rows:1fr auto!important;
+    gap:12px!important;
+    align-items:stretch!important;
+    direction:rtl!important;
+    position:relative!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin:12px 0 16px!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  #management-hero .top-profile {
+    grid-column:1!important;
+    grid-row:1!important;
+    position:relative!important;
+    z-index:5!important;
+    width:100%!important;
+    height:218px!important;
+    min-height:218px!important;
+    max-height:218px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    padding:10px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(255,255,255,.17)!important;
+    border-radius:18px!important;
+    background:rgba(255,255,255,.075)!important;
+    box-shadow:0 10px 28px rgba(0,0,0,.25)!important;
+    -webkit-backdrop-filter:blur(16px) saturate(140%)!important;
+    backdrop-filter:blur(16px) saturate(140%)!important;
+  }
+
+  #management-hero .top-profile-trigger {
+    min-height:38px!important;
+    height:38px!important;
+    flex:0 0 38px!important;
+    padding:3px 6px!important;
+    background:transparent!important;
+  }
+
+  #management-hero .top-quick-nav {
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;
+    gap:5px!important;
+    width:100%!important;
+    margin:0!important;
+    padding:6px 0 0!important;
+    border-top:1px solid rgba(255,255,255,.14)!important;
+    background:transparent!important;
+    overflow:hidden!important;
+  }
+
+  #management-hero .top-quick-nav button {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:6px!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:43px!important;
+    height:43px!important;
+    padding:5px 7px!important;
+    font-size:10px!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    border-radius:9px!important;
+    background:rgba(255,255,255,.055)!important;
+    color:#F1F5FF!important;
+    white-space:nowrap!important;
+  }
+
+  #management-hero .top-quick-nav button:hover,
+  #management-hero .top-quick-nav button.active {
+    background:rgba(255,255,255,.13)!important;
+    border-color:rgba(105,155,255,.55)!important;
+  }
+
+  #management-hero .top-quick-nav button>span {
+    width:25px!important;
+    height:25px!important;
+    flex:0 0 25px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:7px!important;
+    background:rgba(79,124,255,.19)!important;
+    color:#C8D8FF!important;
+  }
+
+  #management-hero .top-quick-nav button.top-nav-primary {
+    background:rgba(79,124,255,.28)!important;
+    border-color:rgba(110,153,255,.45)!important;
+    color:#FFFFFF!important;
+  }
+
+  #management-hero .hero-industrial {
+    grid-column:2!important;
+    grid-row:1!important;
+    width:100%!important;
+    height:218px!important;
+    min-height:218px!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    border-radius:18px!important;
+    overflow:hidden!important;
+  }
+
+  #management-hero .hero-caption {
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    color:#C8D8F5!important;
+  }
+}
+
+/* ================================
+   MOBILE: PRESERVE EXISTING LAYOUT
+   ================================ */
+
+@media(max-width:700px) {
+  #topbar .topbar-brand .h1 {
+    color:#F1F5FF!important;
+  }
+
+  #topbar .topbar-brand .top-sub {
+    color:#A9B4D0!important;
+  }
+
+  #management-hero:not(.has-profile-nav) {
+    display:block!important;
+  }
+
+  #management-hero:not(.has-profile-nav) .top-profile {
+    display:none!important;
+  }
+}
+
+</style>
+
+<script id="mehrsa-profile-responsive-placement">
+(function () {
+  const profile = document.querySelector('#topbar .top-profile');
+  const topbarHead = document.querySelector('#topbar .topbar-head');
+  const hero = document.getElementById('management-hero');
+  const heroContent = hero && hero.querySelector('.hero-industrial');
+
+  if (!profile || !topbarHead || !hero || !heroContent) return;
+
+  const originalParent = profile.parentNode;
+  const originalNext = profile.nextSibling;
+  const desktop = window.matchMedia('(min-width:701px)');
+
+  function placeProfile() {
+    if (desktop.matches) {
+      if (profile.parentNode !== hero) {
+        hero.insertBefore(profile, heroContent);
+      }
+      hero.classList.add('has-profile-nav');
+    } else {
+      if (profile.parentNode !== originalParent) {
+        originalParent.insertBefore(profile, originalNext);
+      }
+      hero.classList.remove('has-profile-nav');
+    }
+  }
+
+  placeProfile();
+
+  if (desktop.addEventListener) {
+    desktop.addEventListener('change', placeProfile);
+  } else {
+    desktop.addListener(placeProfile);
+  }
+})();
+</script>
+  <style id="mehrsa-glassmorphism-theme">
+
+:root {
+  color-scheme:dark;
+  --glass-bg:rgba(255,255,255,.075);
+  --glass-border:rgba(255,255,255,.14);
+  --glass-text:#F1F5FF;
+  --glass-muted:#A9B4D0;
+  --glass-shadow:0 12px 32px rgba(0,0,0,.24);
+}
+
+/* پس‌زمینه عمیق با لکه‌های رنگی */
+html,
+body {
+  background:#091225!important;
+  color:var(--glass-text)!important;
+}
+
+body {
+  position:relative!important;
+  isolation:isolate!important;
+}
+
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 12% 18%,rgba(45,103,220,.23),transparent 38%),
+    radial-gradient(ellipse at 88% 32%,rgba(111,65,210,.19),transparent 36%),
+    radial-gradient(ellipse at 50% 100%,rgba(25,112,170,.14),transparent 42%),
+    linear-gradient(145deg,#091225,#101A32 55%,#0B1428);
+}
+
+/* سطوح اصلی شیشه‌ای */
+#dashboard-kpis .kpi,
+.request-detail-column,
+.request-list-column,
+.request-table-wrap,
+.request-detail-column .flow,
+.request-list-column .flow,
+#request-detail-panel .flow,
+.pipeline,
+.pipe-step,
+.card,
+.panel,
+.stat-card,
+.summary-card {
+  background:var(--glass-bg)!important;
+  border:1px solid var(--glass-border)!important;
+  border-radius:17px!important;
+  box-shadow:var(--glass-shadow)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(140%)!important;
+  backdrop-filter:blur(16px) saturate(140%)!important;
+  color:var(--glass-text)!important;
+}
+
+/* کارت‌های آمار */
+#dashboard-kpis .kpi {
+  min-height:90px!important;
+  background:rgba(255,255,255,.075)!important;
+  border-color:rgba(255,255,255,.15)!important;
+}
+
+#dashboard-kpis .kpi-l,
+#dashboard-kpis .kpi-n,
+#dashboard-kpis .kpi-hint {
+  color:var(--glass-text)!important;
+}
+
+#dashboard-kpis .kpi-hint {
+  color:var(--glass-muted)!important;
+}
+
+#dashboard-kpis .kpi-n {
+  font-weight:800!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* جدول درخواست‌ها */
+.request-table-wrap {
+  overflow-x:auto!important;
+  background:rgba(255,255,255,.055)!important;
+}
+
+.request-table {
+  background:transparent!important;
+  color:var(--glass-text)!important;
+}
+
+.request-table thead th {
+  background:rgba(255,255,255,.075)!important;
+  color:#DCE7FF!important;
+  border-bottom:1px solid rgba(255,255,255,.16)!important;
+}
+
+.request-table tbody td {
+  background:transparent!important;
+  color:var(--glass-text)!important;
+  border-bottom:1px solid rgba(255,255,255,.085)!important;
+}
+
+.request-title-cell strong,
+.request-code,
+.request-date,
+.request-title-cell small {
+  color:var(--glass-text)!important;
+}
+
+.request-title-cell small,
+.request-date {
+  color:var(--glass-muted)!important;
+}
+
+.request-row:hover td {
+  background:rgba(255,255,255,.09)!important;
+}
+
+.request-row.selected td {
+  background:rgba(79,124,255,.17)!important;
+}
+
+.request-row.selected td:first-child {
+  box-shadow:inset -3px 0 #75A4FF!important;
+}
+
+/* جزئیات درخواست */
+.request-detail-heading {
+  color:var(--glass-text)!important;
+  border-bottom-color:rgba(255,255,255,.14)!important;
+  background:transparent!important;
+}
+
+.request-detail-heading small,
+.detail-empty,
+.detail-empty p {
+  color:var(--glass-muted)!important;
+}
+
+.detail-empty strong {
+  color:var(--glass-text)!important;
+}
+
+/* شبکه مراحل گردش کار */
+.flow,
+.request-detail-column .flow,
+#request-detail-panel .flow {
+  background:rgba(255,255,255,.045)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+}
+
+.flow-step,
+.pipe-step {
+  background:rgba(255,255,255,.065)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:var(--glass-text)!important;
+}
+
+.flow-step.done,
+.pipe-step.done {
+  background:rgba(48,185,139,.14)!important;
+  border-color:rgba(74,218,168,.28)!important;
+}
+
+.flow-step.current,
+.pipe-step.current {
+  background:rgba(79,124,255,.19)!important;
+  border:1px solid rgba(105,153,255,.48)!important;
+  box-shadow:0 0 18px rgba(79,124,255,.24)!important;
+}
+
+.flow-lbl,
+.flow-step .flow-lbl {
+  color:#DCE7FF!important;
+}
+
+/* badge وضعیت */
+.badge,
+.status-badge,
+.chip {
+  border:1px solid rgba(255,255,255,.13)!important;
+  color:#F1F5FF!important;
+  background:rgba(255,255,255,.09)!important;
+  border-radius:8px!important;
+}
+
+/* فرم‌ها و ورودی‌ها */
+input,
+select,
+textarea {
+  background:rgba(7,17,36,.72)!important;
+  color:var(--glass-text)!important;
+  border-color:rgba(255,255,255,.17)!important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color:var(--glass-muted)!important;
+}
+
+/* تیترها و متن‌های عمومی داخل محتوای اصلی */
+#main-content h1,
+#main-content h2,
+#main-content h3,
+#main-content .stitle,
+#main-content label {
+  color:var(--glass-text)!important;
+}
+
+#main-content small,
+#main-content .muted,
+#main-content .sub {
+  color:var(--glass-muted)!important;
+}
+
+/* دکمه‌ها */
+#main-content button {
+  color:#F1F5FF;
+}
+
+/* fallback برای مرورگر بدون پشتیبانی از blur */
+@supports not ((backdrop-filter:blur(16px)) or
+               (-webkit-backdrop-filter:blur(16px))) {
+  #dashboard-kpis .kpi,
+  .request-detail-column,
+  .request-list-column,
+  .request-table-wrap,
+  .flow,
+  .flow-step,
+  .pipe-step,
+  .card,
+  .panel {
+    background:rgba(17,29,52,.96)!important;
+  }
+}
+
+/* رعایت کاهش حرکت */
+@media(prefers-reduced-motion:reduce) {
+  *,
+  *::before,
+  *::after {
+    transition:none!important;
+    animation:none!important;
+  }
+}
+
+</style>
 </body>
 </html>
