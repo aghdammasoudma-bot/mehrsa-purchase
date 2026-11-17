@@ -116,7 +116,6 @@ set search_path = ''
 as $$
 declare
   v_wo public.cmms_work_orders%rowtype;
-  v_asset_location uuid;
   v_prior_supervisor uuid;
   v_prior_decision text;
   v_required_role text;
@@ -133,10 +132,6 @@ begin
   if not found then
     raise exception 'Work order not found';
   end if;
-
-  select a.location_id into v_asset_location
-  from public.cmms_assets a
-  where a.id = v_wo.asset_id;
 
   if new.approver_id = v_wo.opened_by then
     raise exception 'Work-order creator cannot approve their own work order';
@@ -361,6 +356,82 @@ for each row execute function public.cmms_record_asset_status_change();
 revoke all on function public.cmms_guard_work_order_approval() from public, anon, authenticated;
 revoke all on function public.cmms_apply_work_order_approval() from public, anon, authenticated;
 revoke all on function public.cmms_guard_work_order_status() from public, anon, authenticated;
+
+-- 8b) Immutable audit trail for operational CMMS entities.
+create or replace function public.cmms_write_audit_log()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_before jsonb;
+  v_after jsonb;
+  v_entity jsonb;
+  v_entity_id uuid;
+begin
+  if tg_op = 'DELETE' then
+    v_before := to_jsonb(old);
+    v_entity := v_before;
+  else
+    v_after := to_jsonb(new);
+    v_entity := v_after;
+    if tg_op = 'UPDATE' then
+      v_before := to_jsonb(old);
+    end if;
+  end if;
+
+  v_entity_id := (v_entity ->> 'id')::uuid;
+
+  insert into public.cmms_audit_logs
+    (actor_id, entity_type, entity_id, action, before_data, after_data)
+  values
+    (auth.uid(), tg_table_name, v_entity_id, lower(tg_op), v_before, v_after);
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists cmms_audit_locations on public.cmms_locations;
+create trigger cmms_audit_locations after insert or update or delete on public.cmms_locations
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_assets on public.cmms_assets;
+create trigger cmms_audit_assets after insert or update or delete on public.cmms_assets
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_failure_reports on public.cmms_failure_reports;
+create trigger cmms_audit_failure_reports after insert or update or delete on public.cmms_failure_reports
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_work_orders on public.cmms_work_orders;
+create trigger cmms_audit_work_orders after insert or update or delete on public.cmms_work_orders
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_assignments on public.cmms_work_order_assignments;
+create trigger cmms_audit_assignments after insert or update or delete on public.cmms_work_order_assignments
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_actions on public.cmms_work_order_actions;
+create trigger cmms_audit_actions after insert or update or delete on public.cmms_work_order_actions
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_pm_plans on public.cmms_pm_plans;
+create trigger cmms_audit_pm_plans after insert or update or delete on public.cmms_pm_plans
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_pm_tasks on public.cmms_pm_tasks;
+create trigger cmms_audit_pm_tasks after insert or update or delete on public.cmms_pm_tasks
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_purchase_links on public.cmms_work_order_purchase_links;
+create trigger cmms_audit_purchase_links after insert or update or delete on public.cmms_work_order_purchase_links
+for each row execute function public.cmms_write_audit_log();
+
+revoke all on function public.cmms_write_audit_log() from public, anon, authenticated;
 
 -- 9) No grants or RLS policies are added here. Authorization must be implemented
 -- via reviewed role/location predicates and narrowly-scoped server-side RPCs.
