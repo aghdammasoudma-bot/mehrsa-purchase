@@ -200,9 +200,9 @@ The existing `private_backup.snapshots` record is still an in-project snapshot. 
 
 ## 18. Verified production state and safety lockdown — 2026-11-17
 A fresh read-only catalog inspection shows the following CMMS objects are currently present in the production Supabase project:
-- 15 CMMS tables, all 15 with RLS enabled.
+- 15 CMMS tables, all 15 with RLS enabled; live column-name comparison matches all 15 tables in the current base schema draft.
 - 15 CMMS row policies; all are SELECT policies. No INSERT/UPDATE/DELETE policies exist.
-- 58 CMMS-named functions across `public` and `cmms_private`, and 24 CMMS triggers.
+- 58 CMMS-named functions across `public` and `cmms_private`, and 24 CMMS triggers. Live-vs-branch comparison found exact function-name and trigger-name matches; only the `cmms_report_failure` signature differs (live 8 arguments, branch draft 9 with optional `downtime_started_at`).
 - Active global role assignments: masoud = technical_supervisor; biabani = responsible_manager; reza = technical_expert; hamid = technician.
 - Four audit rows record those four role-seed inserts, with system actor `NULL`.
 - No locations, assets, failure reports, work orders, assignments, actions, approvals, PM plans/tasks, meter readings or purchase links have been created; those operational tables are empty.
@@ -216,6 +216,7 @@ Current verified safety posture (read-only privilege audit):
 - RLS read access remains available for the four mapped roles, but no operational rows exist. The CMMS UI is not in `main`; no live workflow is enabled.
 - The production schema should be treated as **installed but write-locked**, not as an uninstalled draft. Do not drop these tables or attempt a rollback cleanup without a verified external backup and a reviewed recovery plan.
 - The precise originating deployment action cannot be established from the current tool history. The prior assumption that the rollback validation had left no persistent objects was wrong; the live catalog is the source of truth.
+- Performance Advisor flags 23 unindexed CMMS foreign keys; `supabase/drafts/20261117_cmms_v1_fk_indexes_draft.sql` adds a separate 23-index proposal for staging/query-plan review. The live schema currently has 17 explicit CMMS indexes matching the branch drafts.
 - Security advisor reports pre-existing legacy SECURITY DEFINER exposures: 2 functions callable by anon and 7 by authenticated; leaked-password protection is disabled. No CMMS-specific security lint was returned. Performance advisor reports 24 unindexed foreign keys (23 CMMS), four legacy RLS initplan warnings and 10 unused indexes (mostly CMMS indexes with no operational data). Do not alter legacy purchase RPCs within this CMMS task.
 - Release remains blocked on an external restorable backup/restore test, live-vs-draft schema reconciliation, isolated staging validation, re-enabling only approved RPCs after tests, index review, Storage policy deployment, PM scheduling and UI integration.
 
