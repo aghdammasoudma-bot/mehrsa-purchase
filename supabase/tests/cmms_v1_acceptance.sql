@@ -112,7 +112,7 @@ begin
   perform set_config('request.jwt.claim.sub',v_expert::text,true);
   v_pm_plan := public.cmms_create_pm_plan(
     v_asset,'Daily pump inspection','calendar','day',1::numeric,
-    now()-interval '1 day',null::text,null::text,null::numeric,
+    null::text,null::text,now()-interval '1 day',null::numeric,
     jsonb_build_array(jsonb_build_object('item','Check vibration','required',true))
   );
 
