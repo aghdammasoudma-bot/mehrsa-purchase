@@ -110,14 +110,14 @@ Decision confirmed by the user (2026-11-17): biabani is the responsible-manager 
 - Data API exposure must be explicitly reviewed: Supabase changed defaults so newly created public tables are not automatically exposed; never infer API accessibility from table existence.
 
 
-## 7. Cancellation, reassignment and purchase references
+## 10. Cancellation, reassignment and purchase references
 - Work-order cancellation is restricted to technical supervisor/expert and requires a reason.
 - Reassignment is performed as one controlled operation: create the new assignment, close the prior assignment with timestamp and mandatory reason, and preserve both records.
 - A work order may link to an existing purchase request by its existing PR ID; the CMMS must not alter the purchase-request workflow.
 - These RPCs are drafted only and must pass role, audit, concurrency and purchase-regression tests before release.
 
 
-## 10. Additional negative and edge-case tests
+## 11. Additional negative and edge-case tests
 - NULL decision, stage, priority, test result or return-to-service status must fail closed; SQL CHECK semantics must not allow NULL to pass a closeout condition.
 - A disabled/inactive legacy `user_profiles` account cannot access CMMS even if a stale `cmms_user_roles.is_active` row remains.
 - A technician/technical expert with an inactive legacy profile cannot be assigned to a new work order or PM task.
