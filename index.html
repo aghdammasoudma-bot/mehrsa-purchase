@@ -1092,6 +1092,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
     <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
     <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
     <button type="button" class="nav-logout" onclick="closeProfileMenu();cloudLogout()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></span> خروج از حساب</button>
+      <button type="button" id="cmms-nav-button" data-view="cmms" onclick="switchView(this.dataset.view)" style="display:none"><span aria-hidden="true">🛠</span> تعمیرات و نگهداری</button>
   </nav>
 
   
@@ -1114,6 +1115,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
   <div id="quick-actions" class="quick-actions" aria-hidden="true" style="display:none"></div>
   <div id="dashboard-kpis"></div>
   <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
+  <section id="cmms-v1-view" style="display:none" aria-live="polite"></section>
 </div>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
@@ -1342,6 +1344,8 @@ function setRole(role,user,title){
   // Keep the portrait image; do not overwrite it with the user initial.
   setText("top-name",user);
   setText("top-role",title);
+  const cmmsNav=document.getElementById("cmms-nav-button");
+  if(cmmsNav)cmmsNav.style.display=cmmsCanAccess()?"inline-flex":"none";
   renderAll();
 }
 
@@ -1380,6 +1384,39 @@ function showRoleScreen(){
   document.getElementById("main-content").style.display="none";
 }
 
+// CMMS V1 — UI SHELL. Read-only scaffold; no production table writes.
+let cmmsActiveTab="overview";
+function cmmsCanAccess(){
+  return !!cloudUser && ["masoud","biabani","reza","hamid"].includes(String(currentUsername||"").toLowerCase());
+}
+function cmmsRoleLabel(){
+  const u=String(currentUsername||"").toLowerCase();
+  return ({masoud:"سرپرست فنی — تأیید فنی مرحله اول",biabani:"مدیر مسئول — تأیید نهایی همه تجهیزات",reza:"کارشناس فنی",hamid:"تکنسین تعمیرات"})[u]||"بدون دسترسی CMMS";
+}
+function cmmsSetTab(tab){cmmsActiveTab=tab;renderCMMSView();}
+function renderCMMSView(){
+  const root=document.getElementById("cmms-v1-view");
+  if(!root)return;
+  if(!cmmsCanAccess()){root.innerHTML="<div class='empty'>دسترسی به ماژول تعمیرات و نگهداری برای این حساب تعریف نشده است.</div>";return;}
+  const tabs=[["overview","نمای کلی","▦"],["assets","شناسنامه تجهیزات","⚙"],["failures","گزارش خرابی","⚠"],["orders","دستورکارها","☷"],["pm","نگهداری پیشگیرانه","◷"],["reports","گزارش‌ها","▤"]];
+  const content={
+    overview:{title:"نمای کلی تعمیرات و نگهداری",desc:"نمای مدیریتی وضعیت خرابی‌ها، دستورکارها، تجهیزات و برنامه‌های PM.",cards:[["خرابی‌های باز","—"],["دستورکارهای فعال","—"],["تأییدهای منتظر","—"],["PM سررسیدشده","—"]],note:"اتصال داده هنوز فعال نشده؛ آمار واقعی پس از ایجاد جداول و سیاست‌های دسترسی نمایش داده می‌شود."},
+    assets:{title:"شناسنامه تجهیزات",desc:"ثبت کد یکتا، نام، محل استقرار، سازنده، مدل، شماره سریال، مشخصات فنی و وضعیت عملیاتی.",cards:[["تجهیزات تولید","—"],["برق و ابزار دقیق","—"],["مکانیک","—"],["تأسیسات و یوتیلیتی","—"]],note:"ساختار طبقه‌بندی و مکان‌یابی در طرح دیتابیس پیش‌بینی شده است."},
+    failures:{title:"ثبت و پیگیری خرابی",desc:"ثبت گزارش خرابی با شدت، اثر بر تولید، محل، تجهیز، عکس و شرح اولیه؛ سپس ارجاع برای بررسی.",cards:[["بحرانی","—"],["بالا","—"],["متوسط","—"],["پایین","—"]],note:"ثبت خرابی تا زمان فعال‌شدن دسترسی امن دیتابیس غیرفعال است."},
+    orders:{title:"دستورکارهای تعمیراتی",desc:"اولویت‌بندی، تعیین مسئول، برنامه اجرا، نفرساعت، قطعات مصرفی، شواهد، تست و بازگشت به سرویس.",cards:[["جدید","—"],["ارجاع‌شده","—"],["در حال اجرا","—"],["منتظر تأیید","—"]],note:"بستن دستورکار نیازمند تست موفق، تأیید سرپرست فنی و سپس تأیید مهندس بیابانی است."},
+    pm:{title:"نگهداری پیشگیرانه (PM)",desc:"برنامه‌های زمان‌بندی‌شده، چک‌لیست‌های تجهیز، سررسید، انجام، ثبت نتیجه و کنترل عقب‌افتادگی.",cards:[["برنامه‌های فعال","—"],["سررسید این هفته","—"],["عقب‌افتاده","—"],["تکمیل‌شده","—"]],note:"تولید خودکار وظایف PM و جلوگیری از ایجاد وظیفه تکراری باید در سمت سرور پیاده‌سازی شود."},
+    reports:{title:"گزارش‌ها و سوابق",desc:"تاریخچه تجهیز، توقف‌ها، خرابی‌های پرتکرار، زمان تعمیر، نفرساعت، مصرف قطعه و انطباق PM.",cards:[["توقف تولید","—"],["زمان متوسط تعمیر","—"],["تکرار خرابی","—"],["انطباق PM","—"]],note:"شاخص‌ها فقط از داده‌های ثبت‌شده و قابل‌ردیابی محاسبه خواهند شد؛ بدون داده، عدد تخمینی نمایش داده نمی‌شود."}
+  };
+  const x=content[cmmsActiveTab]||content.overview;
+  const tabHtml=tabs.map(t=>"<button type='button' role='tab' data-tab='"+t[0]+"' aria-selected='"+(cmmsActiveTab===t[0])+"' class='"+(cmmsActiveTab===t[0]?"active":"")+"' onclick='cmmsSetTab(this.dataset.tab)'><span>"+t[2]+"</span>"+t[1]+"</button>").join("");
+  const metricHtml=x.cards.map(k=>"<div class='cmms-metric'><small>"+k[0]+"</small><strong>"+k[1]+"</strong></div>").join("");
+  root.innerHTML=
+    "<div class='cmms-head'><div><div class='cmms-eyebrow'>MEHRSA • CMMS V1</div><h2>تعمیرات و نگهداری تجهیزات</h2><p>سامانه مدیریت چرخه عمر خرابی، تعمیر و نگهداری پیشگیرانه</p></div><div class='cmms-role'>"+escapeHtml(cmmsRoleLabel())+"</div></div>"+
+    "<div class='cmms-gate'><b>حالت آماده‌سازی — بدون ثبت اطلاعات عملیاتی</b><span>ساختار دیتابیس و کنترل دسترسی هنوز در محیط آزمایشی اجرا و تأیید نشده است. دکمه‌های ثبت و تغییر اطلاعات تا آن زمان غیرفعال‌اند.</span></div>"+
+    "<div class='cmms-tabs' role='tablist'>"+tabHtml+"</div>"+
+    "<section class='cmms-panel'><div class='cmms-panel-title'><div><h3>"+x.title+"</h3><p>"+x.desc+"</p></div><span class='cmms-readonly'>پیش‌نمایش ساختار</span></div><div class='cmms-metrics'>"+metricHtml+"</div><div class='cmms-note'>"+x.note+"</div><div class='cmms-actions'><button type='button' disabled>＋ ثبت جدید</button><button type='button' disabled>خروجی گزارش</button><small>عملیات پس از تکمیل امنیت و اتصال دیتابیس فعال می‌شود.</small></div></section>"+
+    "<section class='cmms-flow'><h3>گردش تأیید دستورکار</h3><div class='cmms-steps'><span>ثبت خرابی</span><i>←</i><span>بررسی و تخصیص</span><i>←</i><span>اجرای تعمیر و تست</span><i>←</i><span>تأیید سرپرست فنی</span><i>←</i><span>تأیید مهندس بیابانی</span><i>←</i><span>بستن دستورکار</span></div></section>";
+}
 function inboxItems(){
   if(currentIsAdmin) return requests.filter(r=>
     ["admin_review","admin_rejected","draft","planner_rejected","planner_approved","procurement_inquiry","procurement_ordered","in_transit","delivered"].includes(r.status));
@@ -1392,13 +1429,15 @@ function inboxItems(){
 }
 
 function switchView(v){
+  if(v==="cmms" && !cmmsCanAccess()){alert("شما دسترسی به ماژول تعمیرات و نگهداری ندارید.");return;}
   currentView=v;
-  document.getElementById("req-list").style.display=v==="work"?"none":"block";
+  document.getElementById("req-list").style.display=(v==="work"||v==="cmms")?"none":"block";
   document.getElementById("work-orders").style.display=v==="work"?"block":"none";
+  const cmms=document.getElementById("cmms-v1-view");
+  if(cmms)cmms.style.display=v==="cmms"?"block":"none";
   if(v==="work") loadWorkOrders();
-  document.querySelectorAll(".pipe-step").forEach(el=>{
-    el.classList.toggle("active",el.dataset.view===v);
-  });
+  if(v==="cmms") renderCMMSView();
+  document.querySelectorAll(".pipe-step").forEach(el=>{el.classList.toggle("active",el.dataset.view===v);});
   renderList();
 }
 function renderAll(){
@@ -1442,7 +1481,7 @@ function ensureRequestPrintButton(){
   req.insertBefore(bar,req.firstChild);
 }
 function renderList(){
-  if(currentView==="work") return;
+  if(currentView==="work"||currentView==="cmms") return;
   let list;
   if(currentView==="inbox") list=inboxItems();
   else if(currentView==="done") list=requests.filter(r=>["delivered","closed"].includes(r.status));
@@ -3301,6 +3340,19 @@ textarea::placeholder {
   }
 }
 
+</style>
+<style id="cmms-v1-ui">
+#cmms-v1-view{max-width:1160px;margin:18px auto 110px;padding:0 16px;direction:rtl;color:#202939}
+.cmms-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px;background:linear-gradient(120deg,#172C45,#285C78);border-radius:16px;color:#fff;box-shadow:0 5px 18px rgba(25,50,70,.1)}
+.cmms-eyebrow{font-size:10px;letter-spacing:1.3px;color:#B8D9E7;font-weight:800}.cmms-head h2{font-size:22px;margin:5px 0;color:#fff}.cmms-head p{font-size:12px;color:#D3E4ED}
+.cmms-role{font-size:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:8px 12px;border-radius:10px;white-space:nowrap}
+.cmms-gate{display:flex;flex-direction:column;gap:4px;margin:13px 0;padding:13px 15px;background:#FFF6E4;border:1px solid #F0D9A7;border-right:4px solid #C48A22;border-radius:10px;color:#72500D;font-size:12px;line-height:1.8}.cmms-gate span{font-size:11px;color:#7D6535}
+.cmms-tabs{display:flex;gap:7px;overflow-x:auto;padding:5px 0 12px;scrollbar-width:thin}.cmms-tabs button{flex:none;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid #DCE3EA;border-radius:9px;background:#fff;color:#536274;font-size:11px;font-weight:700}.cmms-tabs button.active{background:#EAF2FB;border-color:#AFC9E1;color:#245B88;box-shadow:inset 0 -2px #398BC5}.cmms-tabs button span{font-size:15px}
+.cmms-panel,.cmms-flow{background:#fff;border:1px solid #DCE3EA;border-radius:14px;padding:18px;box-shadow:0 3px 13px rgba(30,50,70,.045);margin-bottom:13px}.cmms-panel-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cmms-panel-title h3,.cmms-flow h3{font-size:16px;color:#263746}.cmms-panel-title p{font-size:11px;color:#73808E;margin-top:5px;line-height:1.8}.cmms-readonly{font-size:10px;color:#65758A;background:#F1F4F7;border-radius:7px;padding:5px 8px;white-space:nowrap}
+.cmms-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 12px}.cmms-metric{background:#F7F9FB;border:1px solid #E5EAF0;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:8px}.cmms-metric small{font-size:11px;color:#687584}.cmms-metric strong{font-size:24px;color:#245B88}
+.cmms-note{background:#F3F7FA;border:1px solid #E1E9F0;border-radius:9px;padding:12px;color:#536577;font-size:11px;line-height:1.9}.cmms-actions{display:flex;align-items:center;gap:9px;margin-top:14px;flex-wrap:wrap}.cmms-actions button{padding:9px 14px;border-radius:8px;background:#E9EDF2;color:#8994A0;font-size:11px;font-weight:700;cursor:not-allowed}.cmms-actions small{font-size:10px;color:#84909C}
+.cmms-flow h3{margin-bottom:13px}.cmms-steps{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0 8px;white-space:nowrap}.cmms-steps span{background:#EEF3F8;border:1px solid #DCE5EE;border-radius:8px;padding:9px 11px;font-size:10px;color:#38536B;font-weight:700}.cmms-steps i{font-style:normal;color:#9AA8B5}
+@media(max-width:700px){#cmms-v1-view{padding:0 11px}.cmms-head{padding:17px;flex-direction:column}.cmms-head h2{font-size:19px}.cmms-role{white-space:normal}.cmms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-panel{padding:14px}.cmms-panel-title{flex-direction:column}}
 </style>
 </body>
 </html>
