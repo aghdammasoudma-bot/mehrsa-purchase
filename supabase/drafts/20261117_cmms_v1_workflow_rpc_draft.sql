@@ -121,6 +121,66 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_create_work_order(
+  p_asset_id uuid,
+  p_title text,
+  p_work_type text,
+  p_priority text default 'normal',
+  p_description text default null,
+  p_scope text default null,
+  p_planned_start_at timestamptz default null,
+  p_due_at timestamptz default null,
+  p_estimated_duration_minutes integer default null,
+  p_permit_required boolean default false,
+  p_permit_reference text default null,
+  p_isolation_required boolean default false
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+  v_work_order_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_title,'')),'') is null then raise exception 'Work-order title is required'; end if;
+  if p_work_type not in ('corrective','preventive','inspection','improvement') then
+    raise exception 'Invalid work type';
+  end if;
+  if p_priority not in ('low','normal','high','critical') then raise exception 'Invalid priority'; end if;
+  if p_estimated_duration_minutes is not null and p_estimated_duration_minutes < 0 then
+    raise exception 'Estimated duration cannot be negative';
+  end if;
+  if p_planned_start_at is not null and p_due_at is not null and p_due_at < p_planned_start_at then
+    raise exception 'Due date cannot precede planned start';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a
+  where a.id=p_asset_id and a.operational_status <> 'retired';
+  if not found then raise exception 'Asset not found or retired'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then raise exception 'Only technical expert or supervisor can create work orders'; end if;
+
+  insert into public.cmms_work_orders(
+    asset_id,title,description,work_type,scope,priority,status,opened_by,
+    planned_start_at,due_at,estimated_duration_minutes,permit_required,
+    permit_reference,isolation_required
+  ) values (
+    p_asset_id,btrim(p_title),nullif(btrim(coalesce(p_description,'')),''),
+    p_work_type,nullif(btrim(coalesce(p_scope,'')),''),p_priority,'triage',auth.uid(),
+    p_planned_start_at,p_due_at,p_estimated_duration_minutes,coalesce(p_permit_required,false),
+    nullif(btrim(coalesce(p_permit_reference,'')),''),coalesce(p_isolation_required,false)
+  ) returning id into v_work_order_id;
+
+  return v_work_order_id;
+end;
+$;
+
 create or replace function cmms_private.cmms_release_work_order(p_work_order_id uuid)
 returns text
 language plpgsql
@@ -1312,6 +1372,14 @@ create or replace function public.cmms_report_failure(
 create or replace function public.cmms_triage_failure(p_failure_report_id uuid,p_decision text,p_note text default null)
 returns uuid as $$ select cmms_private.cmms_triage_failure($1,$2,$3); $$ language sql security invoker set search_path = '';
 
+create or replace function public.cmms_create_work_order(
+  p_asset_id uuid,p_title text,p_work_type text,p_priority text default 'normal',
+  p_description text default null,p_scope text default null,p_planned_start_at timestamptz default null,
+  p_due_at timestamptz default null,p_estimated_duration_minutes integer default null,
+  p_permit_required boolean default false,p_permit_reference text default null,
+  p_isolation_required boolean default false
+) returns uuid as $ select cmms_private.cmms_create_work_order($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $ language sql security invoker set search_path='';
+
 create or replace function public.cmms_release_work_order(p_work_order_id uuid)
 returns text as $$ select cmms_private.cmms_release_work_order($1); $$ language sql security invoker set search_path = '';
 
@@ -1396,6 +1464,7 @@ revoke all on all functions in schema cmms_private from public, anon, authentica
 grant usage on schema cmms_private to authenticated, service_role;
 grant execute on function cmms_private.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
 grant execute on function cmms_private.cmms_triage_failure(uuid,text,text) to authenticated;
+grant execute on function cmms_private.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) to authenticated;
 grant execute on function cmms_private.cmms_release_work_order(uuid) to authenticated;
 grant execute on function cmms_private.cmms_assign_work_order(uuid,uuid) to authenticated;
 grant execute on function cmms_private.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) to authenticated;
@@ -1425,6 +1494,7 @@ grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to
 
 revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) from public, anon;
 revoke all on function public.cmms_triage_failure(uuid,text,text) from public, anon;
+revoke all on function public.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) from public, anon;
 revoke all on function public.cmms_release_work_order(uuid) from public, anon;
 revoke all on function public.cmms_assign_work_order(uuid,uuid) from public, anon;
 revoke all on function public.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) from public, anon;
@@ -1449,6 +1519,7 @@ revoke all on function public.cmms_assign_pm_task(uuid,uuid) from public, anon;
 
 grant execute on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
 grant execute on function public.cmms_triage_failure(uuid,text,text) to authenticated;
+grant execute on function public.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) to authenticated;
 grant execute on function public.cmms_release_work_order(uuid) to authenticated;
 grant execute on function public.cmms_assign_work_order(uuid,uuid) to authenticated;
 grant execute on function public.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) to authenticated;
