@@ -500,7 +500,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
   v_reading_id uuid;
@@ -530,7 +530,7 @@ begin
 
   return v_reading_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_assign_pm_task(
   p_pm_task_id uuid,
@@ -540,7 +540,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_task public.cmms_pm_tasks%rowtype;
   v_location_id uuid;
@@ -578,7 +578,7 @@ begin
 
   return p_pm_task_id;
 end;
-$;
+$$;
 
 -- Server-side PM generation. Calendar and meter plans are separate bases in v1.
 -- Each missed interval is generated once; unique indexes make reruns idempotent.
@@ -587,7 +587,7 @@ returns integer
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_plan public.cmms_pm_plans%rowtype;
   v_latest_meter numeric(14,3);
@@ -659,7 +659,7 @@ begin
 
   return v_created;
 end;
-$;
+$$;
 
 -- Public API wrappers are SECURITY INVOKER, not SECURITY DEFINER.
 create or replace function public.cmms_report_failure(
