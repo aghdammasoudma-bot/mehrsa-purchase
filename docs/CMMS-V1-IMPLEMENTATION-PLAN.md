@@ -187,3 +187,9 @@ Read-only production inventory after the rollback validation:
 - No Supabase migration history was returned by the Supabase migration-list tool.
 
 The existing `private_backup.snapshots` record is still an in-project snapshot. It is not an external restorable backup. Supabase's current backup documentation says Free projects should regularly export data using the Supabase CLI; database backups also do not include Storage object bytes. Current Storage inventory is zero, but Auth and application data still need an external backup and isolated restore test. The connected Supabase actions do not expose a downloadable `db dump` operation in this session. No backup export has been fabricated or claimed complete.
+
+
+## 18. Evidence storage policy draft
+- Added `supabase/drafts/20261117_cmms_v1_storage_policy_draft.sql` for a private `cmms-evidence` bucket with file-size/MIME restrictions, asset-location scoped read access, record-linked upload checks and no update/delete policy.
+- Object paths are constrained to `cmms/{asset_uuid}/{record_type}/{record_uuid}/{filename}`; reads require a real linked asset/failure/work-order/PM record and the caller's CMMS location role.
+- This is a draft only. Bucket creation and Storage policies have not been applied or tested. Signed URLs and upload/download flows must be verified in staging.
