@@ -279,6 +279,64 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_set_work_order_progress(
+  p_work_order_id uuid,
+  p_next_status text
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_wo public.cmms_work_orders%rowtype;
+  v_location_id uuid;
+  v_is_assigned boolean;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_next_status not in ('in_progress','waiting_parts','testing') then
+    raise exception 'Invalid progress status';
+  end if;
+
+  select w.* into v_wo
+  from public.cmms_work_orders w where w.id=p_work_order_id
+  for update;
+
+  if not found then raise exception 'Work order not found'; end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_wo.asset_id;
+
+  select exists (
+    select 1 from public.cmms_work_order_assignments wa
+    where wa.work_order_id=p_work_order_id
+      and wa.user_id=auth.uid()
+      and wa.unassigned_at is null
+  ) into v_is_assigned;
+
+  if not v_is_assigned and not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then
+    raise exception 'Only assigned workers or technical supervisors/experts can change execution status';
+  end if;
+
+  if not (
+    (v_wo.status='assigned' and p_next_status='in_progress')
+    or (v_wo.status='in_progress' and p_next_status in ('waiting_parts','testing'))
+    or (v_wo.status='waiting_parts' and p_next_status='in_progress')
+    or (v_wo.status='rework' and p_next_status='in_progress')
+  ) then
+    raise exception 'Invalid execution transition: % -> %',v_wo.status,p_next_status;
+  end if;
+
+  update public.cmms_work_orders
+  set status=p_next_status,updated_at=now()
+  where id=p_work_order_id;
+
+  return p_next_status;
+end;
+$;
+
 create or replace function cmms_private.cmms_submit_work_order_test(
   p_work_order_id uuid,
   p_test_result text,
@@ -304,7 +362,7 @@ begin
   from public.cmms_work_orders w where w.id=p_work_order_id
   for update;
 
-  if not found or v_wo.status not in ('in_progress','testing','rework') then
+  if not found or v_wo.status <> 'testing' then
     raise exception 'Work order is not ready for testing';
   end if;
 
@@ -459,6 +517,10 @@ create or replace function public.cmms_record_work_order_action(
 ) returns uuid language sql security invoker set search_path=''
 as $$ select cmms_private.cmms_record_work_order_action($1,$2,$3,$4,$5,$6,$7,$8); $$;
 
+create or replace function public.cmms_set_work_order_progress(p_work_order_id uuid,p_next_status text)
+returns text language sql security invoker set search_path=''
+as $ select cmms_private.cmms_set_work_order_progress($1,$2); $;
+
 create or replace function public.cmms_submit_work_order_test(
   p_work_order_id uuid,p_test_result text,p_return_to_service_status text,
   p_returned_to_service_at timestamptz,p_test_description text,p_attachment_paths text[] default '{}'::text[]
@@ -483,6 +545,7 @@ grant execute on function cmms_private.cmms_release_work_order(uuid) to authenti
 grant execute on function cmms_private.cmms_assign_work_order(uuid,uuid) to authenticated;
 grant execute on function cmms_private.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) to authenticated;
 grant execute on function cmms_private.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) to authenticated;
+grant execute on function cmms_private.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
@@ -494,6 +557,7 @@ revoke all on function public.cmms_release_work_order(uuid) from public, anon;
 revoke all on function public.cmms_assign_work_order(uuid,uuid) from public, anon;
 revoke all on function public.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) from public, anon;
 revoke all on function public.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) from public, anon;
+revoke all on function public.cmms_set_work_order_progress(uuid,text) from public, anon;
 revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
 
@@ -503,6 +567,7 @@ grant execute on function public.cmms_release_work_order(uuid) to authenticated;
 grant execute on function public.cmms_assign_work_order(uuid,uuid) to authenticated;
 grant execute on function public.cmms_record_work_order_action(uuid,text,text,integer,numeric,text,numeric,text[]) to authenticated;
 grant execute on function public.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) to authenticated;
+grant execute on function public.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 
