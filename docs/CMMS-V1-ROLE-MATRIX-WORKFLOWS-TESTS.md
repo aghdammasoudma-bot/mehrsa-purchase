@@ -115,3 +115,15 @@ Decision confirmed by the user (2026-11-17): biabani is the responsible-manager 
 - Reassignment is performed as one controlled operation: create the new assignment, close the prior assignment with timestamp and mandatory reason, and preserve both records.
 - A work order may link to an existing purchase request by its existing PR ID; the CMMS must not alter the purchase-request workflow.
 - These RPCs are drafted only and must pass role, audit, concurrency and purchase-regression tests before release.
+
+
+## 10. Additional negative and edge-case tests
+- NULL decision, stage, priority, test result or return-to-service status must fail closed; SQL CHECK semantics must not allow NULL to pass a closeout condition.
+- A disabled/inactive legacy `user_profiles` account cannot access CMMS even if a stale `cmms_user_roles.is_active` row remains.
+- A technician/technical expert with an inactive legacy profile cannot be assigned to a new work order or PM task.
+- A work order cannot be cancelled by a technician or responsible manager; cancellation requires technical governance role and a non-empty reason, and active assignments are closed with history.
+- Asset status changes require a reason, and that exact reason is preserved in asset status history.
+- A manager cannot approve before the latest supervisor approval; the two approval identities must differ; prior rejection history remains immutable.
+- A closed work order must have passed test, explicit return-to-service decision, both current approval timestamps and distinct approvers.
+- Evidence upload rejects invalid UUID path segments, nonexistent linked records, unauthorized asset locations, unsupported MIME types and oversized files; object update/delete is denied.
+- PM task generation must be idempotent under repeated and concurrent scheduler runs; meter-based due thresholds must not create duplicate tasks.
