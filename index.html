@@ -728,6 +728,20 @@ body{background:#F1F3F6!important;color:#202833!important}
   #management-hero{width:auto!important;margin-right:10px!important;margin-left:10px!important}
 }
 
+
+/* NAVIGATION: collapsed by default; opened from the profile chevron */
+#topbar .top-profile>.top-quick-nav{display:none!important}
+#topbar .top-profile.nav-open>.top-quick-nav{display:flex!important}
+#topbar .top-profile-trigger{cursor:pointer}
+#topbar .top-profile-trigger .top-profile-chevron{transition:transform .2s ease}
+#topbar .top-profile.nav-open .top-profile-chevron{transform:rotate(180deg)}
+@media(max-width:700px){
+  #topbar .top-profile.nav-open>.top-quick-nav{
+    position:absolute!important;top:calc(100% + 8px)!important;right:0!important;left:0!important;
+    width:min(100vw - 24px,340px)!important;max-height:70vh!important;overflow:auto!important;
+    z-index:500!important;
+  }
+}
 </style>
 <style id="mehrsa-fiori-linear-refresh">
 /* Mehrsa visual refresh: SAP Fiori structure + Linear neutral palette.
@@ -1335,15 +1349,19 @@ function toggleProfileMenu(event){
   if(event) event.stopPropagation();
   const menu=document.getElementById("top-profile-menu");
   const trigger=document.getElementById("top-profile-trigger");
-  if(!menu||!trigger)return;
-  const opening=menu.hidden;
-  menu.hidden=!opening;
+  const profile=document.getElementById("top-profile");
+  if(!menu||!trigger||!profile)return;
+  const opening=!profile.classList.contains("nav-open");
+  profile.classList.toggle("nav-open",opening);
+  menu.hidden=true;
   trigger.setAttribute("aria-expanded",String(opening));
 }
 function closeProfileMenu(){
   const menu=document.getElementById("top-profile-menu");
   const trigger=document.getElementById("top-profile-trigger");
+  const profile=document.getElementById("top-profile");
   if(menu)menu.hidden=true;
+  if(profile)profile.classList.remove("nav-open");
   if(trigger)trigger.setAttribute("aria-expanded","false");
 }
 function selectProfileView(view){
