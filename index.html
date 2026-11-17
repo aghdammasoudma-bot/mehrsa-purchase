@@ -1784,6 +1784,135 @@ function printSection(elementId,title){
  w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+title+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+title+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main>
 
 
+
+<style id="mehrsa-enterprise-redesign-2026">
+/* Mehrsa enterprise redesign — SAP Fiori information architecture + Linear visual language.
+   CSS-only layer: no application logic, data, authentication, or workflow changes. */
+:root{
+ --bg:#F5F6F8!important;--card:#FFFFFF!important;--text:#202939!important;--sub:#667085!important;
+ --line:#E4E7EC!important;--pale:#F2F4F7!important;--navy:#17243A!important;--blue:#344B68!important;
+ --steel:#4169E1!important;--sky:#8298F5!important;--shadow:0 1px 2px rgba(16,24,40,.035)!important;
+ --r:10px!important;color-scheme:light!important
+}
+html,body{background:#F5F6F8!important;color:#202939!important;font-family:"Segoe UI",Tahoma,Arial,sans-serif!important}
+body{line-height:1.55!important}
+#topbar.top{height:64px!important;min-height:64px!important;padding:0 30px!important;background:#fff!important;color:#202939!important;border-bottom:1px solid #E4E7EC!important;box-shadow:0 1px 2px rgba(16,24,40,.025)!important}
+#topbar .h1{font-size:16px!important;font-weight:750!important;color:#17243A!important;letter-spacing:-.2px!important}
+#topbar .top-sub{font-size:11px!important;color:#667085!important;margin-top:3px!important}
+#topbar .role-tag{background:#F8F9FB!important;color:#475467!important;border:1px solid #E4E7EC!important;border-radius:7px!important;padding:7px 13px!important;font-size:11px!important}
+#topbar .role-tag:hover{background:#EEF2FF!important;border-color:#C7D2FE!important}
+.management-hero{display:block!important;width:auto!important;max-width:1296px!important;margin:22px auto 14px!important;padding:0 28px!important;border:0!important;border-radius:0!important;overflow:visible!important;box-shadow:none!important}
+.management-hero .hero-industrial{display:flex!important;align-items:center!important;justify-content:space-between!important;position:relative!important;min-height:156px!important;height:auto!important;padding:28px 34px!important;border:1px solid #263A5A!important;border-radius:12px!important;overflow:hidden!important;background:linear-gradient(105deg,#17243A 0%,#223653 62%,#2D456A 100%)!important;box-shadow:none!important;aspect-ratio:auto!important}
+.management-hero .hero-copy{display:block!important;position:relative!important;inset:auto!important;z-index:2!important;max-width:70%!important;padding:0!important;text-align:right!important}
+.management-hero .hero-eyebrow{display:block!important;color:#A5B4FC!important;font-size:10px!important;font-weight:700!important;letter-spacing:1.4px!important;margin-bottom:8px!important}
+.management-hero .hero-copy h2{color:#fff!important;font-size:25px!important;font-weight:750!important;line-height:1.35!important;margin:0 0 5px!important}
+.management-hero .hero-copy p{color:#D0D9E8!important;font-size:12px!important;margin:0!important}
+.management-hero .mehrsa-hero-logo{position:relative!important;inset:auto!important;z-index:2!important;display:block!important;width:auto!important;max-width:190px!important;height:auto!important;max-height:88px!important;object-fit:contain!important;padding:0!important;margin:0 22px 0 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.management-hero .factory-art,.management-hero .hero-glow{display:none!important}
+.management-hero .hero-caption{max-width:none!important;margin:7px 2px 0!important;padding:0!important;text-align:right!important;background:transparent!important;border:0!important;color:#667085!important;font-size:11px!important;font-weight:600!important}
+#quick-actions.quick-actions{max-width:1240px!important;margin:0 auto 16px!important;padding:0 28px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+#quick-actions .quick-action{min-height:58px!important;display:grid!important;grid-template-columns:38px 1fr!important;grid-template-rows:auto auto!important;align-items:center!important;column-gap:12px!important;padding:10px 14px!important;text-align:right!important;background:#fff!important;color:#344054!important;border:1px solid #E4E7EC!important;border-radius:9px!important;box-shadow:none!important}
+#quick-actions .quick-action>span{grid-row:1/3!important;width:36px!important;height:36px!important;display:grid!important;place-items:center!important;background:#EEF2FF!important;color:#4169E1!important;border-radius:8px!important;font-size:18px!important}
+#quick-actions .quick-action b{font-size:12px!important;font-weight:700!important;color:#202939!important}
+#quick-actions .quick-action small{font-size:10px!important;color:#667085!important;margin:0!important}
+#quick-actions .quick-action:hover{background:#FAFBFF!important;border-color:#C7D2FE!important;transform:none!important}
+#main-content.content{max-width:1296px!important;padding:10px 28px 110px!important;margin:0 auto!important}
+#dashboard-kpis{display:block!important;margin:0 0 16px!important}
+#dashboard-kpis .kpi-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:0!important}
+#dashboard-kpis .kpi{position:relative!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:12px!important;min-height:94px!important;padding:15px 16px!important;text-align:right!important;background:#fff!important;border:1px solid #E4E7EC!important;border-radius:10px!important;box-shadow:none!important;color:#202939!important;transform:none!important}
+#dashboard-kpis .kpi:before{content:""!important;display:block!important;position:absolute!important;right:0!important;top:13px!important;bottom:13px!important;width:3px!important;border-radius:3px 0 0 3px!important;background:#4169E1!important;box-shadow:none!important}
+#dashboard-kpis .kpi:after{display:none!important}
+#dashboard-kpis .kpi-icon{flex:0 0 38px!important;width:38px!important;height:38px!important;display:grid!important;place-items:center!important;border-radius:9px!important;background:#EEF2FF!important;color:#4169E1!important;font-size:19px!important}
+#dashboard-kpis .kpi-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:1px!important;min-width:0!important}
+#dashboard-kpis .kpi-l{font-size:11px!important;color:#667085!important;font-weight:600!important}
+#dashboard-kpis .kpi-n{font-size:25px!important;line-height:1.25!important;color:#202939!important;font-weight:750!important;text-shadow:none!important}
+#dashboard-kpis .kpi-hint{font-size:10px!important;color:#98A2B3!important}
+#dashboard-kpis .kpi-arrow{margin-right:auto!important;color:#98A2B3!important;font-size:14px!important}
+#dashboard-kpis .kpi[aria-pressed="true"]{border-color:#A5B4FC!important;background:#FAFBFF!important;box-shadow:inset 0 0 0 1px #C7D2FE!important}
+.request-workspace{display:grid!important;grid-template-columns:minmax(310px,.82fr) minmax(0,1.7fr)!important;gap:14px!important;direction:ltr!important;align-items:start!important;margin-top:0!important}
+.request-detail-column,.request-list-column{direction:rtl!important;min-width:0!important;background:#fff!important;border:1px solid #E4E7EC!important;border-radius:10px!important;box-shadow:none!important;overflow:hidden!important}
+.request-detail-column{position:sticky!important;top:78px!important;max-height:calc(100vh - 96px)!important;overflow:auto!important;padding:16px!important}
+.request-list-column{padding:16px!important}
+.request-detail-heading{display:flex!important;flex-direction:column!important;gap:4px!important;padding:0 0 13px!important;margin:0 0 12px!important;border-bottom:1px solid #EAECF0!important;color:#344054!important;font-size:14px!important;font-weight:700!important}
+.request-detail-heading small{font-size:10px!important;line-height:1.6!important;color:#98A2B3!important}
+#req-list>.stitle{font-size:13px!important;font-weight:700!important;color:#344054!important;margin:0 0 13px!important;padding:0!important;letter-spacing:0!important;text-transform:none!important}
+#req-list .print-toolbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0 0 12px!important;padding-bottom:10px!important;border-bottom:1px solid #EAECF0!important;color:#344054!important;font-size:12px!important}
+#req-list .request-table-wrap{width:100%!important;overflow:auto!important;border:1px solid #E4E7EC!important;border-radius:8px!important;background:#fff!important}
+#req-list .request-table{width:100%!important;min-width:660px!important;border-collapse:separate!important;border-spacing:0!important;direction:rtl!important;background:#fff!important}
+#req-list .request-table thead th{background:#F8F9FB!important;color:#667085!important;font-size:11px!important;font-weight:700!important;padding:12px 13px!important;text-align:right!important;border-bottom:1px solid #E4E7EC!important;white-space:nowrap!important}
+#req-list .request-table tbody td{padding:12px 13px!important;font-size:12px!important;color:#344054!important;text-align:right!important;vertical-align:middle!important;border-bottom:1px solid #F0F1F3!important;background:#fff!important}
+#req-list .request-table tbody tr:last-child td{border-bottom:0!important}
+#req-list .request-table tbody tr:hover td{background:#F8FAFF!important}
+#req-list .request-row.selected td{background:#F1F4FF!important}
+#req-list .request-row.selected td:first-child{box-shadow:inset -3px 0 #526FE5!important}
+#req-list .request-code{font-size:11px!important;font-weight:750!important;color:#5266C8!important}
+#req-list .request-title-cell strong{font-size:12px!important;font-weight:650!important;color:#202939!important}
+#req-list .request-title-cell small{font-size:10px!important;color:#98A2B3!important}
+#req-list .request-date{font-size:11px!important;color:#667085!important;white-space:nowrap!important}
+#req-list .request-ops .btn{font-size:10px!important;padding:6px 9px!important;background:#fff!important;color:#4169E1!important;border:1px solid #D0D5DD!important;border-radius:6px!important}
+#request-detail-panel{color:#344054!important;font-size:12px!important}
+#request-detail-panel .stitle{font-size:11px!important;color:#667085!important;font-weight:700!important;margin:16px 0 8px!important}
+#request-detail-panel .flow{background:#F8F9FB!important;border:1px solid #EAECF0!important;border-radius:8px!important;padding:8px!important;gap:4px!important}
+#request-detail-panel .flow-step{min-width:66px!important;padding:7px 6px!important}
+#request-detail-panel .flow-step.current{background:#EEF2FF!important;border:1px solid #DDE4FF!important;border-radius:7px!important}
+#request-detail-panel .flow-step.current .flow-lbl{color:#4169E1!important}
+#request-detail-panel .detail-empty{min-height:220px!important;color:#98A2B3!important}
+#request-detail-panel .detail-empty strong{color:#475467!important}
+#request-detail-panel .actions{gap:7px!important}
+#request-detail-panel .actions .btn{border-radius:7px!important}
+#req-list .req-card{background:#fff!important;border:1px solid #E4E7EC!important;border-radius:8px!important;box-shadow:none!important;margin:0 0 9px!important;overflow:hidden!important}
+#req-list .req-card-top{padding:12px 14px 10px!important;border-bottom:1px solid #F0F1F3!important}
+#req-list .req-card-title{font-size:13px!important;font-weight:650!important;color:#202939!important;line-height:1.5!important}
+#req-list .req-card-id{font-size:10px!important;color:#667085!important}
+#req-list .req-card-bot{padding:8px 14px!important;background:#FAFAFB!important}
+#req-list .req-card-bot-left{font-size:10px!important;color:#667085!important}
+#req-list .b{font-size:10px!important;border-radius:5px!important;padding:3px 7px!important}
+.btn{border-radius:7px!important;font-weight:650!important;box-shadow:none!important;transition:background .12s,border-color .12s!important}
+.btn-primary,.btn-primary:hover{background:#4169E1!important;border:1px solid #4169E1!important;color:#fff!important}
+.btn-success{background:#16845B!important;border:1px solid #16845B!important}
+.btn-danger{background:#C2414B!important;border:1px solid #C2414B!important}
+.btn-ghost{background:#fff!important;border:1px solid #D0D5DD!important;color:#475467!important}
+.field input,.field select,.field textarea,.comment-box textarea{background:#fff!important;color:#202939!important;border:1px solid #D0D5DD!important;border-radius:7px!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#8298F5!important;box-shadow:0 0 0 3px rgba(65,105,225,.10)!important}
+.mobile-bottom-nav{background:#fff!important;border-top:1px solid #E4E7EC!important;box-shadow:0 -3px 14px rgba(16,24,40,.045)!important;backdrop-filter:none!important}
+.mobile-bottom-nav button{color:#667085!important}
+.mobile-bottom-nav button.active{color:#4169E1!important}
+.mobile-bottom-nav .nav-primary{background:#4169E1!important;color:#fff!important;border:3px solid #fff!important;box-shadow:0 2px 7px rgba(65,105,225,.22)!important}
+.role-screen{background:linear-gradient(135deg,#17243A,#263B5A)!important}
+#auth-box{border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;box-shadow:0 10px 30px rgba(16,24,40,.16)!important}
+@media(max-width:900px){
+ #main-content.content{padding:12px 16px 100px!important}
+ .management-hero{padding:0 16px!important}
+ #quick-actions.quick-actions{padding:0 16px!important}
+ .request-workspace{grid-template-columns:minmax(260px,.85fr) minmax(0,1.4fr)!important}
+}
+@media(max-width:700px){
+ #topbar.top{padding:0 14px!important}
+ .management-hero{padding:0 12px!important;margin:12px auto 10px!important}
+ .management-hero .hero-industrial{min-height:130px!important;padding:18px!important}
+ .management-hero .hero-copy{max-width:66%!important}
+ .management-hero .hero-copy h2{font-size:19px!important}
+ .management-hero .hero-copy p{font-size:10px!important}
+ .management-hero .mehrsa-hero-logo{max-width:100px!important;max-height:65px!important;margin-right:8px!important}
+ #quick-actions.quick-actions{padding:0 12px!important;gap:8px!important}
+ #quick-actions .quick-action{padding:9px!important;grid-template-columns:32px 1fr!important;column-gap:8px!important}
+ #quick-actions .quick-action>span{width:31px!important;height:31px!important;font-size:16px!important}
+ #main-content.content{padding:8px 12px 100px!important}
+ #dashboard-kpis .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ #dashboard-kpis .kpi{min-height:82px!important;padding:10px!important;gap:8px!important}
+ #dashboard-kpis .kpi-icon{width:31px!important;height:31px!important;flex-basis:31px!important;font-size:16px!important}
+ #dashboard-kpis .kpi-n{font-size:21px!important}
+ .request-workspace{grid-template-columns:1fr!important;gap:10px!important}
+ .request-list-column{order:1!important;padding:12px!important}
+ .request-detail-column{order:2!important;position:static!important;max-height:none!important;padding:12px!important}
+ #req-list .request-table{min-width:610px!important}
+}
+@media(max-width:380px){
+ #dashboard-kpis .kpi{gap:6px!important;padding:9px!important}
+ #dashboard-kpis .kpi-hint{font-size:9px!important}
+ #quick-actions .quick-action small{font-size:9px!important}
+}
+</style>
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
