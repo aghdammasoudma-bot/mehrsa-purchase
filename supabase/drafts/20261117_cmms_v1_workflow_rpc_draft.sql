@@ -5,6 +5,12 @@
 
 begin;
 
+-- The live write-locked database has the earlier 8-argument versions.
+-- Remove those inaccessible legacy overloads before installing the 9-argument
+-- downtime-aware RPC; keeping both with defaults would make PostgREST calls ambiguous.
+drop function if exists public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]);
+drop function if exists cmms_private.cmms_report_failure(uuid,text,text,text,text,text,text,text[]);
+
 create or replace function cmms_private.cmms_report_failure(
   p_asset_id uuid,
   p_priority text,
