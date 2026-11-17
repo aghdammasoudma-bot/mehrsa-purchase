@@ -913,6 +913,10 @@ begin
   set status='cancelled',cancel_reason=btrim(p_reason),updated_at=now()
   where id=p_work_order_id;
 
+  update public.cmms_work_order_assignments
+  set unassigned_at=now(),unassign_reason='Work order cancelled: '||btrim(p_reason)
+  where work_order_id=p_work_order_id and unassigned_at is null;
+
   return 'cancelled';
 end;
 $$;
