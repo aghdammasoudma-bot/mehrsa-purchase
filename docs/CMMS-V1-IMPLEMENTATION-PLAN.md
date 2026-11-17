@@ -153,19 +153,20 @@ The production function definitions and ACLs were inspected, not just the Adviso
 
 ## 16. Workflow, PM and transactional SQL validation — 2026-11-17
 - Added `supabase/drafts/20261117_cmms_v1_workflow_rpc_draft.sql` with private, fixed-search-path SECURITY DEFINER implementations and public SECURITY INVOKER entry points for:
+  - location and asset creation, asset editing and reason-coded asset-status changes;
   - failure reporting and technical triage/conversion/rejection;
   - work-order release, assignment, progress and action logging;
   - test submission and explicit return-to-service decision;
   - two-stage approval (technical supervisor, then responsible manager);
-  - PM plan creation/activation, task assignment/start/completion and manual meter readings;
+  - PM plan creation/update/activation, task assignment/start/completion and manual meter readings;
   - idempotent, row-locked server-side calendar/meter PM task generation;
-  - reason-coded work-order cancellation and reassignment, including automatic closure of active assignments;
+  - reason-coded work-order cancellation and reassignment, including automatic closure of active assignments on cancellation/final approval;
   - controlled links from work orders to existing purchase requests.
 - Added a `trigger_type` to PM tasks and separate source-of-truth meter readings. V1 supports calendar OR meter-based PM. Hybrid scheduling is deferred because one shared interval cannot safely represent independent date and meter frequencies.
 - The PM generator is restricted to `service_role`; it is not scheduled. `pg_cron` is available but not installed in this project. The schedule mechanism remains a release decision for staging.
 - The earlier public SECURITY DEFINER RPC draft and duplicate PM scheduler draft were removed. The current workflow draft uses private implementations and public SECURITY INVOKER wrappers; no broad client UPDATE/DELETE grants are included.
 - Added `docs/CMMS-V1-RELEASE-CHECKLIST.md` covering backup/restore, schema, identity, RLS/API security, corrective workflow, PM scheduling, attachments, audit/reporting, regression and rollback.
-- Ran the complete current base schema + hardening + authorization + role-seed + workflow-RPC SQL as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed verification query. The returned mapping was exactly:
+- Ran the complete current base schema + hardening + authorization + role-seed + workflow-RPC SQL (approximately 107 KB) as one explicit PostgreSQL transaction against the production database, then rolled it back. PostgreSQL accepted the complete DDL, functions, triggers, policies, grants and role-seed verification query. The returned mapping was exactly:
   - masoud → technical_supervisor
   - biabani → responsible_manager
   - reza → technical_expert
