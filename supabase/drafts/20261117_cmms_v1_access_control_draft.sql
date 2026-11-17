@@ -117,9 +117,12 @@ grant insert, update on
   public.cmms_locations,
   public.cmms_asset_categories,
   public.cmms_assets,
-  public.cmms_failure_reports,
   public.cmms_pm_plans
 to authenticated;
+
+grant insert on public.cmms_failure_reports to authenticated;
+grant update (status, reviewed_by, reviewed_at, review_note)
+on public.cmms_failure_reports to authenticated;
 
 grant insert on
   public.cmms_work_orders,
@@ -217,7 +220,11 @@ with check (
 create policy cmms_failures_review on public.cmms_failure_reports
 for update to authenticated
 using ((select cmms_private.has_any_role(array['technical_supervisor','technical_expert'])))
-with check ((select cmms_private.has_any_role(array['technical_supervisor','technical_expert'])));
+with check (
+  (select cmms_private.has_any_role(array['technical_supervisor','technical_expert']))
+  and (reviewed_by is null or reviewed_by = (select auth.uid()))
+  and (reviewed_at is null or reviewed_at <= now())
+);
 
 create policy cmms_work_orders_insert on public.cmms_work_orders
 for insert to authenticated
