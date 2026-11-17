@@ -43,10 +43,10 @@ begin
     limit 1;
 
     loop
-      v_due_date := v_plan.frequency_basis in ('calendar','hybrid')
+      v_due_date := v_plan.frequency_basis = 'calendar'
         and v_plan.next_due_at is not null
         and v_plan.next_due_at <= p_now;
-      v_due_meter := v_plan.frequency_basis in ('meter','hybrid')
+      v_due_meter := v_plan.frequency_basis = 'meter'
         and v_plan.next_due_meter_value is not null
         and v_latest_meter is not null
         and v_latest_meter >= v_plan.next_due_meter_value;
