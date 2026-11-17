@@ -612,7 +612,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_old_location uuid;
 begin
@@ -659,7 +659,7 @@ begin
 
   return p_asset_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_change_asset_status(
   p_asset_id uuid,
@@ -670,7 +670,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
 begin
@@ -699,7 +699,7 @@ begin
 
   return p_asset_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_update_pm_plan(
   p_pm_plan_id uuid,
@@ -717,7 +717,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
 begin
@@ -771,7 +771,7 @@ begin
 
   return p_pm_plan_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_set_pm_plan_active(
   p_pm_plan_id uuid,
@@ -1362,16 +1362,16 @@ create or replace function public.cmms_update_asset(
   p_asset_id uuid,p_asset_code text,p_name text,p_location_id uuid,p_criticality text,
   p_category_id uuid,p_manufacturer text,p_model text,p_serial_number text,
   p_technical_specs jsonb,p_equipment_owner text,p_attachment_paths text[]
-) returns uuid as $ select cmms_private.cmms_update_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $ language sql security invoker set search_path='';
+) returns uuid as $$ select cmms_private.cmms_update_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_change_asset_status(p_asset_id uuid,p_new_status text,p_reason text)
-returns uuid as $ select cmms_private.cmms_change_asset_status($1,$2,$3); $ language sql security invoker set search_path='';
+returns uuid as $$ select cmms_private.cmms_change_asset_status($1,$2,$3); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_update_pm_plan(
   p_pm_plan_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,
   p_frequency_value numeric,p_meter_code text,p_meter_unit text,p_next_due_at timestamptz,
   p_next_due_meter_value numeric,p_checklist jsonb
-) returns uuid as $ select cmms_private.cmms_update_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path='';
+) returns uuid as $$ select cmms_private.cmms_update_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_set_pm_plan_active(p_pm_plan_id uuid,p_is_active boolean)
 returns uuid as $$ select cmms_private.cmms_set_pm_plan_active($1,$2); $$ language sql security invoker set search_path='';
