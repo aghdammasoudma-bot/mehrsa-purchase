@@ -4,7 +4,7 @@
 -- State-changing operations must be implemented as narrow, audited RPCs.
 -- Do not expose schema "cmms_private" through the Supabase Data API.
 
-create schema if not exists private;
+create schema if not exists cmms_private;
 revoke all on schema cmms_private from public, anon;
 grant usage on schema cmms_private to authenticated;
 
