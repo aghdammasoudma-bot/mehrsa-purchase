@@ -101,3 +101,23 @@ Supabase Security Advisor was run against the existing production project. It cu
 These findings predate CMMS and are not CMMS changes. Do not modify the purchase RPCs as part of CMMS implementation. Before any production release, separately review each function body, caller checks, actual grants and intended exposure. In particular, `rls_auto_enable()` should not be callable as a public RPC; determine whether it is an event-trigger helper and restrict its EXECUTE grants / exposure through a separately reviewed security change. The purchase RPCs require regression tests before any grant changes. Leaked-password protection should be evaluated as a separate Auth policy decision.
 
 Supabase's current Data API guidance distinguishes grants from RLS: both must be reviewed. New public tables are not automatically exposed by default as of the 2026-10-30 rollout; verify project-level defaults and explicit grants instead of assuming either exposure or isolation.
+
+
+## 11. Production baseline re-check — 2026-11-17
+Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
+- Project status: `ACTIVE_HEALTHY`; PostgreSQL 17.11.
+- Current public tables: `pr_requests` (46 rows), `user_profiles` (6 rows), `technical_work_orders` (3 rows). RLS is enabled on all three.
+- `private_backup.snapshots` contains snapshot `pre_cmms_2026_11_17`, captured at 2026-11-17 18:03:09 UTC. Snapshot sections include public table rows, table definitions, policies, functions, Auth user metadata, Storage bucket metadata and Storage object metadata. It is still an in-project JSON snapshot, not an external restorable backup.
+- Supabase migration history currently returns zero tracked migrations. The live schema therefore must be treated as an existing baseline, not assumed to be reproducible from migration files.
+- Supabase Security Advisor flags `private_backup.snapshots` because RLS is disabled. Catalog checks show the `private_backup` schema has no USAGE grant for `anon` or `authenticated`, and neither role has SELECT on the snapshot table; the table ACL currently lists only `postgres`. This reduces current Data API reachability, but the RLS warning remains a hardening item. Do not change it without explicit user decision. Suggested remediation from the advisor:
+  ```sql
+  ALTER TABLE "private_backup"."snapshots" ENABLE ROW LEVEL SECURITY;
+  ```
+  With RLS enabled and no policies, normal client roles remain blocked; preserve postgres/service administrative access and verify catalog grants after any change.
+- Performance Advisor findings on existing tables: one unindexed FK on `technical_work_orders.created_by`; four RLS init-plan warnings on existing policies; one unused index on `pr_requests`. These are existing-app tuning items, not reasons to alter purchase behavior during CMMS work. Review separately with regression tests.
+- The CMMS base schema draft now defaults new work orders to `triage`, not `approved_for_execution`, to prevent bypassing the assessment gate.
+- The hardening draft now requires explicit passed test, return-to-service timestamp, two distinct approvers and approval timestamps before a work order can be closed.
+
+## 12. UI design artifact
+- `docs/CMMS-V1-UI-SPEC.md` now defines navigation, required fields, workflow screens, role capabilities, responsive RTL behavior, acceptance tests and release gates.
+- No CMMS UI has been merged into `index.html` or made live yet. The existing app shell is 214 KB and contains extensive layered styles and legacy navigation logic; integration will be done as a narrow, reviewed branch-only change after a DOM/script patch is prepared and validated. A previous attempted automated patch did not execute; no source change resulted from that attempt.
