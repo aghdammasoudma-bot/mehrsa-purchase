@@ -459,7 +459,7 @@ begin
   if p_checklist_result is null
      or jsonb_typeof(p_checklist_result) not in ('object','array')
      or (jsonb_typeof(p_checklist_result)='array' and jsonb_array_length(p_checklist_result)=0)
-     or (jsonb_typeof(p_checklist_result)='object' and jsonb_object_length(p_checklist_result)=0) then
+     or (jsonb_typeof(p_checklist_result)='object' and p_checklist_result='{}'::jsonb) then
     raise exception 'Non-empty checklist result is required';
   end if;
 
