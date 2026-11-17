@@ -13,7 +13,8 @@ create or replace function cmms_private.cmms_report_failure(
   p_production_impact text default null,
   p_safety_impact text default null,
   p_environmental_impact text default null,
-  p_attachment_paths text[] default '{}'::text[]
+  p_attachment_paths text[] default '{}'::text[],
+  p_downtime_started_at timestamptz default null
 )
 returns uuid
 language plpgsql
@@ -45,12 +46,12 @@ begin
 
   insert into public.cmms_failure_reports(
     asset_id, reported_by, priority, description, symptoms,
-    production_impact, safety_impact, environmental_impact, attachment_paths
+    production_impact, safety_impact, environmental_impact, attachment_paths, downtime_started_at
   )
   values (
     p_asset_id, auth.uid(), p_priority, btrim(p_description), p_symptoms,
     p_production_impact, p_safety_impact, p_environmental_impact,
-    coalesce(p_attachment_paths,'{}'::text[])
+    coalesce(p_attachment_paths,'{}'::text[]), p_downtime_started_at
   )
   returning id into v_report_id;
 
@@ -105,11 +106,11 @@ begin
   end if;
 
   insert into public.cmms_work_orders(
-    asset_id, failure_report_id, title, description, work_type, priority, status, opened_by
+    asset_id, failure_report_id, title, description, work_type, priority, status, opened_by, downtime_started_at
   )
   values (
     v_report.asset_id, v_report.id, left(v_report.description,120), v_report.description,
-    'corrective', v_report.priority, 'triage', auth.uid()
+    'corrective', v_report.priority, 'triage', auth.uid(), v_report.downtime_started_at
   )
   returning id into v_work_order_id;
 
@@ -1363,8 +1364,9 @@ $$;
 create or replace function public.cmms_report_failure(
   p_asset_id uuid,p_priority text,p_description text,p_symptoms text default null,
   p_production_impact text default null,p_safety_impact text default null,
-  p_environmental_impact text default null,p_attachment_paths text[] default '{}'::text[]
-) returns uuid as $$ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8); $$ language sql security invoker set search_path = '';
+  p_environmental_impact text default null,p_attachment_paths text[] default '{}'::text[],
+  p_downtime_started_at timestamptz default null
+) returns uuid as $ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8,$9); $ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_triage_failure(p_failure_report_id uuid,p_decision text,p_note text default null)
 returns uuid as $$ select cmms_private.cmms_triage_failure($1,$2,$3); $$ language sql security invoker set search_path = '';
@@ -1459,7 +1461,7 @@ returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language
 -- Internal functions are not directly exposed as RPC endpoints.
 revoke all on all functions in schema cmms_private from public, anon, authenticated;
 grant usage on schema cmms_private to authenticated, service_role;
-grant execute on function cmms_private.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
+grant execute on function cmms_private.cmms_report_failure(uuid,text,text,text,text,text,text,text[],timestamptz) to authenticated;
 grant execute on function cmms_private.cmms_triage_failure(uuid,text,text) to authenticated;
 grant execute on function cmms_private.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) to authenticated;
 grant execute on function cmms_private.cmms_release_work_order(uuid) to authenticated;
@@ -1490,7 +1492,7 @@ grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticate
 grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to authenticated;
 grant execute on function cmms_private.cmms_user_has_active_role(uuid,text[]) to authenticated;
 
-revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) from public, anon;
+revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[],timestamptz) from public, anon;
 revoke all on function public.cmms_triage_failure(uuid,text,text) from public, anon;
 revoke all on function public.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) from public, anon;
 revoke all on function public.cmms_release_work_order(uuid) from public, anon;
@@ -1515,7 +1517,7 @@ revoke all on function public.cmms_link_purchase_request(uuid,text) from public,
 revoke all on function public.cmms_record_meter_reading(uuid,text,text,numeric) from public, anon;
 revoke all on function public.cmms_assign_pm_task(uuid,uuid) from public, anon;
 
-grant execute on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
+grant execute on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[],timestamptz) to authenticated;
 grant execute on function public.cmms_triage_failure(uuid,text,text) to authenticated;
 grant execute on function public.cmms_create_work_order(uuid,text,text,text,text,text,timestamptz,timestamptz,integer,boolean,text,boolean) to authenticated;
 grant execute on function public.cmms_release_work_order(uuid) to authenticated;
