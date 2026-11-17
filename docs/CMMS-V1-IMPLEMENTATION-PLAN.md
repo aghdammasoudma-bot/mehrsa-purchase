@@ -135,7 +135,7 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 
 
 ## 14. Authorization and role-seed drafts
-- `supabase/drafts/20261117_cmms_v1_authorization_draft.sql` adds a dedicated non-API helper schema, role/scope helper functions, location-ancestor access checks, SELECT-only RLS policies for all 14 CMMS tables, and explicit least-privilege table grants. Client-side direct writes are deliberately denied; state changes must go through narrowly scoped RPCs.
+- `supabase/drafts/20261117_cmms_v1_authorization_draft.sql` adds a dedicated non-API helper schema, role/scope helper functions, location-ancestor access checks, SELECT-only RLS policies for all 15 CMMS tables, and explicit least-privilege table grants. Client-side direct writes are deliberately denied; state changes must go through narrowly scoped RPCs.
 - `supabase/drafts/20261117_cmms_v1_role_seed_draft.sql` maps the four confirmed usernames using a query against `user_profiles`: masoud → technical_supervisor; biabani → responsible_manager; reza → technical_expert; hamid → technician. It does not alter legacy roles and leaves mohammadi/karami without CMMS access.
 - These are draft SQL files only. The authorization policies have not been executed or tested against a staging database. RPCs for failure intake, triage, work-order lifecycle, assignment, actions, approvals, PM task generation/completion, audit writes and purchase linking remain to be implemented before any write workflow is enabled.
 
@@ -146,3 +146,6 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - `rls_auto_enable()` is not an ordinary RPC: it is the function for the enabled `ensure_rls` event trigger on `ddl_command_end`, owned by postgres. The generic Advisor flags its EXECUTE ACL; do not revoke blindly without confirming event-trigger behavior. Its public/anon/authenticated ACL should be tightened in a controlled change while preserving event-trigger operation.
 - The other inspected SECURITY DEFINER functions include purchase creation, transition, deletion, admin approval and technical-work-order update/approval. Their bodies include profile/role, ownership, assignment or state checks. They are part of the live purchase/mission workflow and remain unchanged during CMMS work.
 - No production security ACLs were changed.
+
+- A dedicated asset-meter-reading table was added so meter- and hybrid-based PM plans have an auditable source for hour/cycle readings; its location-scoped read policy and grants are included in the authorization draft.
+- The current project has the `pg_cron` extension available but not installed. Server-side PM generation will use a controlled scheduled database job or Supabase scheduled function only after the extension/scheduling choice is validated in staging; browser timers are not acceptable.
