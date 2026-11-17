@@ -3,7 +3,7 @@
 -- PostgreSQL 17 target. No changes to purchase workflow or legacy tables.
 
 -- 1) Correct NULL-scope uniqueness for role assignments.
-drop index if exists public.cmms_user_roles_user_id_role_location_id_key;
+alter table public.cmms_user_roles drop constraint if exists cmms_user_roles_user_id_role_location_id_key;
 create unique index if not exists cmms_user_roles_global_role_uq
   on public.cmms_user_roles(user_id, role) where location_id is null;
 create unique index if not exists cmms_user_roles_scoped_role_uq
@@ -83,6 +83,8 @@ as $$
 declare
   wo public.cmms_work_orders%rowtype;
   prior_supervisor uuid;
+  latest_supervisor_decision text;
+  latest_manager_decision text;
 begin
   select * into wo
   from public.cmms_work_orders
@@ -106,28 +108,27 @@ begin
   end if;
 
   if new.stage = 'responsible_manager' then
-    select a.approver_id into prior_supervisor
+    select a.approver_id, a.decision into prior_supervisor, latest_supervisor_decision
     from public.cmms_work_order_approvals a
     where a.work_order_id = new.work_order_id
       and a.stage = 'technical_supervisor'
-      and a.decision = 'approved'
-    order by a.decided_at desc
+    order by a.decided_at desc, a.id desc
     limit 1;
 
-    if prior_supervisor is null then
-      raise exception 'Technical supervisor approval is required first';
+    if prior_supervisor is null or latest_supervisor_decision <> 'approved' then
+      raise exception 'Latest technical supervisor decision must be approved first';
     end if;
     if prior_supervisor = new.approver_id then
       raise exception 'The two approval stages require different people';
     end if;
   elsif new.stage = 'technical_supervisor' then
-    if exists (
-      select 1 from public.cmms_work_order_approvals a
-      where a.work_order_id = new.work_order_id
-        and a.stage = 'responsible_manager'
-        and a.decision = 'approved'
-        and a.approver_id = new.approver_id
-    ) then
+    select a.approver_id, a.decision into prior_supervisor, latest_manager_decision
+    from public.cmms_work_order_approvals a
+    where a.work_order_id = new.work_order_id
+      and a.stage = 'responsible_manager'
+    order by a.decided_at desc, a.id desc
+    limit 1;
+    if latest_manager_decision = 'approved' and prior_supervisor = new.approver_id then
       raise exception 'The two approval stages require different people';
     end if;
   end if;
