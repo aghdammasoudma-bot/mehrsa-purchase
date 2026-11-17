@@ -58,10 +58,10 @@ Priority labels must be calibrated against the plant's actual escalation and res
 ## 4. Preventive-maintenance workflow
 - Each plan belongs to one asset and defines either a calendar interval or a meter interval, checklist, owner and next due threshold.
 - Hybrid calendar+meter plans are deferred from v1 until separate frequency units and cycle semantics are implemented.
-- Due tasks are generated from the plan; a task must not be silently skipped when overdue.
+- Due tasks are generated from the plan; a task must not be silently skipped when overdue. V1 generator and RPCs are drafted, but scheduling and staging tests remain release gates.
 - Completion requires checklist results, actual completion time and executor identity.
-- Failed checklist items create or link to a corrective work order.
-- Plan edits preserve prior task history.
+- Failed checklist items must create or link to a corrective work order; the dedicated PM-failure conversion RPC is still outstanding.
+- Plan edits preserve prior task history; plan creation/activation and task assignment/start/completion use controlled RPC drafts.
 - Do not use browser timers as the scheduler; due-task generation must run server-side.
 
 ## 5. Data and integrity rules to enforce before migration
@@ -108,3 +108,10 @@ Decision confirmed by the user (2026-11-17): biabani is the responsible-manager 
 - `supabase/drafts/20261117_cmms_v1_hardening_draft.sql`: hardening layer for NULL-safe role uniqueness, active assignment uniqueness, location cycle guard, PM completion integrity, approval ordering/identity, append-only approval/audit records and asset status history. Not applied; requires staging tests and review.
 - External restorable backup remains the mandatory release gate. The in-project snapshot is not a disaster-recovery backup.
 - Data API exposure must be explicitly reviewed: Supabase changed defaults so newly created public tables are not automatically exposed; never infer API accessibility from table existence.
+
+
+## 7. Cancellation, reassignment and purchase references
+- Work-order cancellation is restricted to technical supervisor/expert and requires a reason.
+- Reassignment is performed as one controlled operation: create the new assignment, close the prior assignment with timestamp and mandatory reason, and preserve both records.
+- A work order may link to an existing purchase request by its existing PR ID; the CMMS must not alter the purchase-request workflow.
+- These RPCs are drafted only and must pass role, audit, concurrency and purchase-regression tests before release.
