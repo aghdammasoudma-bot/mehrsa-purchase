@@ -409,6 +409,8 @@ begin
        or new.manager_approved_by = new.supervisor_approved_by
        or new.test_result is distinct from 'passed'
        or new.return_to_service_status is null
+       or new.return_to_service_status is null
+       or new.return_to_service_status is null
        or new.return_to_service_status not in ('returned','not_required')
        or (new.return_to_service_status='returned' and new.returned_to_service_at is null)
        or new.closed_at is null then
