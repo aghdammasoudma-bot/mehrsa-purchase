@@ -120,4 +120,15 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 
 ## 12. UI design artifact
 - `docs/CMMS-V1-UI-SPEC.md` now defines navigation, required fields, workflow screens, role capabilities, responsive RTL behavior, acceptance tests and release gates.
-- No CMMS UI has been merged into `index.html` or made live yet. The existing app shell is 214 KB and contains extensive layered styles and legacy navigation logic; integration will be done as a narrow, reviewed branch-only change after a DOM/script patch is prepared and validated. A previous attempted automated patch did not execute; no source change resulted from that attempt.
+- A branch-only CMMS UI shell has now been added to `index.html`: a dedicated navigation entry, separate CMMS view, six tabbed areas (overview, assets, failures, work orders, PM, reports), role-aware navigation visibility and an explicit read-only/disabled-action gate. It uses the existing login session and does not query or write any CMMS tables yet.
+- The existing print helper contained a pre-existing JavaScript syntax error caused by literal newlines inside a single-quoted HTML string. This was corrected only on `feature/cmms-v1`. All four inline scripts now pass JavaScript syntax compilation via V8 `new Function`; this is syntax validation only, not browser or end-to-end testing.
+- The app shell remains a 223 KB single HTML file with layered CSS and legacy navigation logic. The CMMS shell is a scaffold, not a production-ready interactive module. Browser/mobile testing, real data bindings and workflow actions remain outstanding.
+
+
+## 13. Schema coverage added in the latest draft review
+- Locations now support discipline classification (production, electrical, mechanical, utilities, general).
+- Assets and failure reports support evidence paths; failure reports capture production, safety and environmental impact.
+- Work orders capture work type, scope, root cause, planned/due dates, estimated duration, permit and isolation requirements, test result and explicit return-to-service status.
+- PM plans support calendar, meter and hybrid triggers; PM tasks can be generated from date or meter thresholds with a uniqueness guard for meter-based due points.
+- New work orders default to `triage`, not an execution-approved state.
+- Closeout hardening requires a passed test, return-to-service timestamp, both approval identities/timestamps and distinct approvers.
