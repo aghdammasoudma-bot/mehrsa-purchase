@@ -519,7 +519,7 @@ as $$ select cmms_private.cmms_record_work_order_action($1,$2,$3,$4,$5,$6,$7,$8)
 
 create or replace function public.cmms_set_work_order_progress(p_work_order_id uuid,p_next_status text)
 returns text language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_set_work_order_progress($1,$2); $;
+as $ select cmms_private.cmms_set_work_order_progress($1,$2); $;
 
 create or replace function public.cmms_submit_work_order_test(
   p_work_order_id uuid,p_test_result text,p_return_to_service_status text,
