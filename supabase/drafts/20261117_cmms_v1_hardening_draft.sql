@@ -495,7 +495,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 -- Record role roster, category dictionary, approval and meter-reading changes.
 drop trigger if exists cmms_audit_user_roles on public.cmms_user_roles;
