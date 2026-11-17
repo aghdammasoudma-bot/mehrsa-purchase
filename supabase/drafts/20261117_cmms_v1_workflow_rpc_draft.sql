@@ -594,6 +594,110 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_update_asset(
+  p_asset_id uuid,
+  p_asset_code text,
+  p_name text,
+  p_location_id uuid,
+  p_criticality text,
+  p_category_id uuid,
+  p_manufacturer text,
+  p_model text,
+  p_serial_number text,
+  p_technical_specs jsonb,
+  p_equipment_owner text,
+  p_attachment_paths text[]
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_old_location uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_asset_code,'')),'') is null
+     or nullif(btrim(coalesce(p_name,'')),'') is null then
+    raise exception 'Asset code and name are required';
+  end if;
+
+  select a.location_id into v_old_location
+  from public.cmms_assets a where a.id=p_asset_id
+  for update;
+  if not found then raise exception 'Asset not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_old_location
+  ) or not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],p_location_id
+  ) then
+    raise exception 'No permission to edit this asset or move it to the selected location';
+  end if;
+
+  if p_category_id is not null and not exists(
+    select 1 from public.cmms_asset_categories where id=p_category_id
+  ) then raise exception 'Asset category not found'; end if;
+
+  update public.cmms_assets
+  set asset_code=btrim(p_asset_code),
+      name=btrim(p_name),
+      location_id=p_location_id,
+      criticality=p_criticality,
+      category_id=p_category_id,
+      manufacturer=nullif(btrim(coalesce(p_manufacturer,'')),''),
+      model=nullif(btrim(coalesce(p_model,'')),''),
+      serial_number=nullif(btrim(coalesce(p_serial_number,'')),''),
+      technical_specs=coalesce(p_technical_specs,'{}'::jsonb),
+      equipment_owner=nullif(btrim(coalesce(p_equipment_owner,'')),''),
+      attachment_paths=coalesce(p_attachment_paths,attachment_paths),
+      updated_at=now()
+  where id=p_asset_id;
+
+  return p_asset_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_change_asset_status(
+  p_asset_id uuid,
+  p_new_status text,
+  p_reason text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_new_status not in ('operational','degraded','stopped','under_maintenance','retired') then
+    raise exception 'Invalid asset operational status';
+  end if;
+  if nullif(btrim(coalesce(p_reason,'')),'') is null then
+    raise exception 'Asset status-change reason is mandatory';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=p_asset_id
+  for update;
+  if not found then raise exception 'Asset not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_supervisor','technical_expert'],v_location_id
+  ) then raise exception 'Only technical expert or supervisor can change asset status'; end if;
+
+  perform set_config('cmms.status_change_reason',btrim(p_reason),true);
+  update public.cmms_assets
+  set operational_status=p_new_status,updated_at=now()
+  where id=p_asset_id;
+  perform set_config('cmms.status_change_reason','',true);
+
+  return p_asset_id;
+end;
+$;
+
 create or replace function cmms_private.cmms_set_pm_plan_active(
   p_pm_plan_id uuid,
   p_is_active boolean
@@ -1179,6 +1283,15 @@ create or replace function public.cmms_create_pm_plan(
   p_next_due_meter_value numeric,p_checklist jsonb
 ) returns uuid as $$ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $$ language sql security invoker set search_path='';
 
+create or replace function public.cmms_update_asset(
+  p_asset_id uuid,p_asset_code text,p_name text,p_location_id uuid,p_criticality text,
+  p_category_id uuid,p_manufacturer text,p_model text,p_serial_number text,
+  p_technical_specs jsonb,p_equipment_owner text,p_attachment_paths text[]
+) returns uuid as $ select cmms_private.cmms_update_asset($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $ language sql security invoker set search_path='';
+
+create or replace function public.cmms_change_asset_status(p_asset_id uuid,p_new_status text,p_reason text)
+returns uuid as $ select cmms_private.cmms_change_asset_status($1,$2,$3); $ language sql security invoker set search_path='';
+
 create or replace function public.cmms_set_pm_plan_active(p_pm_plan_id uuid,p_is_active boolean)
 returns uuid as $$ select cmms_private.cmms_set_pm_plan_active($1,$2); $$ language sql security invoker set search_path='';
 
@@ -1209,6 +1322,8 @@ grant execute on function cmms_private.cmms_submit_work_order_test(uuid,text,tex
 grant execute on function cmms_private.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) to authenticated;
+grant execute on function cmms_private.cmms_change_asset_status(uuid,text,text) to authenticated;
 grant execute on function cmms_private.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function cmms_private.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
@@ -1235,6 +1350,8 @@ revoke all on function public.cmms_submit_work_order_test(uuid,text,text,timesta
 revoke all on function public.cmms_set_work_order_progress(uuid,text) from public, anon;
 revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from public, anon;
 revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) from public, anon;
+revoke all on function public.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) from public, anon;
+revoke all on function public.cmms_change_asset_status(uuid,text,text) from public, anon;
 revoke all on function public.cmms_set_pm_plan_active(uuid,boolean) from public, anon;
 revoke all on function public.cmms_start_pm_task(uuid) from public, anon;
 revoke all on function public.cmms_create_location(text,text,text,uuid) from public, anon;
@@ -1256,6 +1373,8 @@ grant execute on function public.cmms_submit_work_order_test(uuid,text,text,time
 grant execute on function public.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
+grant execute on function public.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) to authenticated;
+grant execute on function public.cmms_change_asset_status(uuid,text,text) to authenticated;
 grant execute on function public.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function public.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
