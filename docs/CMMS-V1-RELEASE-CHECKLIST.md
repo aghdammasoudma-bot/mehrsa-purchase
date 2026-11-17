@@ -1,6 +1,6 @@
 # CMMS V1 — Release & Acceptance Checklist
 
-Status: production schema is present but write-locked. The four role rows are active; operational CMMS tables are empty. Do not rerun the base schema or enable RPCs until an external restorable backup and staging/security tests are complete. All boxes below are release gates, not claims of completion.
+Status: production schema is installed but write-locked. Verified: 15 CMMS tables with RLS, 15 SELECT-only policies, four active global role rows, four audit rows, and zero operational CMMS records. Public CMMS RPC wrappers are non-executable by anon/authenticated/service_role; direct authenticated table writes are denied. No CMMS Storage bucket or reporting views are installed. Do not rerun the base schema or enable RPCs until an external restorable backup and staging/security tests are complete. All boxes below are release gates, not claims of completion.
 
 ## A. Backup and recovery
 - [ ] Export a complete database backup outside the production Supabase project.
@@ -12,6 +12,11 @@ Status: production schema is present but write-locked. The four role rows are ac
 - [ ] Compare table counts, critical row counts, function/policy counts and application login.
 - [ ] Record restore duration and recovery-point timestamp.
 - [ ] Keep the in-project `private_backup.snapshots` snapshot as a supplemental snapshot only, never as the sole disaster-recovery copy.
+- [ ] Resolve the CRITICAL RLS-disabled exposure on `private_backup.snapshots`. Supabase's current security advisory warns anon/authenticated roles may read or modify it. Proposed SQL (not executed):
+  ```sql
+  ALTER TABLE "private_backup"."snapshots" ENABLE ROW LEVEL SECURITY;
+  ```
+  Decide whether any explicit administrative policy is required; with no policies, client roles are blocked.
 
 ## B. Schema and migration
 - [ ] Review base schema and hardening SQL with a second technical reviewer.
