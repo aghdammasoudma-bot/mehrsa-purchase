@@ -269,6 +269,105 @@ after insert on public.cmms_work_order_approvals
 for each row execute function public.cmms_apply_work_order_approval();
 
 -- 6c) Prevent direct status changes from skipping approval gates.
+create or replace function public.cmms_prevent_location_cycle()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if new.parent_id is null then return new; end if;
+  if new.parent_id = new.id then
+    raise exception 'A location cannot be its own parent';
+  end if;
+
+  if exists (
+    with recursive ancestors(id) as (
+      select new.parent_id
+      union
+      select l.parent_id
+      from public.cmms_locations l
+      join ancestors a on l.id=a.id
+      where l.parent_id is not null
+    )
+    select 1 from ancestors where id=new.id
+  ) then
+    raise exception 'Location hierarchy cycle detected';
+  end if;
+
+  return new;
+end;
+$;
+
+drop trigger if exists cmms_location_cycle_guard on public.cmms_locations;
+create trigger cmms_location_cycle_guard
+before insert or update of parent_id on public.cmms_locations
+for each row execute function public.cmms_prevent_location_cycle();
+
+create or replace function public.cmms_guard_pm_task()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_plan public.cmms_pm_plans%rowtype;
+begin
+  select p.* into v_plan
+  from public.cmms_pm_plans p
+  where p.id=new.pm_plan_id
+  for key share;
+
+  if not found then raise exception 'PM plan not found'; end if;
+  if new.asset_id is distinct from v_plan.asset_id then
+    raise exception 'PM task asset must match its plan asset';
+  end if;
+
+  if v_plan.frequency_basis='calendar' then
+    if new.trigger_type <> 'calendar' or new.due_at is null or new.due_meter_value is not null then
+      raise exception 'Calendar PM task requires a calendar due date only';
+    end if;
+  elsif v_plan.frequency_basis='meter' then
+    if new.trigger_type <> 'meter' or new.due_meter_value is null or new.due_at is not null then
+      raise exception 'Meter PM task requires a meter due value only';
+    end if;
+  end if;
+
+  if new.status='completed' then
+    if new.completed_by is null or new.completed_at is null
+       or new.checklist_result is null
+       or (
+         jsonb_typeof(new.checklist_result)='array'
+         and jsonb_array_length(new.checklist_result)=0
+       )
+       or (
+         jsonb_typeof(new.checklist_result)='object'
+         and new.checklist_result='{}'::jsonb
+       )
+       or jsonb_typeof(new.checklist_result) not in ('array','object') then
+      raise exception 'Completed PM task requires executor, timestamp and non-empty checklist';
+    end if;
+  elsif new.completed_by is not null or new.completed_at is not null or new.checklist_result is not null then
+    raise exception 'Incomplete PM task cannot carry completion fields';
+  end if;
+
+  if tg_op='UPDATE' and old.status='completed' and new.status<>'completed' then
+    raise exception 'Completed PM tasks cannot be reopened; create a follow-up task';
+  end if;
+
+  if new.status in ('assigned','in_progress') and new.assigned_to is null then
+    raise exception 'Assigned or in-progress PM task requires an assignee';
+  end if;
+
+  return new;
+end;
+$;
+
+drop trigger if exists cmms_pm_task_guard on public.cmms_pm_tasks;
+create trigger cmms_pm_task_guard
+before insert or update on public.cmms_pm_tasks
+for each row execute function public.cmms_guard_pm_task();
+
 create or replace function public.cmms_guard_work_order_status()
 returns trigger
 language plpgsql
