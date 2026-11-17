@@ -90,3 +90,14 @@ Important: the existing `admin` role currently represents a broad application ad
 
 ## Security audit correction
 The earlier generic concern about a `SECURITY DEFINER` routine being executable by anonymous users must not be treated as a confirmed finding. The current function definitions show authorization checks in the purchase and work-order routines. Before any changes, inspect actual EXECUTE grants and function exposure. Preserve existing purchase RPC behavior. Any CMMS RPC must check `auth.uid()`, active `user_profiles` membership, role, location scope, and distinct approval identities server-side.
+
+
+## 10. Existing-project security findings — 2026-11-17 (read-only)
+Supabase Security Advisor was run against the existing production project. It currently reports:
+- 2 SECURITY DEFINER functions executable by `anon`: `admin_update_purchase_request(text,jsonb)` and `rls_auto_enable()`.
+- 7 SECURITY DEFINER functions executable by `authenticated`, including existing purchase and technical-work-order RPCs.
+- Leaked-password protection is disabled.
+
+These findings predate CMMS and are not CMMS changes. Do not modify the purchase RPCs as part of CMMS implementation. Before any production release, separately review each function body, caller checks, actual grants and intended exposure. In particular, `rls_auto_enable()` should not be callable as a public RPC; determine whether it is an event-trigger helper and restrict its EXECUTE grants / exposure through a separately reviewed security change. The purchase RPCs require regression tests before any grant changes. Leaked-password protection should be evaluated as a separate Auth policy decision.
+
+Supabase's current Data API guidance distinguishes grants from RLS: both must be reviewed. New public tables are not automatically exposed by default as of the 2026-10-30 rollout; verify project-level defaults and explicit grants instead of assuming either exposure or isolation.
