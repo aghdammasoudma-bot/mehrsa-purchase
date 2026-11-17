@@ -635,6 +635,9 @@ begin
     raise exception 'No permission to edit this asset or move it to the selected location';
   end if;
 
+  if not exists(select 1 from public.cmms_locations where id=p_location_id and is_active) then
+    raise exception 'Target asset location is missing or inactive';
+  end if;
   if p_category_id is not null and not exists(
     select 1 from public.cmms_asset_categories where id=p_category_id
   ) then raise exception 'Asset category not found'; end if;
@@ -695,6 +698,78 @@ begin
   perform set_config('cmms.status_change_reason','',true);
 
   return p_asset_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_update_pm_plan(
+  p_pm_plan_id uuid,
+  p_title text,
+  p_frequency_basis text,
+  p_frequency_unit text,
+  p_frequency_value numeric,
+  p_meter_code text,
+  p_meter_unit text,
+  p_next_due_at timestamptz,
+  p_next_due_meter_value numeric,
+  p_checklist jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_title,'')), '') is null then raise exception 'PM plan title is required'; end if;
+  if p_frequency_value is null or p_frequency_value <= 0 then raise exception 'PM frequency must be positive'; end if;
+  if p_checklist is null or not (
+    (jsonb_typeof(p_checklist)='array' and p_checklist <> '[]'::jsonb)
+    or (jsonb_typeof(p_checklist)='object' and p_checklist <> '{}'::jsonb)
+  ) then raise exception 'A non-empty PM checklist is required'; end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_pm_plans p join public.cmms_assets a on a.id=p.asset_id
+  where p.id=p_pm_plan_id
+  for update of p;
+  if not found then raise exception 'PM plan not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then raise exception 'Only technical expert or supervisor can update PM plans'; end if;
+
+  if p_frequency_basis='calendar' then
+    if p_frequency_unit not in ('day','week','month','year')
+       or p_frequency_value <> trunc(p_frequency_value)
+       or p_next_due_at is null
+       or p_meter_code is not null or p_meter_unit is not null or p_next_due_meter_value is not null then
+      raise exception 'Invalid calendar PM frequency configuration';
+    end if;
+  elsif p_frequency_basis='meter' then
+    if p_frequency_unit not in ('hour','cycle')
+       or nullif(btrim(coalesce(p_meter_code,'')),'') is null
+       or nullif(btrim(coalesce(p_meter_unit,'')),'') is null
+       or p_next_due_meter_value is null or p_next_due_at is not null then
+      raise exception 'Invalid meter PM frequency configuration';
+    end if;
+  else
+    raise exception 'V1 supports calendar or meter PM plans only';
+  end if;
+
+  update public.cmms_pm_plans
+  set title=btrim(p_title),
+      frequency_basis=p_frequency_basis,
+      frequency_unit=p_frequency_unit,
+      frequency_value=p_frequency_value,
+      meter_code=nullif(btrim(coalesce(p_meter_code,'')),''),
+      meter_unit=nullif(btrim(coalesce(p_meter_unit,'')),''),
+      next_due_at=p_next_due_at,
+      next_due_meter_value=p_next_due_meter_value,
+      checklist=p_checklist
+  where id=p_pm_plan_id;
+
+  return p_pm_plan_id;
 end;
 $;
 
@@ -1292,6 +1367,12 @@ create or replace function public.cmms_update_asset(
 create or replace function public.cmms_change_asset_status(p_asset_id uuid,p_new_status text,p_reason text)
 returns uuid as $ select cmms_private.cmms_change_asset_status($1,$2,$3); $ language sql security invoker set search_path='';
 
+create or replace function public.cmms_update_pm_plan(
+  p_pm_plan_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,
+  p_frequency_value numeric,p_meter_code text,p_meter_unit text,p_next_due_at timestamptz,
+  p_next_due_meter_value numeric,p_checklist jsonb
+) returns uuid as $ select cmms_private.cmms_update_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path='';
+
 create or replace function public.cmms_set_pm_plan_active(p_pm_plan_id uuid,p_is_active boolean)
 returns uuid as $$ select cmms_private.cmms_set_pm_plan_active($1,$2); $$ language sql security invoker set search_path='';
 
@@ -1324,6 +1405,7 @@ grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,tex
 grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) to authenticated;
 grant execute on function cmms_private.cmms_change_asset_status(uuid,text,text) to authenticated;
+grant execute on function cmms_private.cmms_update_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function cmms_private.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
@@ -1352,6 +1434,7 @@ revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from p
 revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) from public, anon;
 revoke all on function public.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) from public, anon;
 revoke all on function public.cmms_change_asset_status(uuid,text,text) from public, anon;
+revoke all on function public.cmms_update_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) from public, anon;
 revoke all on function public.cmms_set_pm_plan_active(uuid,boolean) from public, anon;
 revoke all on function public.cmms_start_pm_task(uuid) from public, anon;
 revoke all on function public.cmms_create_location(text,text,text,uuid) from public, anon;
@@ -1375,6 +1458,7 @@ grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to 
 grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
 grant execute on function public.cmms_update_asset(uuid,text,text,uuid,text,uuid,text,text,text,jsonb,text,text[]) to authenticated;
 grant execute on function public.cmms_change_asset_status(uuid,text,text) to authenticated;
+grant execute on function public.cmms_update_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
 grant execute on function public.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
 grant execute on function public.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
