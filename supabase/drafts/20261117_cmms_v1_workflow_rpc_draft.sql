@@ -180,7 +180,7 @@ begin
   where w.id=p_work_order_id
   for update;
 
-  if not found or v_wo.status not in ('approved_for_execution','assigned') then
+  if not found or v_wo.status not in ('approved_for_execution','assigned','rework') then
     raise exception 'Work order is not ready for assignment';
   end if;
 
