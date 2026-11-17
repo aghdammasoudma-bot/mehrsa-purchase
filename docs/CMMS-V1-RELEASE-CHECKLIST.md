@@ -1,6 +1,6 @@
 # CMMS V1 — Release & Acceptance Checklist
 
-Status: in development. All boxes below are release gates, not claims of completion.
+Status: production schema is present but write-locked. The four role rows are active; operational CMMS tables are empty. Do not rerun the base schema or enable RPCs until an external restorable backup and staging/security tests are complete. All boxes below are release gates, not claims of completion.
 
 ## A. Backup and recovery
 - [ ] Export a complete database backup outside the production Supabase project.
@@ -94,7 +94,9 @@ Status: in development. All boxes below are release gates, not claims of complet
 - [ ] Prepare a versioned migration and release notes.
 - [ ] Capture pre-deploy schema/version checksums and row counts.
 - [ ] Confirm backup restore test and rollback owner.
-- [ ] Deploy additive database migration first in a controlled window.
+- [ ] Confirm current write-lock state is preserved until explicit go-live approval.
+- [ ] Do not rerun or replace the already-present production schema until live-vs-draft reconciliation and external restore testing are complete.
+- [ ] Re-enable only the specifically tested RPCs after isolated staging and role-based negative tests pass.
 - [ ] Deploy app changes only after schema/RLS/RPC tests pass.
 - [ ] Verify production smoke tests with each role.
 - [ ] Keep `main` untouched until the release candidate passes.
