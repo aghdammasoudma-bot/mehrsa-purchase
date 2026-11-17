@@ -7,6 +7,7 @@ create table if not exists public.cmms_locations (
   parent_id uuid references public.cmms_locations(id) on delete restrict,
   code text not null unique,
   name text not null,
+  discipline text check (discipline is null or discipline in ('production','electrical','mechanical','utilities','general')),
   manager_user_id uuid references auth.users(id) on delete set null,
   is_active boolean not null default true,
   created_at timestamptz not null default now()
@@ -29,6 +30,8 @@ create table if not exists public.cmms_assets (
   model text,
   serial_number text,
   technical_specs jsonb not null default '{}'::jsonb,
+  attachment_paths text[] not null default '{}'::text[],
+  equipment_owner text,
   criticality text not null default 'medium' check (criticality in ('low','medium','high','critical')),
   operational_status text not null default 'operational' check (operational_status in ('operational','degraded','stopped','under_maintenance','retired')),
   commissioned_at date,
@@ -57,6 +60,10 @@ create table if not exists public.cmms_failure_reports (
   priority text not null default 'normal' check (priority in ('low','normal','high','critical')),
   description text not null,
   symptoms text,
+  production_impact text,
+  safety_impact text,
+  environmental_impact text,
+  attachment_paths text[] not null default '{}'::text[],
   status text not null default 'submitted' check (status in ('submitted','under_review','rejected','converted','cancelled')),
   downtime_started_at timestamptz,
   reviewed_by uuid references auth.users(id) on delete set null,
@@ -72,12 +79,22 @@ create table if not exists public.cmms_work_orders (
   failure_report_id uuid references public.cmms_failure_reports(id) on delete set null,
   title text not null,
   description text,
+  work_type text not null default 'corrective' check (work_type in ('corrective','preventive','inspection','improvement')),
+  scope text,
+  root_cause text,
+  planned_start_at timestamptz,
+  due_at timestamptz,
+  estimated_duration_minutes integer check (estimated_duration_minutes is null or estimated_duration_minutes >= 0),
+  permit_required boolean not null default false,
+  permit_reference text,
+  isolation_required boolean not null default false,
   priority text not null default 'normal' check (priority in ('low','normal','high','critical')),
   status text not null default 'triage' check (status in ('triage','approved_for_execution','assigned','in_progress','waiting_parts','testing','pending_supervisor_approval','pending_manager_approval','rework','closed','cancelled')),
   opened_by uuid not null references auth.users(id) on delete restrict,
   downtime_started_at timestamptz,
   returned_to_service_at timestamptz,
-  test_result text,
+  test_result text check (test_result is null or test_result in ('passed','failed','partial')),
+  return_to_service_status text check (return_to_service_status is null or return_to_service_status in ('returned','not_returned','not_required')),
   supervisor_approved_by uuid references auth.users(id) on delete set null,
   supervisor_approved_at timestamptz,
   manager_approved_by uuid references auth.users(id) on delete set null,
@@ -106,6 +123,8 @@ create table if not exists public.cmms_work_order_actions (
   description text not null,
   quantity numeric(12,3),
   unit text,
+  meter_reading numeric(14,3),
+  attachment_paths text[] not null default '{}'::text[],
   duration_minutes integer check (duration_minutes is null or duration_minutes >= 0),
   created_at timestamptz not null default now()
 );
@@ -124,27 +143,35 @@ create table if not exists public.cmms_pm_plans (
   id uuid primary key default gen_random_uuid(),
   asset_id uuid not null references public.cmms_assets(id) on delete restrict,
   title text not null,
-  frequency_unit text not null check (frequency_unit in ('day','week','month','year')),
-  frequency_value integer not null check (frequency_value > 0),
+  frequency_basis text not null default 'calendar' check (frequency_basis in ('calendar','meter','hybrid')),
+  frequency_unit text not null check (frequency_unit in ('day','week','month','year','hour','cycle')),
+  frequency_value numeric(14,3) not null check (frequency_value > 0),
+  meter_unit text,
+  next_due_meter_value numeric(14,3),
+  last_meter_value numeric(14,3),
   checklist jsonb not null default '[]'::jsonb,
-  next_due_at timestamptz not null,
+  next_due_at timestamptz,
   is_active boolean not null default true,
   created_by uuid references auth.users(id) on delete set null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (frequency_basis not in ('calendar','hybrid') or next_due_at is not null),
+  check (frequency_basis not in ('meter','hybrid') or (meter_unit is not null and next_due_meter_value is not null))
 );
 
 create table if not exists public.cmms_pm_tasks (
   id uuid primary key default gen_random_uuid(),
   pm_plan_id uuid not null references public.cmms_pm_plans(id) on delete restrict,
   asset_id uuid not null references public.cmms_assets(id) on delete restrict,
-  due_at timestamptz not null,
+  due_at timestamptz,
+  due_meter_value numeric(14,3),
   status text not null default 'due' check (status in ('due','assigned','in_progress','completed','overdue','cancelled')),
   assigned_to uuid references auth.users(id) on delete set null,
   completed_by uuid references auth.users(id) on delete set null,
   completed_at timestamptz,
   checklist_result jsonb,
   created_at timestamptz not null default now(),
-  unique(pm_plan_id, due_at)
+  unique(pm_plan_id, due_at),
+  check (due_at is not null or due_meter_value is not null)
 );
 
 create table if not exists public.cmms_asset_status_history (
@@ -184,6 +211,7 @@ create index if not exists cmms_work_orders_asset_status_idx on public.cmms_work
 create index if not exists cmms_work_orders_priority_idx on public.cmms_work_orders(priority,status);
 create index if not exists cmms_assignments_user_idx on public.cmms_work_order_assignments(user_id,work_order_id);
 create index if not exists cmms_pm_tasks_due_idx on public.cmms_pm_tasks(status,due_at);
+create unique index if not exists cmms_pm_tasks_meter_due_uq on public.cmms_pm_tasks(pm_plan_id,due_meter_value) where due_meter_value is not null;
 create index if not exists cmms_audit_entity_idx on public.cmms_audit_logs(entity_type,entity_id,created_at desc);
 
 alter table public.cmms_locations enable row level security;
