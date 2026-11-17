@@ -6,11 +6,11 @@ Project: `jpzgtbafrpjjbtwqwzlr`
 The CMMS schema is present in the production Supabase database, but the module is not operational. The database is write-locked for client users. The CMMS app changes remain on `feature/cmms-v1`; `main` has not been changed or deployed.
 
 ## Verified database facts
-- 15 `public.cmms_*` tables; RLS enabled on all 15.
+- 15 `public.cmms_*` tables; RLS enabled on all 15. Live column-name comparison matches all 15 tables in the current base schema draft.
 - 15 RLS policies; every policy is SELECT-only.
 - Authenticated role: SELECT is granted on CMMS tables; INSERT, UPDATE and DELETE are not granted.
 - Anonymous role: no SELECT on CMMS tables.
-- 58 CMMS-named functions and 24 CMMS triggers exist.
+- 58 CMMS-named functions and 24 CMMS triggers exist. Live-vs-branch comparison found exact function-name and trigger-name matches; the only signature mismatch is `cmms_report_failure` (live 8 arguments, branch 9 with optional downtime timestamp).
 - No public CMMS RPC is executable by `anon` or `authenticated`.
 - Only two private read-only authorization helpers are executable by `authenticated`: `cmms_has_any_role` and `cmms_has_role_at_location`.
 - No private CMMS function is executable by `service_role`; PM generation is not scheduled.
@@ -36,7 +36,7 @@ The GitHub repository is public, so it must not be used to store a database dump
 ## Safety / security observations
 - Current CMMS privileges are fail-closed for client writes.
 - Supabase Security Advisor reports pre-existing legacy SECURITY DEFINER warnings: 2 public functions callable by anon and 7 callable by authenticated, plus leaked-password protection disabled. These findings concern existing purchase/work-order functions; do not change them as part of CMMS v1.
-- Performance Advisor reports 24 unindexed foreign keys (23 in CMMS), four legacy RLS initplan warnings, and 10 unused indexes (mostly CMMS indexes before any operational data exists).
+- Performance Advisor reports 24 unindexed foreign keys (23 in CMMS), four legacy RLS initplan warnings, and 10 unused indexes (mostly CMMS indexes before any operational data exists). A separate 23-index proposal has been added for staging/query-plan review.
 - No CMMS-specific Security Advisor lint was returned.
 - The live production function definitions and grants are not guaranteed to match the latest branch drafts. The live catalog must be reconciled before any grant or migration change.
 
