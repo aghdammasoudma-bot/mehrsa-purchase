@@ -169,7 +169,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
   - hamid → technician
 - Immediately after rollback, a read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining. The pre-existing `private_backup.snapshots` table remained present. Therefore this was a syntax/dependency validation only; it did not install CMMS tables, roles, policies or functions in production.
 - This is not a substitute for isolated staging tests, security tests, browser tests or restore testing. No CMMS production migration or deployment has occurred.
-- Remaining implementation before release: PM task scheduler and meter-reading RPCs, cancellation/reassignment, controlled purchase linking, private Storage policies, full lifecycle integration tests, and wiring UI screens to live data.
+- Remaining implementation before release: schedule the PM generator (pg_cron is available but not installed), cancellation/reassignment, controlled purchase linking, private Storage policies, full lifecycle integration tests, and wiring UI screens to live data.
 
 
 ## 16. Controlled workflow RPCs and PM scheduler drafts
