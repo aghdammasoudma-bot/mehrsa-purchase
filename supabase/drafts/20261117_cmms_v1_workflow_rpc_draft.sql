@@ -707,7 +707,7 @@ returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language
 
 -- Internal functions are not directly exposed as RPC endpoints.
 revoke all on all functions in schema cmms_private from public, anon, authenticated;
-grant usage on schema cmms_private to authenticated;
+grant usage on schema cmms_private to authenticated, service_role;
 grant execute on function cmms_private.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
 grant execute on function cmms_private.cmms_triage_failure(uuid,text,text) to authenticated;
 grant execute on function cmms_private.cmms_release_work_order(uuid) to authenticated;
