@@ -47,12 +47,13 @@ Technical Department only. Assets include production, electrical, mechanical, an
 - PM task generation must be server-side scheduled, not dependent on a user opening the page.
 - Maintenance history and audit logs are append-only for ordinary users.
 
-## Initial role model (to be mapped against real people before activation)
-- Reporter: submit failure reports and see permitted status.
-- Technician: see and execute assigned work orders.
-- Technical expert: maintain asset technical data and propose assignments.
-- Technical Supervisor: triage, assign, supervise, approve first stage.
-- Responsible Manager: approve final closeout for their location.
+## Confirmed CMMS role model (design decision; not yet provisioned)
+- `masoud` → `technical_supervisor`: technical review, assignment/supervision, first-stage approval.
+- `biabani` → `responsible_manager`: final-stage approval for ALL CMMS assets and locations in v1, including production, electrical, mechanical and utilities. No separate area-manager approvers in v1.
+- `reza` → `technical_expert`: technical review, diagnosis, asset technical data and assigned execution.
+- `hamid` → `technician`: corrective and preventive maintenance execution as assigned.
+- `mohammadi` and `karami`: no CMMS access by default; procurement remains in the existing purchase module.
+- Keep these assignments in `cmms_user_roles`; do not alter or reinterpret legacy `user_profiles.role`.
 Authorization must be enforced in PostgreSQL RLS/RPC, not merely by hiding buttons.
 
 ## Integration design
@@ -60,16 +61,17 @@ Authorization must be enforced in PostgreSQL RLS/RPC, not merely by hiding butto
 - Optional `work_order_purchase_links.purchase_request_id` references `pr_requests.id` as TEXT.
 - No modifications to existing purchase request schema or functions.
 
-## Implementation sequence
-1. Obtain external logical backup using Supabase CLI/pg_dump; separately export Storage if buckets are later added; verify a restore into a disposable project.
-2. Review existing RLS, SECURITY DEFINER functions, Auth/profile mapping, and current front-end navigation.
-3. Create CMMS tables in a staging database; add explicit role/location policies.
-4. Build asset registry and failure intake UI.
-5. Add corrective work orders and two-stage approvals.
-6. Add PM scheduler and task execution.
-7. Link work orders to purchase requests.
-8. Test role matrix, mobile flows, concurrency, auditability, and purchase module regression.
-9. Release only after approval; never merge this branch to main automatically.
+## Implementation sequence — full delivery checklist
+1. Obtain a downloadable external logical backup; separately export Storage object bytes if any exist; restore into an isolated disposable database/project and verify row counts, schema, policies, functions and Auth migration implications.
+2. Complete read-only audit of existing RLS, function definitions and EXECUTE grants, Auth/profile mapping, Data API exposure settings, app navigation and current technical-mission behavior.
+3. Finalize schema constraints, indexes, lifecycle/state machine, immutable audit history and server-side PM generation. Review SQL independently before staging.
+4. Build staging schema and least-privilege role/location RLS policies plus narrow RPCs. Test anonymous, no-role, each role, unauthorized locations, self-approval, approval ordering, rework, concurrency and audit immutability.
+5. Build the separate CMMS UI in `feature/cmms-v1`: dashboard, asset register, hierarchical locations, failure intake, triage, work-order board, assignment, action/labor/parts/evidence logs, test/return-to-service, two-stage approvals, PM plans/tasks, history, audit and purchase links.
+6. Integrate into the existing app shell/login without replacing existing technical missions or changing purchase module behavior.
+7. Add server-side PM task generation and overdue handling; verify duplicate prevention and schedule recovery.
+8. Run mobile/responsive, accessibility, validation, file upload/storage, session expiry, concurrency and regression tests for existing login, role views, purchase create/edit/approve/delete/print and technical work orders.
+9. Run Supabase security/performance advisors, inspect Data API grants/exposure, verify backup/restore again after staging changes, and produce release notes + rollback plan.
+10. Release only after user approval; keep `main` unchanged until explicit release approval. Never merge/deploy automatically.
 
 ## Current front-end integration points
 The existing app is a single-page HTML/JS application with Supabase JS v2 loaded from jsDelivr. Relevant existing functions include `cloudLogin`, `loadUserProfile`, `switchView`, `renderAll`, `loadWorkOrders`, `newWorkOrder`, `submitWorkOrder`, `updateWork`, and `approveWork`.
