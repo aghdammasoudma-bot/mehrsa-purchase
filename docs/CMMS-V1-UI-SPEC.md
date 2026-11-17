@@ -49,7 +49,8 @@ Status: design scaffold only. No live CMMS table exists yet; no CMMS writes are 
 - Closure is blocked unless test is passed, return-to-service decision is explicit, both approvals are current and all required fields/evidence are present.
 
 ### Preventive maintenance
-- PM plan by asset, frequency (calendar or meter-based), checklist template, responsible role, next due date, estimated duration and required materials.
+- PM plan by asset, frequency (calendar-based or meter-based in v1), checklist template, responsible role, next due date, estimated duration and required materials.
+- Hybrid calendar+meter scheduling is deferred; do not combine different frequency units in one interval field.
 - Server-side task generation with duplicate protection and missed-run recovery.
 - PM task completion requires executor, completion timestamp, checklist result and exceptions.
 - Overdue/escalation rules must be visible and auditable.
