@@ -86,10 +86,10 @@ The current `work-orders` view is already used for basic technical missions. CMM
 - mohammadi — planner — active
 - karami — procurement — active
 
-Important: the existing `admin` role currently represents a broad application administrator/technical approval role in existing purchase workflows. Do not automatically map every existing admin to the CMMS responsible-manager role. Confirm the real manager approval authority and map it explicitly. Likewise, `tech` and `maintenance` should not automatically be treated as identical CMMS roles without confirming who can report failures, maintain asset data, and execute repairs.
+Important: the existing `admin` role is broad in the legacy application. The user's explicit governance decision maps only `biabani` to CMMS `responsible_manager` and `masoud` to `technical_supervisor`; do not infer CMMS roles from legacy `admin`. Keep the CMMS role map separate. The remaining `tech` and `maintenance` accounts are mapped explicitly to `technical_expert` and `technician`.
 
 ## Security audit correction
-The earlier generic concern about a `SECURITY DEFINER` routine being executable by anonymous users must not be treated as a confirmed finding. The current function definitions show authorization checks in the purchase and work-order routines. Before any changes, inspect actual EXECUTE grants and function exposure. Preserve existing purchase RPC behavior. Any CMMS RPC must check `auth.uid()`, active `user_profiles` membership, role, location scope, and distinct approval identities server-side.
+Initial caution about `SECURITY DEFINER` exposure was provisional pending evidence. A subsequent live Security Advisor run and catalog inspection did identify anon EXECUTE grants on `admin_update_purchase_request` and the `rls_auto_enable` event-trigger function. Their bodies/trigger attachment were then inspected separately; see sections 10 and 15. Existing purchase and work-order RPCs remain unchanged. Any CMMS RPC must check `auth.uid()`, active `user_profiles` membership, role, location scope, and distinct approval identities server-side.
 
 
 ## 10. Existing-project security findings — 2026-11-17 (read-only)
@@ -147,7 +147,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - The other inspected SECURITY DEFINER functions include purchase creation, transition, deletion, admin approval and technical-work-order update/approval. Their bodies include profile/role, ownership, assignment or state checks. They are part of the live purchase/mission workflow and remain unchanged during CMMS work.
 - No production security ACLs were changed.
 
-- A dedicated asset-meter-reading table was added so meter- and hybrid-based PM plans have an auditable source for hour/cycle readings; its location-scoped read policy and grants are included in the authorization draft.
+- A dedicated asset-meter-reading table was added so meter-based PM plans have an auditable source for hour/cycle readings; its location-scoped read policy and grants are included in the authorization draft.
 - The current project has the `pg_cron` extension available but not installed. Server-side PM generation will use a controlled scheduled database job or Supabase scheduled function only after the extension/scheduling choice is validated in staging; browser timers are not acceptable.
 
 
