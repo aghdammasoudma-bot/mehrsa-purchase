@@ -74,3 +74,17 @@ Authorization must be enforced in PostgreSQL RLS/RPC, not merely by hiding butto
 ## Current front-end integration points
 The existing app is a single-page HTML/JS application with Supabase JS v2 loaded from jsDelivr. Relevant existing functions include `cloudLogin`, `loadUserProfile`, `switchView`, `renderAll`, `loadWorkOrders`, `newWorkOrder`, `submitWorkOrder`, `updateWork`, and `approveWork`.
 The current `work-orders` view is already used for basic technical missions. CMMS should be a separate view/module and should not replace this flow until migration and regression tests are complete.
+
+
+## Verified existing user-role mapping (read-only audit, 2026-11-17)
+- masoud — admin — active
+- biabani — admin — active
+- reza — tech — active
+- hamid — maintenance — active
+- mohammadi — planner — active
+- karami — procurement — active
+
+Important: the existing `admin` role currently represents a broad application administrator/technical approval role in existing purchase workflows. Do not automatically map every existing admin to the CMMS responsible-manager role. Confirm the real manager approval authority and map it explicitly. Likewise, `tech` and `maintenance` should not automatically be treated as identical CMMS roles without confirming who can report failures, maintain asset data, and execute repairs.
+
+## Security audit correction
+The earlier generic concern about a `SECURITY DEFINER` routine being executable by anonymous users must not be treated as a confirmed finding. The current function definitions show authorization checks in the purchase and work-order routines. Before any changes, inspect actual EXECUTE grants and function exposure. Preserve existing purchase RPC behavior. Any CMMS RPC must check `auth.uid()`, active `user_profiles` membership, role, location scope, and distinct approval identities server-side.
