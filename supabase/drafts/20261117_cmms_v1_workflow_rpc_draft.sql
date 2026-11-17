@@ -1366,7 +1366,7 @@ create or replace function public.cmms_report_failure(
   p_production_impact text default null,p_safety_impact text default null,
   p_environmental_impact text default null,p_attachment_paths text[] default '{}'::text[],
   p_downtime_started_at timestamptz default null
-) returns uuid as $ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8,$9); $ language sql security invoker set search_path = '';
+) returns uuid as $$ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8,$9); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_triage_failure(p_failure_report_id uuid,p_decision text,p_note text default null)
 returns uuid as $$ select cmms_private.cmms_triage_failure($1,$2,$3); $$ language sql security invoker set search_path = '';
