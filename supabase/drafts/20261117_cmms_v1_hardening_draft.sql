@@ -269,19 +269,35 @@ as $$
 declare
   v_supervisor public.cmms_work_order_approvals%rowtype;
   v_manager public.cmms_work_order_approvals%rowtype;
+  v_latest_rejection public.cmms_work_order_approvals%rowtype;
+  v_is_governance boolean;
+  v_is_assigned boolean;
+  v_transition_allowed boolean := false;
 begin
-  if new.status = 'pending_supervisor_approval' and old.status is distinct from new.status then
-    if new.test_result is distinct from 'passed'
-       or new.return_to_service_status not in ('returned','not_required')
-       or (new.return_to_service_status = 'returned' and new.returned_to_service_at is null) then
-      raise exception 'Cannot request approval before successful test and return-to-service decision';
-    end if;
+  if new.status is not distinct from old.status then
+    return new;
   end if;
 
-  if new.status in ('pending_manager_approval','closed') and old.status is distinct from new.status then
+  select exists (
+    select 1 from public.cmms_user_roles ur
+    where ur.user_id=auth.uid()
+      and ur.is_active
+      and ur.location_id is null
+      and ur.role in ('technical_supervisor','technical_expert')
+  ) into v_is_governance;
+
+  select exists (
+    select 1 from public.cmms_work_order_assignments wa
+    where wa.work_order_id=new.id
+      and wa.user_id=auth.uid()
+      and wa.unassigned_at is null
+  ) into v_is_assigned;
+
+  -- Approval-trigger transitions are allowed only when the latest decision is current.
+  if new.status in ('pending_manager_approval','closed') then
     select ap.* into v_supervisor
     from public.cmms_work_order_approvals ap
-    where ap.work_order_id = new.id and ap.stage = 'technical_supervisor'
+    where ap.work_order_id=new.id and ap.stage='technical_supervisor'
     order by ap.decided_at desc, ap.id desc limit 1;
 
     if v_supervisor.decision is distinct from 'approved'
@@ -290,18 +306,68 @@ begin
     end if;
   end if;
 
-  if new.status = 'closed' and old.status is distinct from new.status then
+  if new.status='closed' then
     select ap.* into v_manager
     from public.cmms_work_order_approvals ap
-    where ap.work_order_id = new.id and ap.stage = 'responsible_manager'
+    where ap.work_order_id=new.id and ap.stage='responsible_manager'
     order by ap.decided_at desc, ap.id desc limit 1;
 
     if v_manager.decision is distinct from 'approved'
        or new.manager_approved_by is distinct from v_manager.approver_id
        or new.manager_approved_by = new.supervisor_approved_by
        or new.test_result is distinct from 'passed'
+       or new.return_to_service_status not in ('returned','not_required')
+       or (new.return_to_service_status='returned' and new.returned_to_service_at is null)
        or new.closed_at is null then
-      raise exception 'Current, distinct responsible-manager approval is required before closure';
+      raise exception 'Current, distinct responsible-manager approval and successful closeout are required';
+    end if;
+    return new;
+  end if;
+
+  -- Rework can only be initiated by the approver who just rejected the current stage.
+  if new.status='rework' and old.status in ('pending_supervisor_approval','pending_manager_approval') then
+    select ap.* into v_latest_rejection
+    from public.cmms_work_order_approvals ap
+    where ap.work_order_id=new.id
+      and ap.stage=case when old.status='pending_supervisor_approval'
+                        then 'technical_supervisor' else 'responsible_manager' end
+    order by ap.decided_at desc, ap.id desc limit 1;
+
+    if v_latest_rejection.decision is distinct from 'rejected'
+       or v_latest_rejection.approver_id is distinct from auth.uid() then
+      raise exception 'Only the current-stage approver may return a work order for rework';
+    end if;
+    return new;
+  end if;
+
+  -- Ordinary lifecycle transitions.
+  if old.status='triage' and new.status='approved_for_execution' then
+    v_transition_allowed := v_is_governance;
+  elsif old.status='approved_for_execution' and new.status='assigned' then
+    v_transition_allowed := v_is_governance;
+  elsif old.status='assigned' and new.status='in_progress' then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif old.status='in_progress' and new.status in ('waiting_parts','testing') then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif old.status='waiting_parts' and new.status='in_progress' then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif old.status='testing' and new.status='in_progress' then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif old.status='rework' and new.status in ('assigned','in_progress','testing') then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  elsif old.status in ('testing','rework') and new.status='pending_supervisor_approval' then
+    v_transition_allowed := v_is_assigned or v_is_governance;
+  end if;
+
+  if not v_transition_allowed then
+    raise exception 'Invalid or unauthorized work-order transition: % -> %',old.status,new.status;
+  end if;
+
+  if new.status='pending_supervisor_approval' then
+    if new.test_result is distinct from 'passed'
+       or new.return_to_service_status not in ('returned','not_required')
+       or (new.return_to_service_status='returned' and new.returned_to_service_at is null) then
+      raise exception 'Cannot request approval before successful test and explicit return-to-service decision';
     end if;
   end if;
 
