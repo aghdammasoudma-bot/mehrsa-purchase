@@ -526,6 +526,135 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_create_pm_plan(
+  p_asset_id uuid,
+  p_title text,
+  p_frequency_basis text,
+  p_frequency_unit text,
+  p_frequency_value numeric,
+  p_meter_code text,
+  p_meter_unit text,
+  p_next_due_at timestamptz,
+  p_next_due_meter_value numeric,
+  p_checklist jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+  v_plan_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_title,'')), '') is null then raise exception 'PM plan title is required'; end if;
+  if p_frequency_value is null or p_frequency_value <= 0 then raise exception 'PM frequency must be positive'; end if;
+  if p_checklist is null or not (
+    (jsonb_typeof(p_checklist)='array' and p_checklist <> '[]'::jsonb)
+    or (jsonb_typeof(p_checklist)='object' and p_checklist <> '{}'::jsonb)
+  ) then raise exception 'A non-empty PM checklist is required'; end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=p_asset_id;
+  if not found then raise exception 'Asset not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then raise exception 'Only technical expert or supervisor can create PM plans'; end if;
+
+  if p_frequency_basis='calendar' then
+    if p_frequency_unit not in ('day','week','month','year')
+       or p_frequency_value <> trunc(p_frequency_value)
+       or p_next_due_at is null
+       or p_meter_code is not null or p_meter_unit is not null or p_next_due_meter_value is not null then
+      raise exception 'Invalid calendar PM frequency configuration';
+    end if;
+  elsif p_frequency_basis='meter' then
+    if p_frequency_unit not in ('hour','cycle')
+       or nullif(btrim(coalesce(p_meter_code,'')),'') is null
+       or nullif(btrim(coalesce(p_meter_unit,'')),'') is null
+       or p_next_due_meter_value is null or p_next_due_at is not null then
+      raise exception 'Invalid meter PM frequency configuration';
+    end if;
+  else
+    raise exception 'V1 supports calendar or meter PM plans only';
+  end if;
+
+  insert into public.cmms_pm_plans(
+    asset_id,title,frequency_basis,frequency_unit,frequency_value,
+    meter_code,meter_unit,next_due_at,next_due_meter_value,checklist,created_by
+  ) values (
+    p_asset_id,btrim(p_title),p_frequency_basis,p_frequency_unit,p_frequency_value,
+    nullif(btrim(coalesce(p_meter_code,'')),''),nullif(btrim(coalesce(p_meter_unit,'')),''),
+    p_next_due_at,p_next_due_meter_value,p_checklist,auth.uid()
+  ) returning id into v_plan_id;
+
+  return v_plan_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_set_pm_plan_active(
+  p_pm_plan_id uuid,
+  p_is_active boolean
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select a.location_id into v_location_id
+  from public.cmms_pm_plans p join public.cmms_assets a on a.id=p.asset_id
+  where p.id=p_pm_plan_id
+  for update of p;
+  if not found then raise exception 'PM plan not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then raise exception 'Only technical expert or supervisor can change PM plan status'; end if;
+
+  update public.cmms_pm_plans set is_active=p_is_active where id=p_pm_plan_id;
+  return p_pm_plan_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_start_pm_task(p_pm_task_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_task public.cmms_pm_tasks%rowtype;
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select t.* into v_task
+  from public.cmms_pm_tasks t where t.id=p_pm_task_id
+  for update;
+  if not found or v_task.status not in ('assigned','due','overdue') then
+    raise exception 'PM task is not ready to start';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_task.asset_id;
+
+  if v_task.assigned_to is distinct from auth.uid()
+     and not cmms_private.cmms_has_role_at_location(
+       array['technical_expert','technical_supervisor'],v_location_id
+     ) then
+    raise exception 'Only assigned user or technical governance role can start this PM task';
+  end if;
+
+  update public.cmms_pm_tasks set status='in_progress' where id=p_pm_task_id;
+  return p_pm_task_id;
+end;
+$;
+
 create or replace function cmms_private.cmms_complete_pm_task(
   p_pm_task_id uuid,
   p_checklist_result jsonb
@@ -947,6 +1076,18 @@ returns uuid as $ select cmms_private.cmms_reassign_work_order($1,$2,$3); $ lang
 create or replace function public.cmms_link_purchase_request(p_work_order_id uuid,p_purchase_request_id text)
 returns uuid as $ select cmms_private.cmms_link_purchase_request($1,$2); $ language sql security invoker set search_path='';
 
+create or replace function public.cmms_create_pm_plan(
+  p_asset_id uuid,p_title text,p_frequency_basis text,p_frequency_unit text,
+  p_frequency_value numeric,p_meter_code text,p_meter_unit text,p_next_due_at timestamptz,
+  p_next_due_meter_value numeric,p_checklist jsonb
+) returns uuid as $ select cmms_private.cmms_create_pm_plan($1,$2,$3,$4,$5,$6,$7,$8,$9,$10); $ language sql security invoker set search_path='';
+
+create or replace function public.cmms_set_pm_plan_active(p_pm_plan_id uuid,p_is_active boolean)
+returns uuid as $ select cmms_private.cmms_set_pm_plan_active($1,$2); $ language sql security invoker set search_path='';
+
+create or replace function public.cmms_start_pm_task(p_pm_task_id uuid)
+returns uuid as $ select cmms_private.cmms_start_pm_task($1); $ language sql security invoker set search_path='';
+
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
@@ -961,6 +1102,9 @@ grant execute on function cmms_private.cmms_record_work_order_action(uuid,text,t
 grant execute on function cmms_private.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) to authenticated;
 grant execute on function cmms_private.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,text) to authenticated;
+grant execute on function cmms_private.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
+grant execute on function cmms_private.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function cmms_private.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
 grant execute on function cmms_private.cmms_assign_pm_task(uuid,uuid) to authenticated;
@@ -981,6 +1125,9 @@ revoke all on function public.cmms_record_work_order_action(uuid,text,text,integ
 revoke all on function public.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) from public, anon;
 revoke all on function public.cmms_set_work_order_progress(uuid,text) from public, anon;
 revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from public, anon;
+revoke all on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) from public, anon;
+revoke all on function public.cmms_set_pm_plan_active(uuid,boolean) from public, anon;
+revoke all on function public.cmms_start_pm_task(uuid) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
 revoke all on function public.cmms_cancel_work_order(uuid,text) from public, anon;
 revoke all on function public.cmms_reassign_work_order(uuid,uuid,text) from public, anon;
@@ -997,6 +1144,9 @@ grant execute on function public.cmms_record_work_order_action(uuid,text,text,in
 grant execute on function public.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) to authenticated;
 grant execute on function public.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to authenticated;
+grant execute on function public.cmms_create_pm_plan(uuid,text,text,text,numeric,text,text,timestamptz,numeric,jsonb) to authenticated;
+grant execute on function public.cmms_set_pm_plan_active(uuid,boolean) to authenticated;
+grant execute on function public.cmms_start_pm_task(uuid) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
 grant execute on function public.cmms_cancel_work_order(uuid,text) to authenticated;
 grant execute on function public.cmms_reassign_work_order(uuid,uuid,text) to authenticated;
