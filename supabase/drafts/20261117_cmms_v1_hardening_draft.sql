@@ -107,6 +107,13 @@ alter table public.cmms_work_orders
   );
 
 alter table public.cmms_work_orders
+  drop constraint if exists cmms_work_order_cancel_integrity;
+alter table public.cmms_work_orders
+  add constraint cmms_work_order_cancel_integrity check (
+    (status = 'cancelled') = (cancel_reason is not null)
+  );
+
+alter table public.cmms_work_orders
   drop constraint if exists cmms_work_order_approval_timestamp_integrity;
 alter table public.cmms_work_orders
   add constraint cmms_work_order_approval_timestamp_integrity check (
@@ -331,6 +338,16 @@ begin
        or (new.return_to_service_status='returned' and new.returned_to_service_at is null)
        or new.closed_at is null then
       raise exception 'Current, distinct responsible-manager approval and successful closeout are required';
+    end if;
+    return new;
+  end if;
+
+  -- Cancellation is a governed terminal transition and requires a written reason.
+  if new.status='cancelled' then
+    if old.status in ('closed','cancelled')
+       or not v_is_governance
+       or nullif(btrim(coalesce(new.cancel_reason,'')), '') is null then
+      raise exception 'Only technical supervisor/expert may cancel an open work order with a reason';
     end if;
     return new;
   end if;
