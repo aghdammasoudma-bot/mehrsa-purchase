@@ -174,4 +174,82 @@ begin
 end;
 $cmms_test$;
 
+
+-- RLS/API tests run as the real authenticated database role, not postgres.
+select set_config(
+  'request.jwt.claim.sub',
+  (select user_id::text from public.user_profiles where username='hamid' and is_active),
+  true
+);
+set local role authenticated;
+
+do $cmms_rls_tech$
+declare
+  v_count integer;
+  v_denied boolean := false;
+  v_asset uuid;
+  v_report uuid;
+begin
+  select count(*) into v_count
+  from public.cmms_assets
+  where asset_code like 'TEST-ASSET-%';
+  if v_count < 1 then raise exception 'Technician should read assets in the technical scope'; end if;
+
+  select count(*) into v_count from public.cmms_user_roles;
+  if v_count <> 1 then raise exception 'Technician should only read their own CMMS role row'; end if;
+
+  select id into v_asset from public.cmms_assets where asset_code like 'TEST-ASSET-%' limit 1;
+  v_report := public.cmms_report_failure(v_asset,'low','Authenticated RPC smoke test');
+  if v_report is null then raise exception 'Authenticated failure-report RPC did not return an id'; end if;
+
+  begin
+    insert into public.cmms_assets(asset_code,name,location_id)
+    values('DIRECT-WRITE-FORBIDDEN','Must fail',(select location_id from public.cmms_assets where id=v_asset));
+  exception when insufficient_privilege then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Direct authenticated table INSERT was not denied'; end if;
+
+  v_denied := false;
+  begin
+    perform public.cmms_create_asset(
+      'TECH-CREATE-FORBIDDEN','Must fail',(select location_id from public.cmms_assets where id=v_asset)
+    );
+  exception when others then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Technician asset-creation RPC was not denied'; end if;
+
+  v_denied := false;
+  begin
+    perform cmms_private.cmms_generate_due_pm_tasks();
+  exception when insufficient_privilege then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Authenticated user must not execute server-only PM scheduler'; end if;
+end;
+$cmms_rls_tech$;
+
+reset role;
+
+select set_config(
+  'request.jwt.claim.sub',
+  (select user_id::text from public.user_profiles where username='mohammadi' and is_active),
+  true
+);
+set local role authenticated;
+
+do $cmms_rls_planner$
+declare
+  v_count integer;
+begin
+  select count(*) into v_count from public.cmms_assets;
+  if v_count <> 0 then raise exception 'Planner must not see CMMS assets by default'; end if;
+  select count(*) into v_count from public.cmms_user_roles;
+  if v_count <> 0 then raise exception 'Planner must not see CMMS role rows'; end if;
+end;
+$cmms_rls_planner$;
+
+reset role;
+
 rollback;
