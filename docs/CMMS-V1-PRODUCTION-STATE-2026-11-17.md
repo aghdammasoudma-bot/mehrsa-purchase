@@ -42,8 +42,8 @@ The GitHub repository is public, so it must not be used to store a database dump
 
 ## GitHub / app state
 - `main` is unchanged.
-- `feature/cmms-v1` is the development branch. Current comparison: 155 commits ahead, 0 behind; 13 changed files at the audit checkpoint.
-- `index.html` contains a CMMS UI shell only on the feature branch. It is not deployed from `main`; no live workflow is enabled.
+- `feature/cmms-v1` is the development branch. Current comparison: 163 commits ahead, 0 behind; 14 changed files at the latest check.
+- `index.html` contains a CMMS UI shell only on the feature branch. It is not deployed from `main`; no live workflow is enabled. A function/DOM-ID comparison found all 53 pre-existing functions and all existing IDs preserved; four CMMS functions and three CMMS IDs were added.
 - Existing purchase workflow tables and counts are unchanged.
 
 ## Release blockers
