@@ -2,18 +2,18 @@
 -- CMMS v1 authorization layer. Depends on the base schema draft.
 -- Design: authenticated users get read-only table access through RLS.
 -- State-changing operations must be implemented as narrow, audited RPCs.
--- Do not expose schema "private" through the Supabase Data API.
+-- Do not expose schema "cmms_private" through the Supabase Data API.
 
 create schema if not exists private;
-revoke all on schema private from public, anon;
-grant usage on schema private to authenticated;
+revoke all on schema cmms_private from public, anon;
+grant usage on schema cmms_private to authenticated;
 
-create or replace function private.cmms_has_any_role(p_roles text[])
+create or replace function cmms_private.cmms_has_any_role(p_roles text[])
 returns boolean
 language sql
 stable
 security definer
-set search_path = pg_catalog, public, auth, private
+set search_path = pg_catalog, public, auth, cmms_private
 as $$
   select auth.uid() is not null and exists (
     select 1
@@ -25,12 +25,12 @@ as $$
   );
 $$;
 
-create or replace function private.cmms_has_role_at_location(p_roles text[], p_location_id uuid)
+create or replace function cmms_private.cmms_has_role_at_location(p_roles text[], p_location_id uuid)
 returns boolean
 language sql
 stable
 security definer
-set search_path = pg_catalog, public, auth, private
+set search_path = pg_catalog, public, auth, cmms_private
 as $$
   with recursive ancestors(id) as (
     select p_location_id
@@ -54,10 +54,10 @@ as $$
   );
 $$;
 
-revoke all on function private.cmms_has_any_role(text[]) from public, anon;
-revoke all on function private.cmms_has_role_at_location(text[], uuid) from public, anon;
-grant execute on function private.cmms_has_any_role(text[]) to authenticated;
-grant execute on function private.cmms_has_role_at_location(text[], uuid) to authenticated;
+revoke all on function cmms_private.cmms_has_any_role(text[]) from public, anon;
+revoke all on function cmms_private.cmms_has_role_at_location(text[], uuid) from public, anon;
+grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
+grant execute on function cmms_private.cmms_has_role_at_location(text[], uuid) to authenticated;
 
 -- Role assignments are private: users can read their own; global supervisors/managers
 -- can audit the role roster. No direct client-side role changes.
@@ -66,26 +66,26 @@ create policy cmms_roles_read_self_or_governance
 on public.cmms_user_roles for select to authenticated
 using (
   user_id = (select auth.uid())
-  or private.cmms_has_any_role(array['technical_supervisor','responsible_manager'])
+  or cmms_private.cmms_has_any_role(array['technical_supervisor','responsible_manager'])
 );
 
 -- Locations and category dictionary.
 create policy cmms_locations_read_scope
 on public.cmms_locations for select to authenticated
-using (private.cmms_has_role_at_location(
+using (cmms_private.cmms_has_role_at_location(
   array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
   id
 ));
 create policy cmms_categories_read_cmms
 on public.cmms_asset_categories for select to authenticated
-using (private.cmms_has_any_role(
+using (cmms_private.cmms_has_any_role(
   array['reporter','technician','technical_expert','technical_supervisor','responsible_manager']
 ));
 
 -- Assets.
 create policy cmms_assets_read_scope
 on public.cmms_assets for select to authenticated
-using (private.cmms_has_role_at_location(
+using (cmms_private.cmms_has_role_at_location(
   array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
   location_id
 ));
@@ -96,7 +96,7 @@ on public.cmms_failure_reports for select to authenticated
 using (exists (
   select 1 from public.cmms_assets a
   where a.id = asset_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -108,7 +108,7 @@ on public.cmms_work_orders for select to authenticated
 using (exists (
   select 1 from public.cmms_assets a
   where a.id = asset_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -121,7 +121,7 @@ using (exists (
   select 1 from public.cmms_work_orders w
   join public.cmms_assets a on a.id = w.asset_id
   where w.id = work_order_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -133,7 +133,7 @@ using (exists (
   select 1 from public.cmms_work_orders w
   join public.cmms_assets a on a.id = w.asset_id
   where w.id = work_order_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -145,7 +145,7 @@ using (exists (
   select 1 from public.cmms_work_orders w
   join public.cmms_assets a on a.id = w.asset_id
   where w.id = work_order_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -157,7 +157,7 @@ on public.cmms_pm_plans for select to authenticated
 using (exists (
   select 1 from public.cmms_assets a
   where a.id = asset_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -168,7 +168,7 @@ on public.cmms_pm_tasks for select to authenticated
 using (exists (
   select 1 from public.cmms_assets a
   where a.id = asset_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -179,7 +179,7 @@ on public.cmms_asset_status_history for select to authenticated
 using (exists (
   select 1 from public.cmms_assets a
   where a.id = asset_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -188,7 +188,7 @@ using (exists (
 -- Audit is restricted to the two governance roles.
 create policy cmms_audit_read_governance
 on public.cmms_audit_logs for select to authenticated
-using (private.cmms_has_any_role(array['technical_supervisor','responsible_manager']));
+using (cmms_private.cmms_has_any_role(array['technical_supervisor','responsible_manager']));
 
 create policy cmms_purchase_links_read_scope
 on public.cmms_work_order_purchase_links for select to authenticated
@@ -196,7 +196,7 @@ using (exists (
   select 1 from public.cmms_work_orders w
   join public.cmms_assets a on a.id = w.asset_id
   where w.id = work_order_id
-    and private.cmms_has_role_at_location(
+    and cmms_private.cmms_has_role_at_location(
       array['technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
     )
@@ -218,7 +218,7 @@ revoke all on table
   public.cmms_asset_status_history,
   public.cmms_audit_logs,
   public.cmms_work_order_purchase_links
-from anon, authenticated;
+from public, anon, authenticated;
 
 grant select on table
   public.cmms_locations,
