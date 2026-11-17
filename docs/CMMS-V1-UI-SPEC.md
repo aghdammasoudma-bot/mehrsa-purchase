@@ -26,6 +26,7 @@ Status: design scaffold only. No live CMMS table exists yet; no CMMS writes are 
 
 ### Asset register
 - Unique asset code; asset name; category; discipline; parent location; exact location; manufacturer; model; serial number; criticality; operational status; commissioning date; technical specifications; attachments; notes.
+- Create/edit and lifecycle status changes are server-controlled; every status change requires a reason and creates immutable history.
 - Asset detail tabs: identity, work-order history, failure history, PM plan, status history, documents.
 - Lifecycle statuses include in-service, limited, out-of-service, decommissioned.
 
