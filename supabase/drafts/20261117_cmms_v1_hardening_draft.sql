@@ -14,6 +14,11 @@ create unique index if not exists cmms_one_active_assignment_uq
   on public.cmms_work_order_assignments(work_order_id, user_id)
   where unassigned_at is null;
 
+-- A failure report may have only one active originating work order at a time.
+create unique index if not exists cmms_one_active_work_order_per_failure_uq
+  on public.cmms_work_orders(failure_report_id)
+  where failure_report_id is not null and status not in ('closed','cancelled');
+
 -- 3) Query support.
 create index if not exists cmms_approvals_order_stage_time_idx
   on public.cmms_work_order_approvals(work_order_id, stage, decided_at desc);
@@ -71,7 +76,10 @@ alter table public.cmms_pm_tasks
       completed_by is not null
       and completed_at is not null
       and checklist_result is not null
-      and jsonb_typeof(checklist_result) in ('object','array')
+      and (
+        (jsonb_typeof(checklist_result) = 'array' and jsonb_array_length(checklist_result) > 0)
+        or (jsonb_typeof(checklist_result) = 'object' and jsonb_object_length(checklist_result) > 0)
+      )
     )
   );
 
@@ -325,6 +333,16 @@ for each row execute function public.cmms_reject_history_mutation();
 drop trigger if exists cmms_approval_no_mutation on public.cmms_work_order_approvals;
 create trigger cmms_approval_no_mutation
 before update or delete on public.cmms_work_order_approvals
+for each row execute function public.cmms_reject_history_mutation();
+
+drop trigger if exists cmms_action_no_mutation on public.cmms_work_order_actions;
+create trigger cmms_action_no_mutation
+before update or delete on public.cmms_work_order_actions
+for each row execute function public.cmms_reject_history_mutation();
+
+drop trigger if exists cmms_asset_history_no_mutation on public.cmms_asset_status_history;
+create trigger cmms_asset_history_no_mutation
+before update or delete on public.cmms_asset_status_history
 for each row execute function public.cmms_reject_history_mutation();
 
 -- 8) Asset status history is generated in the same transaction as a status change.
