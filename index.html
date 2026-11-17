@@ -676,9 +676,9 @@ body{background:#F1F3F6!important;color:#202833!important}
   #management-hero{width:calc(100% + 36px)!important;max-width:none!important;margin-right:-18px!important;margin-left:-18px!important}
   #management-hero .hero-industrial{width:100%!important;box-sizing:border-box!important}
 }
-/* Raise the profile card by the requested 3.2 cm, while keeping it on-screen */
+/* Raise profile card to the top edge; larger offset would clip it off-screen */
 @media(min-width:701px){
-  #topbar .top-profile{top:0!important;transform:translateY(-18px)!important}
+  #topbar .top-profile{top:0!important;transform:none!important}
 }
 /* Dark 3D highlight treatment for the four dashboard request filters */
 #dashboard-kpis .kpi-row{
