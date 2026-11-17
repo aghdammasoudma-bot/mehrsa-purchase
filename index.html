@@ -1071,13 +1071,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
         <span class="top-profile-identity"><strong id="top-name"></strong><small id="top-role"></small></span>
         <span class="top-profile-chevron">⌄</span>
       </button>
-  <nav class="top-quick-nav" aria-label="دسترسی سریع">
-    <button type="button" data-view="inbox" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span> صندوق</button>
-    <button type="button" data-view="all" onclick="switchView('all')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span> درخواست‌ها</button>
-    <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
-    <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
-    <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
-  </nav>
+  
       <div class="top-profile-menu" id="top-profile-menu" hidden>
         <div class="top-profile-menu-title">حساب کاربری</div>
         <button type="button" class="profile-menu-logout" onclick="closeProfileMenu();cloudLogout()"><span>↩</span> خروج از حساب</button>
@@ -1092,7 +1086,13 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 </div>
 
 <!-- CONTENT -->
-<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="hero-caption">سامانه عملیات فنی</div></section>
+<section class="management-hero" id="management-hero" style="display:none"><div class="hero-industrial"><div class="hero-copy"><span class="hero-eyebrow">MEHRSA • TECHNICAL OPERATIONS</span><h2>سامانه عملیات فنی</h2><p>پایش درخواست‌ها، مأموریت‌ها و جریان عملیات</p></div><img class="mehrsa-hero-logo" src="./logo_mehrsa_shimi.png" alt="لوگوی مهرسا شیمی"><nav class="top-quick-nav" aria-label="دسترسی سریع">
+    <button type="button" data-view="inbox" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span> صندوق</button>
+    <button type="button" data-view="all" onclick="switchView('all')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span> درخواست‌ها</button>
+    <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
+    <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
+    <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
+  </nav><div class="factory-art" aria-hidden="true"><span class="stack stack-a"></span><span class="stack stack-b"></span><span class="tank tank-a"></span><span class="tank tank-b"></span><span class="pipe pipe-a"></span><span class="pipe pipe-b"></span><span class="factory-ground"></span></div><div class="hero-glow"></div></div><div class="hero-caption">سامانه عملیات فنی</div></section>
 <div class="content" id="main-content" style="display:none">
   <div id="quick-actions" class="quick-actions" aria-hidden="true" style="display:none"></div>
   <div id="dashboard-kpis"></div>
@@ -2043,6 +2043,33 @@ function printSection(elementId,title){
 }
 </style>
 
+
+<style id="navigation-inside-operations-card">
+/* Navigation is physically inside the same operations hero card */
+#management-hero .hero-industrial{position:relative!important;box-sizing:border-box!important;padding-bottom:76px!important;min-height:245px!important}
+#management-hero .top-quick-nav{
+ position:absolute!important;z-index:8!important;right:18px!important;left:18px!important;bottom:13px!important;
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;
+ gap:8px!important;width:auto!important;margin:0!important;padding:8px!important;
+ border:1px solid rgba(255,255,255,.22)!important;border-radius:13px!important;
+ background:rgba(8,20,38,.76)!important;backdrop-filter:blur(12px)!important;
+ direction:rtl!important;box-sizing:border-box!important
+}
+#management-hero .top-quick-nav button{
+ flex:1 1 0!important;min-width:0!important;min-height:40px!important;height:40px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+ padding:6px 9px!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:9px!important;
+ background:rgba(255,255,255,.09)!important;color:#fff!important;font-size:12px!important;white-space:nowrap!important
+}
+#management-hero .top-quick-nav button>span{display:grid!important;place-items:center!important;flex:0 0 24px!important;width:24px!important;height:24px!important;border-radius:7px!important;background:rgba(111,151,255,.22)!important;color:#fff!important}
+#management-hero .top-quick-nav button.top-nav-primary{background:linear-gradient(110deg,#4F7CFF,#6C63E8)!important;border-color:transparent!important}
+@media(max-width:700px){
+ #management-hero .hero-industrial{min-height:265px!important;padding-bottom:112px!important}
+ #management-hero .top-quick-nav{right:10px!important;left:10px!important;bottom:10px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:7px!important}
+ #management-hero .top-quick-nav button{height:36px!important;min-height:36px!important;font-size:10px!important;padding:5px!important;gap:4px!important}
+ #management-hero .top-quick-nav button>span{width:20px!important;height:20px!important;flex-basis:20px!important}
+}
+</style>
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
