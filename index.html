@@ -1077,6 +1077,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
     <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
     <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
     <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
+    <button type="button" class="nav-logout" onclick="closeProfileMenu();cloudLogout()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></span> خروج از حساب</button>
   </nav>
 
   
@@ -2121,7 +2122,7 @@ function printSection(elementId,title){
 }
 #topbar .top-quick-nav{
  position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
- display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+ display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
  grid-auto-flow:row!important;flex:none!important;flex-direction:row!important;flex-wrap:nowrap!important;
  gap:8px!important;width:100%!important;height:auto!important;max-height:none!important;
  margin:0!important;padding:9px!important;box-sizing:border-box!important;
@@ -2139,10 +2140,9 @@ function printSection(elementId,title){
  #topbar .topbar-head{display:flex!important;flex-direction:column!important;gap:10px!important}
  #topbar .top-profile{width:100%!important;flex:1 1 auto!important;padding:9px!important;gap:8px!important}
  #topbar .top-profile-trigger{min-height:48px!important}
- #topbar .top-quick-nav{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important;padding:7px!important}
- #topbar .top-quick-nav button{grid-column:span 2!important;min-height:38px!important;height:38px!important;font-size:11px!important}
- #topbar .top-quick-nav button:nth-child(4){grid-column:2/span 2!important}
- #topbar .top-quick-nav button:nth-child(5){grid-column:4/span 2!important}
+ #topbar .top-quick-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:7px!important}
+ #topbar .top-quick-nav button{grid-column:auto!important;min-height:38px!important;height:38px!important;font-size:11px!important}
+ #topbar .top-quick-nav .nav-logout{grid-column:auto!important}
  #topbar .topbar-brand{width:100%!important;text-align:center!important}
 }
 </style>
@@ -2822,6 +2822,7 @@ button:disabled{opacity:.48!important;filter:saturate(.55)}
   #topbar .topbar-brand{order:2!important;width:100%!important;text-align:center!important}
   #topbar .top-profile{order:1!important}
 }
+#topbar .top-quick-nav .nav-logout{background:rgba(139,45,56,.22)!important;border:1px solid rgba(255,130,140,.3)!important;color:#ffdadd!important}
 </style>
 </body>
 </html>
