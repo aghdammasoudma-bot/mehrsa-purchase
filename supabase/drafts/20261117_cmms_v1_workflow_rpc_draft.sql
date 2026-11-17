@@ -199,6 +199,7 @@ begin
       and r.is_active
       and r.location_id is null
       and r.role in ('technician','technical_expert')
+      and exists (select 1 from public.user_profiles up where up.user_id=r.user_id and up.is_active)
   ) then
     raise exception 'Assignee has no active technician CMMS role';
   end if;
@@ -568,6 +569,7 @@ begin
     select 1 from public.cmms_user_roles ur
     where ur.user_id=p_assignee_id and ur.is_active
       and ur.location_id is null and ur.role in ('technician','technical_expert')
+      and exists (select 1 from public.user_profiles up where up.user_id=ur.user_id and up.is_active)
   ) then
     raise exception 'PM assignee has no active technician role';
   end if;
