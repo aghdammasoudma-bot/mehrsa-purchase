@@ -490,6 +490,177 @@ begin
 end;
 $$;
 
+create or replace function cmms_private.cmms_record_meter_reading(
+  p_asset_id uuid,
+  p_meter_code text,
+  p_meter_unit text,
+  p_meter_value numeric
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_location_id uuid;
+  v_reading_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(btrim(coalesce(p_meter_code,'')),'') is null
+     or nullif(btrim(coalesce(p_meter_unit,'')),'') is null
+     or p_meter_value is null or p_meter_value < 0 then
+    raise exception 'Valid meter code, unit and non-negative reading are required';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=p_asset_id;
+  if not found then raise exception 'Asset not found'; end if;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technician','technical_expert','technical_supervisor'],v_location_id
+  ) then
+    raise exception 'No permission to record meter readings for this asset';
+  end if;
+
+  insert into public.cmms_asset_meter_readings(
+    asset_id,meter_code,meter_unit,meter_value,recorded_by,source
+  ) values (
+    p_asset_id,btrim(p_meter_code),btrim(p_meter_unit),p_meter_value,auth.uid(),'manual'
+  ) returning id into v_reading_id;
+
+  return v_reading_id;
+end;
+$;
+
+create or replace function cmms_private.cmms_assign_pm_task(
+  p_pm_task_id uuid,
+  p_assignee_id uuid
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_task public.cmms_pm_tasks%rowtype;
+  v_location_id uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+
+  select t.* into v_task
+  from public.cmms_pm_tasks t where t.id=p_pm_task_id
+  for update;
+
+  if not found or v_task.status not in ('due','overdue','assigned') then
+    raise exception 'PM task is not available for assignment';
+  end if;
+
+  select a.location_id into v_location_id
+  from public.cmms_assets a where a.id=v_task.asset_id;
+
+  if not cmms_private.cmms_has_role_at_location(
+    array['technical_expert','technical_supervisor'],v_location_id
+  ) then
+    raise exception 'Only technical expert or supervisor can assign PM tasks';
+  end if;
+
+  if not exists (
+    select 1 from public.cmms_user_roles ur
+    where ur.user_id=p_assignee_id and ur.is_active
+      and ur.location_id is null and ur.role in ('technician','technical_expert')
+  ) then
+    raise exception 'PM assignee has no active technician role';
+  end if;
+
+  update public.cmms_pm_tasks
+  set assigned_to=p_assignee_id,status='assigned'
+  where id=p_pm_task_id;
+
+  return p_pm_task_id;
+end;
+$;
+
+-- Server-side PM generation. Calendar and meter plans are separate bases in v1.
+-- Each missed interval is generated once; unique indexes make reruns idempotent.
+create or replace function cmms_private.cmms_generate_due_pm_tasks()
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_plan public.cmms_pm_plans%rowtype;
+  v_latest_meter numeric(14,3);
+  v_next_due_at timestamptz;
+  v_next_due_meter numeric(14,3);
+  v_created integer := 0;
+  v_rows integer;
+  v_runs integer;
+begin
+  for v_plan in
+    select p.* from public.cmms_pm_plans p
+    where p.is_active
+    order by p.created_at,p.id
+    for update skip locked
+  loop
+    v_runs := 0;
+
+    if v_plan.frequency_basis='calendar' then
+      v_next_due_at := v_plan.next_due_at;
+
+      while v_next_due_at <= now() and v_runs < 100 loop
+        insert into public.cmms_pm_tasks(pm_plan_id,asset_id,due_at,trigger_type,status)
+        values(v_plan.id,v_plan.asset_id,v_next_due_at,'calendar','due')
+        on conflict do nothing;
+        get diagnostics v_rows = row_count;
+        v_created := v_created + v_rows;
+
+        v_next_due_at := case v_plan.frequency_unit
+          when 'day' then v_next_due_at + make_interval(days => v_plan.frequency_value::integer)
+          when 'week' then v_next_due_at + make_interval(weeks => v_plan.frequency_value::integer)
+          when 'month' then v_next_due_at + make_interval(months => v_plan.frequency_value::integer)
+          when 'year' then v_next_due_at + make_interval(years => v_plan.frequency_value::integer)
+        end;
+        v_runs := v_runs + 1;
+      end loop;
+
+      update public.cmms_pm_plans set next_due_at=v_next_due_at where id=v_plan.id;
+
+    elsif v_plan.frequency_basis='meter' then
+      select mr.meter_value into v_latest_meter
+      from public.cmms_asset_meter_readings mr
+      where mr.asset_id=v_plan.asset_id
+        and mr.meter_code=v_plan.meter_code
+        and mr.meter_unit=v_plan.meter_unit
+      order by mr.reading_at desc,mr.created_at desc
+      limit 1;
+
+      if v_latest_meter is null then
+        continue;
+      end if;
+
+      v_next_due_meter := v_plan.next_due_meter_value;
+      while v_next_due_meter <= v_latest_meter and v_runs < 100 loop
+        insert into public.cmms_pm_tasks(pm_plan_id,asset_id,due_meter_value,trigger_type,status)
+        values(v_plan.id,v_plan.asset_id,v_next_due_meter,'meter','due')
+        on conflict do nothing;
+        get diagnostics v_rows = row_count;
+        v_created := v_created + v_rows;
+
+        v_next_due_meter := v_next_due_meter + v_plan.frequency_value;
+        v_runs := v_runs + 1;
+      end loop;
+
+      update public.cmms_pm_plans
+      set next_due_meter_value=v_next_due_meter,last_meter_value=v_latest_meter
+      where id=v_plan.id;
+    end if;
+  end loop;
+
+  return v_created;
+end;
+$;
+
 -- Public API wrappers are SECURITY INVOKER, not SECURITY DEFINER.
 create or replace function public.cmms_report_failure(
   p_asset_id uuid,p_priority text,p_description text,p_symptoms text default null,
@@ -528,6 +699,15 @@ create or replace function public.cmms_decide_work_order(
   p_work_order_id uuid,p_stage text,p_decision text,p_note text default null
 ) returns text as $$ select cmms_private.cmms_decide_work_order($1,$2,$3,$4); $$ language sql security invoker set search_path = '';
 
+create or replace function public.cmms_record_meter_reading(
+  p_asset_id uuid,p_meter_code text,p_meter_unit text,p_meter_value numeric
+) returns uuid language sql security invoker set search_path=''
+as $ select cmms_private.cmms_record_meter_reading($1,$2,$3,$4); $;
+
+create or replace function public.cmms_assign_pm_task(p_pm_task_id uuid,p_assignee_id uuid)
+returns uuid language sql security invoker set search_path=''
+as $ select cmms_private.cmms_assign_pm_task($1,$2); $;
+
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
 returns uuid language sql security invoker set search_path=''
 as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$;
@@ -544,6 +724,10 @@ grant execute on function cmms_private.cmms_submit_work_order_test(uuid,text,tex
 grant execute on function cmms_private.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
+grant execute on function cmms_private.cmms_assign_pm_task(uuid,uuid) to authenticated;
+revoke all on function cmms_private.cmms_generate_due_pm_tasks() from public,anon,authenticated;
+grant execute on function cmms_private.cmms_generate_due_pm_tasks() to service_role;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
 grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to authenticated;
 
@@ -556,6 +740,8 @@ revoke all on function public.cmms_submit_work_order_test(uuid,text,text,timesta
 revoke all on function public.cmms_set_work_order_progress(uuid,text) from public, anon;
 revoke all on function public.cmms_decide_work_order(uuid,text,text,text) from public, anon;
 revoke all on function public.cmms_complete_pm_task(uuid,jsonb) from public, anon;
+revoke all on function public.cmms_record_meter_reading(uuid,text,text,numeric) from public, anon;
+revoke all on function public.cmms_assign_pm_task(uuid,uuid) from public, anon;
 
 grant execute on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) to authenticated;
 grant execute on function public.cmms_triage_failure(uuid,text,text) to authenticated;
@@ -566,11 +752,13 @@ grant execute on function public.cmms_submit_work_order_test(uuid,text,text,time
 grant execute on function public.cmms_set_work_order_progress(uuid,text) to authenticated;
 grant execute on function public.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function public.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function public.cmms_record_meter_reading(uuid,text,text,numeric) to authenticated;
+grant execute on function public.cmms_assign_pm_task(uuid,uuid) to authenticated;
 
 commit;
 
 -- Remaining v1 server-side work before release:
--- * scheduled calendar/meter/hybrid PM generation and missed-run recovery;
+-- * scheduling cmms_private.cmms_generate_due_pm_tasks() with pg_cron or a service-role scheduler;
 -- * cancellation and controlled reassignment/unassignment RPCs;
 -- * report export, notification delivery, and purchase-link RPC;
 -- * integration tests in isolated PostgreSQL/Supabase staging;
