@@ -1514,7 +1514,7 @@ function openRequest(id){
   if(title) title.textContent=r.title||"جزئیات درخواست";
   if(number) number.textContent="شماره درخواست: "+r.id+" · "+statusLabel(r.status);
   if(modal){
-    window.__requestModalReturnFocus=document.activeElement;
+    window.__requestModalReturnFocus=row||document.activeElement;
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden","false");
     document.body.classList.add("request-modal-open");
@@ -2215,7 +2215,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible,[tabindex]:focus-vi
 #request-detail-panel .actions{position:sticky;bottom:-20px;z-index:3;display:flex!important;flex-wrap:wrap;gap:9px!important;padding:13px 0 4px;margin:16px -20px -20px!important;background:linear-gradient(180deg,rgba(18,28,56,.92),#121C38 28%)!important;border-top:1px solid var(--app-border)!important}
 #request-detail-panel .actions .btn{flex:1 1 150px;width:auto!important;min-height:44px!important}
 #request-detail-panel .comment-box{background:#172544!important;color:var(--app-text)!important;border:1px solid var(--app-border)!important;border-radius:12px;padding:12px}
-body.request-modal-open{overflow:hidden!important;touch-action:none}
+body.request-modal-open{overflow:hidden!important}
 @media(max-width:760px){
  .request-modal{align-items:flex-end;padding:0}
  .request-modal-sheet{width:100%;max-width:none;max-height:90dvh;height:auto;border-radius:20px 20px 0 0;border-bottom:0;transform:translateY(100%);opacity:1;transition:transform .26s cubic-bezier(.2,.8,.2,1)}
