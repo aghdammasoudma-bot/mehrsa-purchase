@@ -138,3 +138,11 @@ Read-only verification against project `jpzgtbafrpjjbtwqwzlr`:
 - `supabase/drafts/20261117_cmms_v1_authorization_draft.sql` adds a dedicated non-API helper schema, role/scope helper functions, location-ancestor access checks, SELECT-only RLS policies for all 14 CMMS tables, and explicit least-privilege table grants. Client-side direct writes are deliberately denied; state changes must go through narrowly scoped RPCs.
 - `supabase/drafts/20261117_cmms_v1_role_seed_draft.sql` maps the four confirmed usernames using a query against `user_profiles`: masoud → technical_supervisor; biabani → responsible_manager; reza → technical_expert; hamid → technician. It does not alter legacy roles and leaves mohammadi/karami without CMMS access.
 - These are draft SQL files only. The authorization policies have not been executed or tested against a staging database. RPCs for failure intake, triage, work-order lifecycle, assignment, actions, approvals, PM task generation/completion, audit writes and purchase linking remain to be implemented before any write workflow is enabled.
+
+
+## 15. SECURITY DEFINER function review — read-only detail
+The production function definitions and ACLs were inspected, not just the Advisor summary:
+- `admin_update_purchase_request(text,jsonb)` is executable by anon and authenticated, but its body checks `auth.uid()` against an active `admin` profile before updating. Anonymous calls should fail this guard; the anon EXECUTE grant is still unnecessary exposure and should be reviewed as a separate, regression-tested security change.
+- `rls_auto_enable()` is not an ordinary RPC: it is the function for the enabled `ensure_rls` event trigger on `ddl_command_end`, owned by postgres. The generic Advisor flags its EXECUTE ACL; do not revoke blindly without confirming event-trigger behavior. Its public/anon/authenticated ACL should be tightened in a controlled change while preserving event-trigger operation.
+- The other inspected SECURITY DEFINER functions include purchase creation, transition, deletion, admin approval and technical-work-order update/approval. Their bodies include profile/role, ownership, assignment or state checks. They are part of the live purchase/mission workflow and remain unchanged during CMMS work.
+- No production security ACLs were changed.
