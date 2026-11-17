@@ -1020,6 +1020,30 @@ body{overflow-x:hidden!important;line-height:1.55!important}
  .request-detail-column{order:2!important;position:static!important;max-height:none!important;padding:11px!important}
  #req-list .request-table{min-width:610px!important}
 }
+
+/* Navigation inside the profile sidecard */
+@media(min-width:701px){
+ #topbar .top-profile{gap:12px!important}
+ #topbar .top-quick-nav{position:static!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;max-height:none!important;overflow:visible!important;gap:7px!important;padding:11px 0 0!important;margin:0!important;border-top:1px solid rgba(145,173,224,.22)!important;direction:rtl!important}
+ #topbar .top-quick-nav button{width:100%!important;min-height:42px!important;justify-content:flex-start!important;padding:9px 11px!important;border:1px solid rgba(145,173,224,.18)!important;border-radius:11px!important;background:rgba(37,57,88,.52)!important;color:#EAF0FF!important;font-size:12px!important}
+ #topbar .top-quick-nav button:hover,#topbar .top-quick-nav button.active{background:linear-gradient(110deg,rgba(79,124,255,.27),rgba(124,92,255,.18))!important;border-color:rgba(125,157,255,.48)!important;color:#fff!important}
+ #topbar .top-quick-nav button>span{display:grid!important;place-items:center!important;width:27px!important;height:27px!important;border-radius:8px!important;background:rgba(79,124,255,.18)!important;color:#BFD0FF!important}
+ #topbar .top-quick-nav button.top-nav-primary{background:linear-gradient(110deg,#4F7CFF,#6C63E8)!important;border-color:transparent!important;color:#fff!important}
+ #topbar .top-quick-nav button.top-nav-primary>span{background:rgba(255,255,255,.17)!important;color:#fff!important}
+}
+@media(max-width:700px){
+ #topbar .top-profile{gap:8px!important}
+ #topbar .top-quick-nav{position:static!important;display:grid!important;width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:10px 0 0!important;margin:0!important;border-top:1px solid rgba(145,173,224,.22)!important;direction:rtl!important;max-height:none!important;overflow:visible!important}
+ #topbar .top-quick-nav button{min-width:0!important;width:100%!important;min-height:40px!important;padding:7px!important;justify-content:center!important;font-size:10px!important}
+ #topbar .top-quick-nav button.top-nav-primary{grid-column:span 2!important}
+}
+#management-hero .mehrsa-hero-logo{max-width:250px!important;max-height:112px!important;width:clamp(190px,22vw,250px)!important;height:clamp(82px,10vw,112px)!important;object-fit:contain!important;opacity:1!important}
+#management-hero .hero-industrial{min-height:190px!important}
+@media(max-width:700px){
+ #management-hero .mehrsa-hero-logo{max-width:145px!important;max-height:66px!important;width:145px!important;height:66px!important;top:12px!important;right:14px!important}
+ #management-hero .hero-industrial{min-height:205px!important}
+ #management-hero .hero-copy{padding-top:48px!important}
+}
 </style>
 </head>
 <body>
@@ -1047,6 +1071,13 @@ body{overflow-x:hidden!important;line-height:1.55!important}
         <span class="top-profile-identity"><strong id="top-name"></strong><small id="top-role"></small></span>
         <span class="top-profile-chevron">⌄</span>
       </button>
+  <nav class="top-quick-nav" aria-label="دسترسی سریع">
+    <button type="button" data-view="inbox" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span> صندوق</button>
+    <button type="button" data-view="all" onclick="switchView('all')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span> درخواست‌ها</button>
+    <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
+    <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
+    <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
+  </nav>
       <div class="top-profile-menu" id="top-profile-menu" hidden>
         <div class="top-profile-menu-title">حساب کاربری</div>
         <button type="button" class="profile-menu-logout" onclick="closeProfileMenu();cloudLogout()"><span>↩</span> خروج از حساب</button>
@@ -1057,13 +1088,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
       <div class="top-sub">مدیریت درخواست‌های فنی و خرید</div>
     </div>
   </div>
-  <nav class="top-quick-nav" aria-label="دسترسی سریع">
-    <button type="button" data-view="inbox" onclick="switchView('inbox')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg></span> صندوق</button>
-    <button type="button" data-view="all" onclick="switchView('all')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span> درخواست‌ها</button>
-    <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
-    <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
-    <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
-  </nav>
+
 </div>
 
 <!-- CONTENT -->
