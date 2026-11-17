@@ -73,7 +73,7 @@ create table if not exists public.cmms_work_orders (
   title text not null,
   description text,
   priority text not null default 'normal' check (priority in ('low','normal','high','critical')),
-  status text not null default 'approved_for_execution' check (status in ('approved_for_execution','assigned','in_progress','waiting_parts','testing','pending_supervisor_approval','pending_manager_approval','rework','closed','cancelled')),
+  status text not null default 'triage' check (status in ('triage','approved_for_execution','assigned','in_progress','waiting_parts','testing','pending_supervisor_approval','pending_manager_approval','rework','closed','cancelled')),
   opened_by uuid not null references auth.users(id) on delete restrict,
   downtime_started_at timestamptz,
   returned_to_service_at timestamptz,
