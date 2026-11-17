@@ -24,6 +24,7 @@ create index if not exists cmms_approvals_order_stage_time_idx
   on public.cmms_work_order_approvals(work_order_id, stage, decided_at desc);
 create index if not exists cmms_failure_reports_reporter_time_idx
   on public.cmms_failure_reports(reported_by, created_at desc);
+create index if not exists cmms_meter_readings_asset_time_idx on public.cmms_asset_meter_readings(asset_id,meter_code,reading_at desc);
 create index if not exists cmms_pm_plans_due_idx
   on public.cmms_pm_plans(is_active, next_due_at);
 
@@ -410,6 +411,11 @@ create trigger cmms_approval_no_mutation
 before update or delete on public.cmms_work_order_approvals
 for each row execute function public.cmms_reject_history_mutation();
 
+drop trigger if exists cmms_meter_readings_no_mutation on public.cmms_asset_meter_readings;
+create trigger cmms_meter_readings_no_mutation
+before update or delete on public.cmms_asset_meter_readings
+for each row execute function public.cmms_reject_history_mutation();
+
 drop trigger if exists cmms_action_no_mutation on public.cmms_work_order_actions;
 create trigger cmms_action_no_mutation
 before update or delete on public.cmms_work_order_actions
@@ -487,6 +493,23 @@ begin
   return new;
 end;
 $;
+
+-- Record role roster, category dictionary, approval and meter-reading changes.
+drop trigger if exists cmms_audit_user_roles on public.cmms_user_roles;
+create trigger cmms_audit_user_roles after insert or update or delete on public.cmms_user_roles
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_asset_categories on public.cmms_asset_categories;
+create trigger cmms_audit_asset_categories after insert or update or delete on public.cmms_asset_categories
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_approvals on public.cmms_work_order_approvals;
+create trigger cmms_audit_approvals after insert on public.cmms_work_order_approvals
+for each row execute function public.cmms_write_audit_log();
+
+drop trigger if exists cmms_audit_meter_readings on public.cmms_asset_meter_readings;
+create trigger cmms_audit_meter_readings after insert on public.cmms_asset_meter_readings
+for each row execute function public.cmms_write_audit_log();
 
 drop trigger if exists cmms_audit_locations on public.cmms_locations;
 create trigger cmms_audit_locations after insert or update or delete on public.cmms_locations
