@@ -173,6 +173,7 @@ The production function definitions and ACLs were inspected, not just the Adviso
   - hamid → technician
 - A subsequent read-only catalog check confirmed zero `cmms_*` relations and zero `cmms_private` schema remaining; the pre-existing `private_backup.snapshots` table remained present. This was syntax/dependency validation only; no CMMS tables, roles, policies, functions or grants remain in production.
 - All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
+- After the rollback validation, additional asset/location CRUD, PM-plan management, asset-status, cancellation/reassignment and Storage policy drafts were added. The latest RPC/Storage changes have passed static structural checks (balanced SQL dollar quotes, no duplicate function names, all app inline scripts compile) but have not been rerun through PostgreSQL or isolated staging. They remain unvalidated release inputs.
 - No CMMS production migration or deployment has occurred. `main` remains untouched.
 - Remaining release blockers: external restorable backup and restore test; isolated staging execution; full RLS/RPC negative and positive tests; actual scheduled PM job; cancellation/reassignment and controlled purchase-link RPCs; private Storage policies; UI data binding and browser/iPhone tests; purchase-module regression.
 
