@@ -139,7 +139,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_location_id uuid;
   v_work_order_id uuid;
@@ -179,7 +179,7 @@ begin
 
   return v_work_order_id;
 end;
-$;
+$$;
 
 create or replace function cmms_private.cmms_release_work_order(p_work_order_id uuid)
 returns text
@@ -1378,7 +1378,7 @@ create or replace function public.cmms_create_work_order(
   p_due_at timestamptz default null,p_estimated_duration_minutes integer default null,
   p_permit_required boolean default false,p_permit_reference text default null,
   p_isolation_required boolean default false
-) returns uuid as $ select cmms_private.cmms_create_work_order($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $ language sql security invoker set search_path='';
+) returns uuid as $$ select cmms_private.cmms_create_work_order($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12); $$ language sql security invoker set search_path='';
 
 create or replace function public.cmms_release_work_order(p_work_order_id uuid)
 returns text as $$ select cmms_private.cmms_release_work_order($1); $$ language sql security invoker set search_path = '';
