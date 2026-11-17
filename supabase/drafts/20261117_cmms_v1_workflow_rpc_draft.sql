@@ -669,16 +669,13 @@ create or replace function public.cmms_report_failure(
 ) returns uuid as $$ select cmms_private.cmms_report_failure($1,$2,$3,$4,$5,$6,$7,$8); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_triage_failure(p_failure_report_id uuid,p_decision text,p_note text default null)
-returns uuid language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_triage_failure($1,$2,$3); $$;
+returns uuid as $$ select cmms_private.cmms_triage_failure($1,$2,$3); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_release_work_order(p_work_order_id uuid)
-returns text language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_release_work_order($1); $$;
+returns text as $$ select cmms_private.cmms_release_work_order($1); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_assign_work_order(p_work_order_id uuid,p_assignee_id uuid)
-returns uuid language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_assign_work_order($1,$2); $$;
+returns uuid as $$ select cmms_private.cmms_assign_work_order($1,$2); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_record_work_order_action(
   p_work_order_id uuid,p_action_type text,p_description text,p_duration_minutes integer default null,
@@ -687,8 +684,7 @@ create or replace function public.cmms_record_work_order_action(
 ) returns uuid as $$ select cmms_private.cmms_record_work_order_action($1,$2,$3,$4,$5,$6,$7,$8); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_set_work_order_progress(p_work_order_id uuid,p_next_status text)
-returns text language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_set_work_order_progress($1,$2); $$;
+returns text as $$ select cmms_private.cmms_set_work_order_progress($1,$2); $$ language sql security invoker set search_path = '';
 
 create or replace function public.cmms_submit_work_order_test(
   p_work_order_id uuid,p_test_result text,p_return_to_service_status text,
@@ -709,8 +705,7 @@ returns uuid language sql security invoker set search_path=''
 as $ select cmms_private.cmms_assign_pm_task($1,$2); $;
 
 create or replace function public.cmms_complete_pm_task(p_pm_task_id uuid,p_checklist_result jsonb)
-returns uuid language sql security invoker set search_path=''
-as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$;
+returns uuid as $$ select cmms_private.cmms_complete_pm_task($1,$2); $$ language sql security invoker set search_path = '';
 
 -- Internal functions are not directly exposed as RPC endpoints.
 revoke all on all functions in schema cmms_private from public, anon, authenticated;
