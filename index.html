@@ -979,23 +979,14 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 
 <!-- TOP BAR -->
 <div class="top" id="topbar" style="display:none">
-  <div class="top-profile" id="top-profile">
-    <button class="top-profile-trigger" id="top-profile-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="top-profile-menu" onclick="toggleProfileMenu(event)">
-      <span class="top-profile-avatar" id="top-profile-avatar">؟</span>
-      <span class="top-profile-identity"><strong id="top-name"></strong><small id="top-role"></small></span>
-      <span class="top-profile-chevron">⌄</span>
-    </button>
-    <div class="top-profile-menu" id="top-profile-menu" hidden>
-      <div class="top-profile-menu-title">دسترسی سریع</div>
-      <button type="button" data-view="inbox" onclick="selectProfileView('inbox')"><span>▣</span> صندوق ورودی</button>
-      <button type="button" data-view="all" onclick="selectProfileView('all')"><span>▤</span> درخواست‌ها</button>
-      <button type="button" class="profile-menu-primary" onclick="closeProfileMenu();openNewRequest()"><span>＋</span> ثبت درخواست جدید</button>
-      <button type="button" data-view="work" onclick="selectProfileView('work')"><span>⚙</span> مأموریت‌ها</button>
-      <button type="button" data-view="done" onclick="selectProfileView('done')"><span>✓</span> تکمیل‌شده</button>
-      <div class="top-profile-menu-divider"></div>
-      <button type="button" class="profile-menu-logout" onclick="closeProfileMenu();cloudLogout()"><span>↩</span> خروج از حساب</button>
-    </div>
-  </div>
+  <nav class="top-quick-nav" aria-label="دسترسی سریع">
+    <button type="button" data-view="inbox" onclick="switchView('inbox')"><span>▣</span> صندوق</button>
+    <button type="button" data-view="all" onclick="switchView('all')"><span>▤</span> درخواست‌ها</button>
+    <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span>＋</span> ثبت</button>
+    <button type="button" data-view="work" onclick="switchView('work')"><span>⚙</span> مأموریت</button>
+    <button type="button" data-view="done" onclick="switchView('done')"><span>✓</span> تکمیل</button>
+    <button type="button" class="top-nav-logout" onclick="cloudLogout()" title="خروج از حساب" aria-label="خروج از حساب"><span>↩</span></button>
+  </nav>
   <div class="topbar-brand">
     <div class="h1">سامانه عملیات فنی مهرسا</div>
     <div class="top-sub">مدیریت درخواست‌ها و مأموریت‌ها</div>
@@ -2137,6 +2128,28 @@ setInterval(addPrintButtons,1200);
  #main-content.content{padding-bottom:24px!important}
 }
 
+/* Top navigation: show the actual sections, not the user's profile */
+#topbar.top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;min-height:66px!important;padding:8px 22px!important}
+.top-quick-nav{display:flex!important;align-items:center!important;gap:6px!important;flex:0 1 auto!important;order:0!important;direction:rtl!important}
+.top-quick-nav button{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:38px!important;padding:7px 12px!important;border:1px solid #E4E7EC!important;border-radius:9px!important;background:#fff!important;color:#344054!important;font-size:11px!important;font-weight:650!important;white-space:nowrap!important;cursor:pointer!important;transition:background .15s,border-color .15s!important}
+.top-quick-nav button:hover,.top-quick-nav button.active{background:#F2F6FC!important;border-color:#C9D7EE!important;color:#244A86!important}
+.top-quick-nav button>span{font-size:15px!important;line-height:1!important;color:#667085!important}
+.top-quick-nav button.top-nav-primary{background:#3157A4!important;border-color:#3157A4!important;color:#fff!important}
+.top-quick-nav button.top-nav-primary>span{color:#fff!important}
+.top-quick-nav button.top-nav-logout{min-width:38px!important;padding:7px!important;color:#B42332!important}
+.top-quick-nav button.top-nav-logout>span{color:#B42332!important}
+#topbar .topbar-brand{margin-right:auto!important;flex:0 0 auto!important;text-align:left!important}
+#mobile-bottom-nav{display:none!important}
+@media(max-width:700px){
+ #topbar.top{height:auto!important;min-height:unset!important;padding:8px 9px!important;align-items:flex-start!important;gap:8px!important;flex-direction:column!important}
+ .top-quick-nav{width:100%!important;order:0!important;justify-content:space-between!important;gap:4px!important}
+ .top-quick-nav button{flex:1 1 auto!important;min-width:0!important;min-height:36px!important;padding:6px 5px!important;gap:4px!important;font-size:9px!important}
+ .top-quick-nav button>span{font-size:13px!important}
+ .top-quick-nav button.top-nav-logout{flex:0 0 34px!important;min-width:34px!important}
+ #topbar .topbar-brand{order:1!important;margin:0!important}
+ #topbar .topbar-brand .h1{font-size:11px!important}
+ #topbar .topbar-brand .top-sub{font-size:8px!important}
+}
 </style>
 </body>
 </html>
