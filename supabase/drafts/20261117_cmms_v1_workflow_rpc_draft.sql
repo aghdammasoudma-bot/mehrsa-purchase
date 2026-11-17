@@ -74,7 +74,7 @@ declare
   v_work_order_id uuid;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if p_decision not in ('convert','reject') then raise exception 'Invalid triage decision'; end if;
+  if p_decision is null or p_decision not in ('convert','reject') then raise exception 'Invalid triage decision'; end if;
   if p_decision = 'reject' and nullif(btrim(coalesce(p_note,'')), '') is null then
     raise exception 'Rejection reason is required';
   end if;
@@ -420,7 +420,7 @@ declare
   v_is_assigned boolean;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if p_test_result not in ('passed','failed','partial') then raise exception 'Invalid test result'; end if;
+  if p_test_result is null or p_test_result not in ('passed','failed','partial') then raise exception 'Invalid test result'; end if;
 
   select w.* into v_wo
   from public.cmms_work_orders w where w.id=p_work_order_id
@@ -451,7 +451,7 @@ begin
   end if;
 
   if p_test_result='passed' then
-    if p_return_to_service_status not in ('returned','not_required') then
+    if p_return_to_service_status is null or p_return_to_service_status not in ('returned','not_required') then
       raise exception 'Explicit return-to-service decision is required';
     end if;
     if p_return_to_service_status='returned' and p_returned_to_service_at is null then
