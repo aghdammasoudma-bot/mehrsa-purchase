@@ -172,3 +172,16 @@ The production function definitions and ACLs were inspected, not just the Adviso
 - All four inline scripts in the development-branch app pass JavaScript syntax compilation. This is not browser, mobile, RLS, security, workflow or end-to-end testing.
 - No CMMS production migration or deployment has occurred. `main` remains untouched.
 - Remaining release blockers: external restorable backup and restore test; isolated staging execution; full RLS/RPC negative and positive tests; actual scheduled PM job; cancellation/reassignment and controlled purchase-link RPCs; private Storage policies; UI data binding and browser/iPhone tests; purchase-module regression.
+
+
+## 17. Backup inventory and remaining recovery gap
+Read-only production inventory after the rollback validation:
+- `public.pr_requests`: 46 rows.
+- `public.user_profiles`: 6 rows.
+- `public.technical_work_orders`: 3 rows.
+- `auth.users`: 6 users.
+- `storage.buckets` and `storage.objects`: both currently 0.
+- Public base tables: 3. No CMMS relations remain in production.
+- No Supabase migration history was returned by the Supabase migration-list tool.
+
+The existing `private_backup.snapshots` record is still an in-project snapshot. It is not an external restorable backup. Supabase's current backup documentation says Free projects should regularly export data using the Supabase CLI; database backups also do not include Storage object bytes. Current Storage inventory is zero, but Auth and application data still need an external backup and isolated restore test. The connected Supabase actions do not expose a downloadable `db dump` operation in this session. No backup export has been fabricated or claimed complete.
