@@ -193,13 +193,12 @@ begin
     raise exception 'Only technical expert or supervisor can assign work';
   end if;
 
-  if not (
-    cmms_private.cmms_has_role_at_location(array['technician'],v_location_id)
-    and exists (
-      select 1 from public.cmms_user_roles r
-      where r.user_id=p_assignee_id and r.is_active and r.location_id is null
-        and r.role in ('technician','technical_expert')
-    )
+  if not exists (
+    select 1 from public.cmms_user_roles r
+    where r.user_id=p_assignee_id
+      and r.is_active
+      and r.location_id is null
+      and r.role in ('technician','technical_expert')
   ) then
     raise exception 'Assignee has no active technician CMMS role';
   end if;
@@ -210,7 +209,7 @@ begin
 
   update public.cmms_work_orders
   set status='assigned',updated_at=now()
-  where id=p_work_order_id and status='approved_for_execution';
+  where id=p_work_order_id and status in ('approved_for_execution','rework');
 
   return v_assignment_id;
 end;
@@ -486,6 +485,8 @@ grant execute on function cmms_private.cmms_record_work_order_action(uuid,text,t
 grant execute on function cmms_private.cmms_submit_work_order_test(uuid,text,text,timestamptz,text,text[]) to authenticated;
 grant execute on function cmms_private.cmms_decide_work_order(uuid,text,text,text) to authenticated;
 grant execute on function cmms_private.cmms_complete_pm_task(uuid,jsonb) to authenticated;
+grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
+grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to authenticated;
 
 revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[]) from public, anon;
 revoke all on function public.cmms_triage_failure(uuid,text,text) from public, anon;
