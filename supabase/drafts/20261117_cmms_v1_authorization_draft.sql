@@ -13,7 +13,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = pg_catalog, public, auth, cmms_private
+set search_path = ''
 as $$
   select auth.uid() is not null and exists (
     select 1
@@ -72,10 +72,10 @@ using (
 -- Locations and category dictionary.
 create policy cmms_locations_read_scope
 on public.cmms_locations for select to authenticated
-using (cmms_private.cmms_has_role_at_location(
+using ((select cmms_private.cmms_has_role_at_location(
   array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
   id
-));
+)));
 create policy cmms_categories_read_cmms
 on public.cmms_asset_categories for select to authenticated
 using (cmms_private.cmms_has_any_role(
@@ -88,7 +88,7 @@ on public.cmms_assets for select to authenticated
 using (cmms_private.cmms_has_role_at_location(
   array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
   location_id
-));
+)));
 
 -- Failure reports: read within permitted asset location.
 create policy cmms_failures_read_scope
@@ -99,7 +99,7 @@ using (exists (
     and cmms_private.cmms_has_role_at_location(
       array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
       a.location_id
-    )
+    ))
 ));
 
 -- Work orders.
@@ -188,7 +188,7 @@ using (exists (
 -- Audit is restricted to the two governance roles.
 create policy cmms_audit_read_governance
 on public.cmms_audit_logs for select to authenticated
-using (cmms_private.cmms_has_any_role(array['technical_supervisor','responsible_manager']));
+using ((select cmms_private.cmms_has_any_role(array['technical_supervisor','responsible_manager'])));
 
 create policy cmms_purchase_links_read_scope
 on public.cmms_work_order_purchase_links for select to authenticated
