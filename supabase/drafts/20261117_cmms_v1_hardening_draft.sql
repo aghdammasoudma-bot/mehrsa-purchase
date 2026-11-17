@@ -74,6 +74,36 @@ alter table public.cmms_pm_tasks
     )
   );
 
+-- 5b) Work-order closure integrity: never close before a passed test,
+-- explicit return-to-service, both current approvals, and two distinct approvers.
+alter table public.cmms_work_orders
+  drop constraint if exists cmms_work_order_closeout_integrity;
+alter table public.cmms_work_orders
+  add constraint cmms_work_order_closeout_integrity check (
+    (status = 'closed') = (closed_at is not null)
+    and (
+      status <> 'closed'
+      or (
+        test_result = 'passed'
+        and returned_to_service_at is not null
+        and supervisor_approved_by is not null
+        and supervisor_approved_at is not null
+        and manager_approved_by is not null
+        and manager_approved_at is not null
+        and supervisor_approved_by <> manager_approved_by
+      )
+    )
+  );
+
+alter table public.cmms_work_orders
+  drop constraint if exists cmms_work_order_approval_timestamp_integrity;
+alter table public.cmms_work_orders
+  add constraint cmms_work_order_approval_timestamp_integrity check (
+    (supervisor_approved_by is null) = (supervisor_approved_at is null)
+    and (manager_approved_by is null) = (manager_approved_at is null)
+    and (manager_approved_by is null or supervisor_approved_by is not null)
+  );
+
 -- 6) Approval identity and stage-order guard. Decisions remain append-only history.
 create or replace function public.cmms_guard_work_order_approval()
 returns trigger
