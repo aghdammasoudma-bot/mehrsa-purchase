@@ -1,0 +1,5 @@
+const CACHE="mehrsa-cmms-v1";
+const SHELL=["./","./index.html","./manifest.webmanifest","../icons/icon-192.png","../icons/icon-512.png"];
+self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("mehrsa-cmms-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",event=>{const req=event.request,url=new URL(req.url);if(req.method!=="GET"||url.origin!==self.location.origin)return;if(req.mode==="navigate"){event.respondWith(fetch(new Request(req,{cache:"no-store"})).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put("./index.html",res.clone()));return res;}).catch(async()=>await caches.match("./index.html")||new Response("برای دریافت نسخه جدید به اینترنت متصل شوید.",{status:503,headers:{"Content-Type":"text/plain;charset=utf-8"}})));return;}event.respondWith(fetch(req).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(req,res.clone()));return res;}).catch(async()=>await caches.match(req)||Response.error()));});
