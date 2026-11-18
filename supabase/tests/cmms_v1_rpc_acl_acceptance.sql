@@ -52,8 +52,16 @@ begin
   if has_function_privilege('authenticated', 'cmms_private.cmms_generate_due_pm_tasks()', 'EXECUTE') then
     raise exception 'authenticated must not execute PM scheduler routine';
   end if;
+  if has_function_privilege('authenticated', 'cmms_private.cmms_user_has_active_role(uuid,text[])', 'EXECUTE') then
+    raise exception 'authenticated must not execute arbitrary-user role lookup helper';
+  end if;
   if has_function_privilege('anon', 'cmms_private.cmms_has_any_role(text[])', 'EXECUTE') then
     raise exception 'anon must not execute role helper';
+  end if;
+
+  if (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+      where n.nspname='cmms_private' and p.proname like 'cmms_%') <> 27 then
+    raise exception 'Expected 27 private CMMS routines; catalog count differs';
   end if;
 
   raise notice 'CMMS RPC ACL structural checks passed for % wrappers', v_count;
