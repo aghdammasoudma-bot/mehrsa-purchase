@@ -200,3 +200,17 @@ Production and main remain unchanged. The PR remains Draft. This milestone does 
 - Added meter-reading capture for technician, technical expert and technical supervisor, plus a latest-readings view using the verified reading_at column.
 - Rollback-only Staging SQL checks succeeded for meter-reading and asset-status RPC signatures. The transaction was rolled back, leaving the sample asset unchanged.
 - Current branch head: 659444c9bcefc0d31234c3f928c5af43cccbf325; push and PR syntax checks passed.
+
+
+## Operational workflow extension — 2026-11-18 (feature branch only)
+
+- Added supervisor/expert work-order cancellation in the UI. A mandatory reason is collected; the database RPC closes active assignments and records the cancellation.
+- Added supervisor-only work-order reassignment UI. It requires an active assignment, selects only active technician/expert role rows in the asset's global or matching location scope, and requires a reason. The server-side RPC remains authoritative.
+- Work-order cards now show active assignee identifiers so the supervisor can see who owns execution.
+- Enabled supervisor-only location creation through the existing `cmms_create_location` RPC. Category creation remains disabled because there is no approved category-write RPC in this release candidate.
+- Rollback-only Staging transaction validated location creation, work-order creation/release, assignment, reassignment and cancellation together using synthetic identities. The transaction was rolled back; no permanent test data was retained.
+- The first attempt to create a work order against the retired Staging fixture asset was correctly rejected by the server-side retirement guard. The test was repeated against the active fixture asset and passed.
+- GitHub Actions push syntax check passed for branch head `1c4be9c7ccae33b08b59ad565cdb1333adb5854a`.
+- Staging Security Advisor still reports only the two intentionally isolated compatibility stubs (`pr_requests`, `user_profiles`) with RLS but no policies, plus the pre-existing leaked-password protection warning. Performance Advisor reports 31 unused-index INFO notices on the low-traffic synthetic Staging project; no unindexed CMMS foreign-key warning returned.
+
+Production and `main` remain unchanged. PR #1 remains Draft and unmerged. Real browser/JWT/Storage HTTP tests, actual purchase-module regression, Data API exposure verification, scheduler setup and explicit go-live authorization remain release blockers.
