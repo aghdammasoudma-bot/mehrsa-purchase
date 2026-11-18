@@ -193,3 +193,10 @@ The frontend reads role-scoped assignment rows only for the technical supervisor
 - Category/location master-data create/edit workflows, work-order reassignment/cancellation, meter-based PM setup, evidence upload UI, notifications, and reporting exports remain incomplete.
 
 Production and main remain unchanged. The PR remains Draft. This milestone does not authorize production deployment.
+
+
+### Additional equipment controls — 2026-11-18
+- Added controlled asset operational-status changes with mandatory reason, confirmation before retirement, and server-side retirement guards.
+- Added meter-reading capture for technician, technical expert and technical supervisor, plus a latest-readings view using the verified reading_at column.
+- Rollback-only Staging SQL checks succeeded for meter-reading and asset-status RPC signatures. The transaction was rolled back, leaving the sample asset unchanged.
+- Current branch head: 659444c9bcefc0d31234c3f928c5af43cccbf325; push and PR syntax checks passed.
