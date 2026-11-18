@@ -1,6 +1,6 @@
 -- CMMS V1 P1 business-rule hardening — STAGING ONLY
 -- Drafted from read-only Production function definitions on 2026-11-18.
--- DO NOT APPLY TO PRODUCTION. No production or staging SQL was executed.
+-- DO NOT APPLY TO PRODUCTION. Applied successfully to isolated Staging on 2026-11-18; partial workflow/retirement tests passed. Remaining edge-case and concurrency tests are still required.
 -- Preconditions: isolated staging schema/data, backup/restore path, and review of the audit report.
 -- Locking: asset rows are locked FOR SHARE in write operations; retirement uses FOR UPDATE.
 -- This serializes retirement against new meter readings, PM plan changes and failure conversion.
