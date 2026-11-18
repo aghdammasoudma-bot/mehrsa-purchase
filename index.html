@@ -1419,8 +1419,15 @@ async function cmmsLoadData(force=false){
   const queries=[
     ["assets","cmms_assets"],["locations","cmms_locations"],["categories","cmms_asset_categories"],
     ["failures","cmms_failure_reports"],["orders","cmms_work_orders"],["pmPlans","cmms_pm_plans"],
-    ["pmTasks","cmms_pm_tasks"],["audit","cmms_audit_logs"]
+    ["pmTasks","cmms_pm_tasks"]
   ];
+  // Audit logs are governance-only under RLS. Do not make the whole dashboard
+  // fail for experts/technicians when they correctly lack audit-log access.
+  if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)){
+    queries.push(["audit","cmms_audit_logs"]);
+  }else{
+    cmmsData.audit=[];
+  }
   const results=await Promise.all(queries.map(async ([key,table])=>{
     try{const {data,error}=await cloud.from(table).select("*").limit(500);if(error)throw error;return {key,data:data||[]};}
     catch(e){return {key,error:e};}
