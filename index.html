@@ -4970,3 +4970,30 @@ html,body,#main-content{color:var(--app-text)!important}
 #management-hero .hero-industrial .hero-copy h2{font-weight:950!important}
 #management-hero .hero-industrial .hero-copy p{font-weight:800!important}
 </style>
+
+
+<style id="mehrsa-desktop-nav-two-col-registration-20261118">
+/* Desktop only: keep DOM order and behavior; make Register occupy both grid columns */
+@media(min-width:701px){
+  #management-hero .top-profile .top-quick-nav{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-flow:row dense!important;
+    grid-auto-rows:minmax(38px,1fr)!important;
+    gap:6px!important;
+    align-content:stretch!important;
+    height:auto!important;
+    max-height:100%!important;
+    overflow:visible!important;
+  }
+  #management-hero .top-profile .top-quick-nav>button.top-nav-primary{
+    grid-column:1 / -1!important;
+    width:100%!important;
+    min-width:0!important;
+    height:38px!important;
+    min-height:38px!important;
+    max-height:38px!important;
+    justify-content:center!important;
+  }
+}
+</style>
