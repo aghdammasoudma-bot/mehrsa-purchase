@@ -3,11 +3,18 @@
 -- DO NOT APPLY TO PRODUCTION.
 -- Preconditions:
 --   1) Run only on an isolated Supabase development branch with verified reset/restore.
---   2) Review each private routine authorization and search_path.
---   3) Run the role-negative acceptance tests before any production release.
+--   2) Confirm cmms_private is NOT in Supabase Data API exposed schemas.
+--   3) Review docs/CMMS-V1-FUNCTION-BY-FUNCTION-SECURITY-AUDIT-2026-11-18.md.
+--   4) Review each private routine authorization and search_path.
+--   5) Run role-negative and workflow acceptance tests on staging.
+--   6) Confirm wrapper owner remains postgres and all wrappers call only their
+--      matching schema-qualified cmms_private routine.
+--   7) This script is not approved for production; it is a staging test draft.
 -- Strategy: keep cmms_private routines owner-only; elevate only the narrow public
 -- wrappers to SECURITY DEFINER; pin search_path to empty; grant exact signatures.
 -- Scheduler routine cmms_generate_due_pm_tasks is intentionally excluded.
+-- cmms_private.cmms_user_has_active_role(uuid,text[]) is not used by CMMS RLS
+-- policies and accepts an arbitrary user_id; remove its unnecessary client EXECUTE.
 
 begin;
 
@@ -109,6 +116,10 @@ grant execute on function public.cmms_submit_work_order_test(uuid, text, text, t
 grant execute on function public.cmms_triage_failure(uuid, text, text) to authenticated;
 grant execute on function public.cmms_update_asset(uuid, text, text, uuid, text, uuid, text, text, text, jsonb, text, text[]) to authenticated;
 grant execute on function public.cmms_update_pm_plan(uuid, text, text, text, numeric, text, text, timestamptz, numeric, jsonb) to authenticated;
+
+-- This helper is only called by SECURITY DEFINER private routines, not by RLS
+-- policies. It accepts an arbitrary target user id, so client EXECUTE is not needed.
+revoke all on function cmms_private.cmms_user_has_active_role(uuid, text[]) from public, anon, authenticated;
 
 commit;
 
