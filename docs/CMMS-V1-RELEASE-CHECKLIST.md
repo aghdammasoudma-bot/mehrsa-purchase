@@ -119,3 +119,27 @@ Status: Production schema is installed but write-locked; Production has not been
 - [ ] Keep `main` untouched until the release candidate passes.
 - [ ] Merge only after explicit go-live approval.
 - [ ] Verify rollback procedure in staging before production release.
+
+
+## Release follow-up — 2026-11-18
+
+This update supersedes earlier checklist statements that Production remains write-locked and has no Storage bucket or scheduler.
+
+### Completed after Staging acceptance
+- [x] Production runtime grants applied through migration `cmms_v1_production_runtime_activation`; only approved authenticated RPC wrappers and their exact private implementations are executable.
+- [x] Production `cmms-evidence` private bucket and location/record-scoped SELECT/INSERT policies installed; no UPDATE/DELETE policy.
+- [x] Production CMMS business-rule routines aligned to Staging for all 27 shared private functions.
+- [x] Failure-report RPC updated to the active 9-argument signature including `downtime_started_at`; obsolete 8-argument client wrapper is revoked.
+- [x] Failure triage now copies downtime start to the generated corrective work order.
+- [x] Daily `pg_cron` job installed in Production and Staging: `15 0 * * *` GMT.
+- [x] Staging acceptance suite completed successfully after the downtime propagation fix, including corrective work order, dual approval, rework, reassignment, cancellation, PM generation and negative authorization tests.
+- [x] JavaScript syntax CI passed for feature head `75e2e031b4fd71d821ea49a435885af3a30be237` (run `44273044296`).
+
+### Still required before claiming fully field-accepted
+- [ ] Confirm in Supabase Dashboard that `cmms_private` is excluded from exposed Data API schemas; the connected project metadata does not expose this setting.
+- [ ] Run real browser sign-in and REST RPC tests using the four production accounts.
+- [ ] Run actual Storage byte upload/download and signed-URL tests with role/location isolation.
+- [ ] Run browser regression of existing purchase request workflows after the app is published.
+- [ ] Enter the actual equipment/location master data. Production CMMS currently has zero locations and zero assets; no operational asset register was fabricated.
+
+The Production database now has the required runtime schema, grants, private evidence storage and PM scheduler. The remaining items are real-user/browser acceptance and master-data onboarding, not missing database migrations.
