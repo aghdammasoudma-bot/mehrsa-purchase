@@ -118,7 +118,7 @@ grant execute on function public.cmms_update_asset(uuid, text, text, uuid, text,
 grant execute on function public.cmms_update_pm_plan(uuid, text, text, text, numeric, text, text, timestamptz, numeric, jsonb) to authenticated;
 
 -- This helper is only called by SECURITY DEFINER private routines, not by RLS
--- policies. It accepts an arbitrary target user id, so client EXECUTE is not needed.
+-- policies. It accepts an arbitrary target user id; preserve owner-only access.
 revoke all on function cmms_private.cmms_user_has_active_role(uuid, text[]) from public, anon, authenticated;
 
 commit;
