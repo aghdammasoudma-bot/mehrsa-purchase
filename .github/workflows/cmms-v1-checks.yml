@@ -40,3 +40,23 @@ jobs:
             echo "Checking $file"
             node --check "$file"
           done
+
+      - name: Extract and syntax-check standalone CMMS JavaScript
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("cmms/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>", html, flags=re.I)
+          inline = [s for s in scripts if s.strip()]
+          if not inline:
+              raise SystemExit("No inline JavaScript blocks found in cmms/index.html")
+          for i, script in enumerate(inline, 1):
+              Path(f"/tmp/cmms-standalone-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Extracted {len(inline)} standalone JavaScript block(s)")
+          PY
+          for file in /tmp/cmms-standalone-*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
