@@ -1467,18 +1467,44 @@ function cmmsAssetForm(){
  "<label>کد تجهیز *<input name='asset_code' required maxlength='40' placeholder='مثلاً PUMP-001'></label>"+
  "<label>نام تجهیز *<input name='name' required maxlength='160' placeholder='مثلاً پمپ انتقال رزین'></label>"+
  "<label>دسته‌بندی<select name='category_id'><option value=''>انتخاب دسته‌بندی</option>"+optionList(categories,"دسته‌بندی تعریف نشده")+"</select></label>"+
- "<label>محل استقرار<select name='location_id'><option value=''>انتخاب محل</option>"+optionList(locations,"محلی تعریف نشده")+"</select></label>"+
+ "<label>محل استقرار *<select name='location_id' required><option value=''>انتخاب محل</option>"+optionList(locations,"محلی تعریف نشده")+"</select></label>"+
  "<label>سازنده<input name='manufacturer' maxlength='120'></label>"+
  "<label>مدل<input name='model' maxlength='120'></label>"+
  "<label>شماره سریال<input name='serial_number' maxlength='120'></label>"+
  "<label>مسئول تجهیز<input name='equipment_owner' maxlength='120' placeholder='واحد یا مسئول بهره‌بردار'></label>"+
  "<label>اهمیت تجهیز *<select name='criticality' required><option value='medium'>متوسط</option><option value='low'>پایین</option><option value='high'>بالا</option><option value='critical'>بحرانی</option></select></label>"+
- "<label>وضعیت عملیاتی *<select name='operational_status' required><option value='operational'>در سرویس</option><option value='degraded'>دارای محدودیت</option><option value='stopped'>متوقف</option><option value='under_maintenance'>در تعمیر</option><option value='retired'>اسقاط‌شده</option></select></label>"+
- "<label>تاریخ راه‌اندازی<input name='commissioned_at' type='date'></label>"+
- "<label>پایان گارانتی<input name='warranty_until' type='date'></label>"+
+ ""+
+ ""+
+ ""+
  "<label class='wide'>مشخصات فنی<textarea name='technical_specs' rows='3' placeholder='توان، ظرفیت، فشار، دما، ولتاژ، جریان، ابعاد و سایر مشخصات...'></textarea></label>"+
- "</div><div class='cmms-form-actions'><button type='button' class='cmms-preview-btn' onclick='document.getElementById(&#39;cmms-asset-form&#39;).requestSubmit()'>بررسی اطلاعات</button><button type='button' class='cmms-save-disabled' disabled title='تا تکمیل کنترل‌های امنیتی و فعال‌سازی عملیات ثبت غیرفعال است'>ثبت در سامانه — غیرفعال</button></div>"+
+ "</div><div class='cmms-form-actions'><button type='button' class='cmms-preview-btn' onclick='document.getElementById(&#39;cmms-asset-form&#39;).requestSubmit()'>بررسی اطلاعات</button><button type='button' class='cmms-save-btn' onclick='cmmsCreateAsset()' "+(cmmsCanCreateAsset()?"":"disabled title='فقط سرپرست فنی و کارشناس فنی مجاز به ثبت تجهیز هستند'")+">ثبت شناسنامه تجهیز</button></div>"+
  "<div id='cmms-asset-preview' class='cmms-asset-preview' aria-live='polite'></div></form>";
+}
+function cmmsCanCreateAsset(){return ["technical_supervisor","technical_expert"].includes(cmmsAssignedRole);}
+async function cmmsCreateAsset(){
+ const form=document.getElementById("cmms-asset-form");
+ if(!form||!cmmsCanCreateAsset())return;
+ if(!form.reportValidity())return;
+ const d=Object.fromEntries(new FormData(form).entries());
+ if(!d.location_id){alert("انتخاب محل استقرار الزامی است.");return;}
+ const btn=form.querySelector(".cmms-save-btn");
+ if(btn){btn.disabled=true;btn.textContent="در حال ثبت...";}
+ try{
+  const {data,error}=await cloud.rpc("cmms_create_asset",{
+   p_asset_code:d.asset_code.trim(),p_name:d.name.trim(),p_location_id:d.location_id,
+   p_criticality:d.criticality,p_category_id:d.category_id||null,
+   p_manufacturer:d.manufacturer||null,p_model:d.model||null,
+   p_serial_number:d.serial_number||null,
+   p_technical_specs:{notes:d.technical_specs||""},
+   p_equipment_owner:d.equipment_owner||null
+  });
+  if(error)throw error;
+  alert("شناسنامه تجهیز با موفقیت ثبت شد. شناسه: "+data);
+  form.reset();
+  const preview=document.getElementById("cmms-asset-preview");if(preview)preview.innerHTML="";
+  await cmmsLoadData(true);
+ }catch(e){alert("ثبت تجهیز ناموفق بود: "+(e.message||String(e)));}
+ finally{if(btn){btn.disabled=!cmmsCanCreateAsset();btn.textContent="ثبت شناسنامه تجهیز";}}
 }
 function cmmsPreviewAsset(event){
  event.preventDefault();
@@ -1487,15 +1513,14 @@ function cmmsPreviewAsset(event){
  const data=Object.fromEntries(new FormData(form).entries());
  const category=cmmsRows("categories").find(x=>x.id===data.category_id);
  const location=cmmsRows("locations").find(x=>x.id===data.location_id);
- const status=({operational:"در سرویس",degraded:"دارای محدودیت",stopped:"متوقف",under_maintenance:"در تعمیر",retired:"اسقاط‌شده"})[data.operational_status]||data.operational_status;
  const criticality=({low:"پایین",medium:"متوسط",high:"بالا",critical:"بحرانی"})[data.criticality]||data.criticality;
  const preview=document.getElementById("cmms-asset-preview");
  preview.innerHTML="<b>اطلاعات واردشده بررسی شد</b><div>"+[
  "کد: "+data.asset_code,"نام: "+data.name,"دسته‌بندی: "+(category?.name||"انتخاب نشده"),
  "محل: "+(location?.name||"انتخاب نشده"),"سازنده/مدل: "+[data.manufacturer,data.model].filter(Boolean).join(" / "),
- "شماره سریال: "+(data.serial_number||"—"),"اهمیت: "+criticality,"وضعیت: "+status,
- "مسئول: "+(data.equipment_owner||"—"),"راه‌اندازی: "+(data.commissioned_at||"—"),"گارانتی: "+(data.warranty_until||"—")
- ].map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>این پیش‌نمایش محلی است؛ هیچ رکوردی در Supabase ایجاد یا تغییر نکرده است.</small>";
+ "شماره سریال: "+(data.serial_number||"—"),"اهمیت: "+criticality,
+ "مسئول: "+(data.equipment_owner||"—")
+ ].map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>این پیش‌نمایش محلی است؛ برای ذخیره، دکمه ثبت را انتخاب کنید.</small>";
  return false;
 }
 function cmmsMasterDataForms(){
