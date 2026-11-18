@@ -1388,23 +1388,27 @@ function showRoleScreen(){
 // CMMS V1 — connected read-only module. No writes are enabled.
 let cmmsActiveTab="overview";
 let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],audit:[]};
-let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="";
+let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="",cmmsAssignedRoles=[];
 async function cmmsLoadUserRole(){
   cmmsAssignedRole="";
+  cmmsAssignedRoles=[];
   if(!cloudUser)return;
   const {data,error}=await cloud.from("cmms_user_roles")
-    .select("role,is_active")
+    .select("role,location_id")
     .eq("user_id",cloudUser.id)
-    .eq("is_active",true)
-    .maybeSingle();
+    .eq("is_active",true);
   if(error)throw new Error("خطا در دریافت سطح دسترسی CMMS: "+error.message);
-  cmmsAssignedRole=data?.role||"";
+  cmmsAssignedRoles=[...new Set((data||[]).map(x=>x.role).filter(Boolean))];
+  const precedence=["responsible_manager","technical_supervisor","technical_expert","technician"];
+  cmmsAssignedRole=precedence.find(role=>cmmsAssignedRoles.includes(role))||"";
 }
 function cmmsCanAccess(){
   return !!cloudUser && ["technical_supervisor","responsible_manager","technical_expert","technician"].includes(cmmsAssignedRole);
 }
 function cmmsRoleLabel(){
-  return ({technical_supervisor:"سرپرست فنی — تأیید فنی مرحله اول",responsible_manager:"مدیر مسئول — تأیید نهایی همه تجهیزات",technical_expert:"کارشناس فنی",technician:"تکنسین تعمیرات"})[cmmsAssignedRole]||"بدون دسترسی CMMS";
+  const labels={technical_supervisor:"سرپرست فنی — تأیید فنی مرحله اول",responsible_manager:"مدیر مسئول — تأیید نهایی همه تجهیزات",technical_expert:"کارشناس فنی",technician:"تکنسین تعمیرات"};
+  const ordered=["responsible_manager","technical_supervisor","technical_expert","technician"].filter(role=>cmmsAssignedRoles.includes(role));
+  return ordered.map(role=>labels[role]).join(" / ")||"بدون دسترسی CMMS";
 }
 function cmmsSetTab(tab){cmmsActiveTab=tab;renderCMMSView();}
 function cmmsText(v){return v===null||v===undefined||v===""?"—":String(v);}
