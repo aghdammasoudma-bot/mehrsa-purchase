@@ -1583,7 +1583,7 @@ async function cmmsRecordMeter(e){
 }
 function cmmsMeterReadingsTable(){
  const rows=cmmsRows("meterReadings").slice().sort((a,b)=>new Date(b.recorded_at||b.created_at)-new Date(a.recorded_at||a.created_at)).slice(0,20);
- return "<section class='cmms-master-list'><h4>آخرین قرائت‌ها</h4>"+cmmsTable([["تجهیز",r=>cmmsRows("assets").find(a=>a.id===r.asset_id)?.name],["کد کنتور",r=>r.meter_code],["مقدار",r=>r.meter_value],["واحد",r=>r.meter_unit],["زمان",r=>cmmsDate(r.recorded_at||r.created_at)]],rows,"هنوز قرائتی ثبت نشده است.")+"</section>";
+ return "<section class='cmms-master-list'><h4>آخرین قرائت‌ها</h4>"+cmmsTable([["تجهیز",r=>cmmsRows("assets").find(a=>a.id===r.asset_id)?.name],["کد کنتور",r=>r.meter_code],["مقدار",r=>r.meter_value],["واحد",r=>r.meter_unit],["زمان",r=>cmmsDate(r.reading_at||r.created_at)]],rows,"هنوز قرائتی ثبت نشده است.")+"</section>";
 }
 function cmmsFailureForm(){
  const can=["technician","technical_expert","technical_supervisor"].includes(cmmsAssignedRole);
