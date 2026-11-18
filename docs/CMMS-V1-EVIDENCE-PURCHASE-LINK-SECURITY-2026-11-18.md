@@ -80,3 +80,11 @@ Tests must cover role/location boundaries, record ownership/assignment, malforme
 - No Production API EXECUTE grant was issued.
 - No Production DDL/ACL change was made.
 - Staging validation is partial and not a go-live approval.
+
+
+## 9. Additional Staging checks
+- A scoped technician assigned only to a sibling location returned zero rows for an asset in another location.
+- Work-order creator self-approval was rejected by the approval trigger.
+- P1 negative-value and retired-asset guards passed for duration, NaN quantity, infinite meter value, retired-asset meter reading, PM creation and failure reporting.
+- A 23-index staging-only foreign-key support file was added and applied. The Performance Advisor no longer reports unindexed CMMS foreign keys; only unused-index INFO notices remain because the test database has very little workload.
+- The frontend now avoids requesting governance-only audit logs for technicians/experts, preventing a correct RLS denial from failing the entire dashboard.
