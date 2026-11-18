@@ -81,3 +81,15 @@ Inspection of representative public wrappers and private implementations found a
 - The sampled private implementations include authorization checks: asset creation requires technical_supervisor or technical_expert; work-order creation checks those roles at the asset location; failure reporting permits reporter/technician/technical_expert/technical_supervisor at the location; the two-stage approval function checks the designated role and prevents the same user approving both stages. The full set of routines still requires function-by-function review.
 
 This is a newly identified blocker to enabling CMMS writes. No database object or privilege was changed.
+
+
+## Function-by-function security audit — 2026-11-18
+
+- Completed a read-only catalog and static body review of all 23 private business operations, all 3 private helpers, the PM scheduler, and the public wrapper/trigger inventory.
+- Corrected the private routine count: 27 total (23 business operations + 3 helpers + 1 scheduler), not 24.
+- Added `docs/CMMS-V1-FUNCTION-BY-FUNCTION-SECURITY-AUDIT-2026-11-18.md` with per-function authorization, validation, workflow, and P0/P1 findings.
+- Identified unnecessary authenticated EXECUTE on `cmms_private.cmms_user_has_active_role(uuid,text[])`; no CMMS RLS policy references this helper, and it accepts an arbitrary user UUID. The staging-only draft now revokes client EXECUTE on this helper.
+- Confirmed the existing narrow-wrapper pattern is viable for staging review only: exact public signatures, SECURITY DEFINER, empty search_path, REVOKE from PUBLIC/anon, GRANT to authenticated; private write routines and scheduler remain owner-only.
+- Added an acceptance assertion for the helper revoke and corrected the private routine count to 27.
+- No SQL was executed against Production or Staging. No database object, ACL, policy, trigger, storage, or scheduler was changed. No backup or restore was performed.
+- `feature/cmms-v1` only; `main` and production deployment remain unchanged.
