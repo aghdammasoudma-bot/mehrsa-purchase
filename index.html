@@ -4924,20 +4924,32 @@ html,body,#main-content{color:var(--app-text)!important}
 </style>
 
 <style id="mehrsa-existing-hero-logo-enlarge-20261118">
-/* Enlarge the already-present Mehrsa logo only; preserve banner artwork and all app UI */
+/* Make the existing Mehrsa logo image fill the complete banner frame */
 #management-hero .hero-industrial .mehrsa-hero-logo{
-  width:clamp(190px,22vw,250px)!important;
-  max-width:250px!important;
-  height:auto!important;
-  max-height:112px!important;
-  object-fit:contain!important;
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  padding:0!important;
   opacity:1!important;
+  z-index:1!important;
+}
+#management-hero .hero-industrial .hero-copy{
+  position:relative!important;
+  z-index:3!important;
 }
 @media(max-width:700px){
   #management-hero .hero-industrial .mehrsa-hero-logo{
-    width:clamp(130px,34vw,170px)!important;
-    max-width:170px!important;
-    max-height:78px!important;
+    width:100%!important;
+    height:100%!important;
+    max-width:none!important;
+    max-height:none!important;
+    object-fit:cover!important;
   }
 }
 </style>
