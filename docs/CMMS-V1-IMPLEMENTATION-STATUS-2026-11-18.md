@@ -93,3 +93,51 @@ This is a newly identified blocker to enabling CMMS writes. No database object o
 - Added an acceptance assertion for the helper revoke and corrected the private routine count to 27.
 - No SQL was executed against Production or Staging. No database object, ACL, policy, trigger, storage, or scheduler was changed. No backup or restore was performed.
 - `feature/cmms-v1` only; `main` and production deployment remain unchanged.
+
+
+## Isolated Staging build and first acceptance run — 2026-11-18
+
+The earlier statement that no Staging SQL had been executed is superseded by this section.
+
+### Staging environment
+- Project: `mehrsa-cmms-staging` (`sdemtfdzpwcbiiysaipm`), PostgreSQL 17.12, ACTIVE_HEALTHY.
+- Staging began with no public CMMS tables and no tracked migrations.
+- Created minimal compatibility stubs for `public.pr_requests` and `public.user_profiles` only to satisfy the CMMS foreign-key/function dependencies. Both stubs have RLS enabled, no client grants and no policies. They contain no production data and do not reproduce the live purchase module.
+- Created four synthetic Auth identities and matching profile/CMMS role rows for database-level tests only. No production identities, credentials or operational data were copied.
+
+### SQL layers applied successfully to Staging
+1. CMMS base schema (15 tables).
+2. CMMS hardening triggers and constraints.
+3. Location/role RLS authorization layer.
+4. Workflow RPCs and least-privilege ACLs.
+5. P1 business-rule hardening.
+6. Purchase-link authorization hardening.
+7. Private evidence bucket and Storage object policies.
+
+All seven SQL layers returned success. Production was not targeted.
+
+### Verified Staging outcomes
+- 15/15 CMMS tables have RLS enabled.
+- 15 read policies exist; all are SELECT-only.
+- Authenticated has SELECT but no direct INSERT/UPDATE/DELETE on CMMS tables; anon has no CMMS table SELECT.
+- Public business wrappers are SECURITY INVOKER. Authenticated can execute approved wrappers; anon cannot. Private workflow implementations are SECURITY DEFINER and have narrow EXECUTE grants. The internal arbitrary-user role lookup helper `cmms_user_has_active_role` remains owner-only.
+- PM scheduler is not executable by authenticated users; its service-role/owner path remains separate.
+- Purchase-link tests passed: authorized expert can link; duplicate returns the same link id; technician without supervisor/expert role is denied; unknown PR is denied.
+- RLS smoke test passed: an active expert sees the test asset; a caller with no active profile sees zero assets.
+- Corrective workflow passed end-to-end: failure report → technical triage → release → assignment → execution log → successful test → supervisor approval → distinct responsible-manager approval → closed.
+- PM workflow passed: plan creation → server-side due-task generation → repeated scheduler run without duplicate tasks → assignment → start → checklist completion.
+- Retirement guard passed: retirement was blocked while an active work order or active PM plan remained; after the test work order was cancelled and PM plan deactivated, retirement succeeded.
+- Storage policy test initially exposed a real bug: unqualified `name` references inside nested subqueries resolved to `cmms_assets.name`, not `storage.objects.name`. The policy draft was corrected to qualify the outer object name. After reapplying, valid expert asset-evidence upload passed, technician asset-master upload was denied, and an authorized expert could read linked evidence. The synthetic metadata-only test object was cleaned using the Storage lifecycle cleanup routine; no file bytes were uploaded.
+
+### Remaining Staging validation
+- The current test run used synthetic database identities and SQL-level JWT claim simulation. It is not a substitute for real browser/Auth JWT and Storage HTTP API tests.
+- The Storage upload test validated RLS metadata authorization only; actual byte upload/download, signed URLs, MIME spoofing and content scanning remain untested.
+- Supabase Security Advisor reports no CMMS-specific ERROR after the build. Remaining items: INFO notices for the intentionally closed compatibility stubs (RLS enabled with no policies), a project-level leaked-password-protection warning, and performance INFO notices for 23 unindexed foreign keys plus unused indexes in the low-volume test database.
+- Confirm the Data API exposed-schema list in the Supabase dashboard and ensure `cmms_private` is not exposed. SQL session configuration did not reveal this project-level setting.
+- No scheduler has been installed or scheduled; cron runtime behavior still requires separate testing.
+- No actual mobile/browser workflow or purchase-module regression has been run because Staging contains only compatibility stubs, not the live purchase app schema/data.
+
+### Release status
+- Production schema, functions, grants, Storage and scheduler remain unchanged.
+- `main` remains unchanged.
+- External backup/restore, real API tests, UI integration/regression, scheduler validation and explicit release approval remain mandatory.
