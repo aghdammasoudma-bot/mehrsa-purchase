@@ -57,7 +57,7 @@ let cloud=null,cloudUser=null,currentRole="",currentUser="",currentTitle="";
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function authMessage(t){const el=document.getElementById("auth-msg");if(el)el.textContent=t;}
 async function ensureCloud(){if(!window.supabase?.createClient)throw new Error("کتابخانه اتصال بارگذاری نشد.");if(!cloud)cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);return cloud;}
-// CMMS V1 — connected read-only module. No writes are enabled.
+// CMMS V1 — standalone application. Mutations are performed only through authorized RPCs.
 let cmmsActiveTab="overview";
 let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};
 let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="",cmmsAssignedRoles=[];
@@ -418,7 +418,7 @@ function renderCMMSView(){
  const x=cmmsRenderTab();
  const tabHtml=tabs.map(t=>"<button type='button' role='tab' data-tab='"+t[0]+"' aria-selected='"+(cmmsActiveTab===t[0])+"' class='"+(cmmsActiveTab===t[0]?"active":"")+"' onclick='cmmsSetTab(this.dataset.tab)'><span>"+t[2]+"</span>"+t[1]+"</button>").join("");
  const metrics=x.metrics.map(m=>cmmsMetric(m[0],m[1])).join("");
- const gate=cmmsLoadState==="error"?"<div class='cmms-gate cmms-error'><b>خطا در خواندن داده‌ها</b><span>"+escapeHtml(cmmsLoadError)+"</span><span>هیچ تغییری در پایگاه داده ایجاد نشده است.</span></div>":cmmsLoadState==="loading"?"<div class='cmms-gate'><b>در حال دریافت اطلاعات زنده…</b><span>درخواست‌ها فقط خواندنی هستند.</span></div>":"<div class='cmms-gate'><b>اتصال خواندنی فعال است</b><span>عملیات مجاز از طریق RPCهای کنترل‌شده انجام می‌شود؛ دسترسی نهایی در سمت پایگاه داده بررسی می‌شود.</span></div>";
+ const gate=cmmsLoadState==="error"?"<div class='cmms-gate cmms-error'><b>خطا در خواندن داده‌ها</b><span>"+escapeHtml(cmmsLoadError)+"</span><span>هیچ تغییری در پایگاه داده ایجاد نشده است.</span></div>":cmmsLoadState==="loading"?"<div class='cmms-gate'><b>در حال دریافت اطلاعات زنده…</b><span>درخواست‌ها فقط خواندنی هستند.</span></div>":"<div class='cmms-gate'><b>اتصال عملیاتی فعال است</b><span>ثبت و تغییر اطلاعات فقط از مسیر RPCهای کنترل‌شده انجام می‌شود و سطح دسترسی در پایگاه داده بررسی می‌شود.</span></div>";
  root.innerHTML="<div class='cmms-head'><div><div class='cmms-eyebrow'>MEHRSA • CMMS V1</div><h2>تعمیرات و نگهداری تجهیزات</h2><p>مدیریت تجهیزات، خرابی، دستورکار و نگهداری پیشگیرانه</p></div><div class='cmms-head-tools'><div class='cmms-role'>"+escapeHtml(cmmsRoleLabel())+"</div><button type='button' class='cmms-refresh' onclick='cmmsLoadData(true)'>↻ به‌روزرسانی</button></div></div>"+gate+"<div class='cmms-tabs' role='tablist'>"+tabHtml+"</div><section class='cmms-panel'><div class='cmms-panel-title'><div><h3>"+escapeHtml(x.title)+"</h3><p>"+escapeHtml(x.desc)+"</p></div><span class='cmms-readonly'>نمایش اطلاعات واقعی</span></div><div class='cmms-metrics'>"+metrics+"</div>"+x.body+"</section><section class='cmms-flow'><h3>گردش تأیید دستورکار</h3><div class='cmms-steps'><span>ثبت خرابی</span><i>←</i><span>بررسی و تخصیص</span><i>←</i><span>اجرای تعمیر و تست</span><i>←</i><span>تأیید سرپرست فنی</span><i>←</i><span>تأیید مهندس بیابانی</span><i>←</i><span>بستن دستورکار</span></div></section>";
 }
 
