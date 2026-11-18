@@ -11,8 +11,8 @@
 - The form's database-submit control is intentionally disabled. The preview validates and displays entered data locally only; it does not create or change database records.
 - Switching into CMMS hides the purchase request workspace and its KPIs; switching back restores the existing purchase view.
 - CMMS access is now resolved from the authenticated user's active `cmms_user_roles` row, not a hardcoded username allowlist. Current production role assignments were read and matched to the four intended accounts: masoud (technical_supervisor), biabani (responsible_manager), reza (technical_expert), and hamid (technician).
-- The `cmms_user_roles` RLS policy allows users to read their own assignment. The browser-side authenticated Data API path has not yet been exercised. If duplicate active role rows exist for one user, `.maybeSingle()` fails closed rather than granting access.
-- The role table currently has no uniqueness constraint on `user_id`; this is a governance/schema gap to resolve in a reviewed migration after backup/recovery and staging validation.
+- The `cmms_user_roles` RLS policy allows users to read their own assignment. The browser-side authenticated Data API path has not yet been exercised. Users may hold multiple active roles. The latest branch code now fetches all active assignments and resolves a deterministic display/permission precedence; the real authenticated Data API path remains untested.
+- The role table intentionally permits multiple role/location assignments per user through its composite uniqueness rule; the frontend now handles multiple active roles rather than assuming a single row.
 - No CMMS INSERT, UPDATE, DELETE, or UPSERT operation was added.
 - Existing purchase module code was not intentionally modified beyond view switching to show/hide the CMMS module.
 
@@ -77,7 +77,7 @@ Inspection of representative public wrappers and private implementations found a
 - The public business-operation wrappers (for example `public.cmms_create_asset`, `public.cmms_create_work_order`, `public.cmms_decide_work_order`, and `public.cmms_report_failure`) are SQL functions running as INVOKER (their `prosecdef` is false).
 - Their corresponding `cmms_private.*` implementations are SECURITY DEFINER but have EXECUTE granted only to postgres. The authenticated caller therefore lacks permission to invoke the private routine through the wrapper, even if EXECUTE were granted on the public wrapper alone.
 - Do not grant EXECUTE to authenticated on all private routines. That would expose a large privileged surface and bypass the intended public-wrapper boundary.
-- Preferred design for review: make each approved public wrapper a narrow SECURITY DEFINER entry point with a fixed empty search_path and fully-qualified private routine call, while retaining role/location/workflow authorization inside the private implementation; then grant EXECUTE on only that exact public signature to authenticated. Validate ownership, search_path, auth.uid propagation, and negative role tests in staging first. This is a design recommendation, not an applied change.
+- Staging design selected and compiled: public business wrappers remain SECURITY INVOKER; only approved public signatures and their exact private SECURITY DEFINER implementations receive authenticated EXECUTE. Trigger-only routines and `cmms_user_has_active_role` remain owner-only. This pattern is safe only if `cmms_private` is excluded from the exposed Data API schemas; dashboard confirmation and real API/JWT tests remain release gates.
 - The sampled private implementations include authorization checks: asset creation requires technical_supervisor or technical_expert; work-order creation checks those roles at the asset location; failure reporting permits reporter/technician/technical_expert/technical_supervisor at the location; the two-stage approval function checks the designated role and prevents the same user approving both stages. The full set of routines still requires function-by-function review.
 
 This was a privilege-chain blocker before staging validation. The narrow invoker/private-definer chain now compiles and its ACLs have been verified in isolated Staging; Production remains unchanged.
@@ -89,7 +89,7 @@ This was a privilege-chain blocker before staging validation. The narrow invoker
 - Corrected the private routine count: 27 total (23 business operations + 3 helpers + 1 scheduler), not 24.
 - Added `docs/CMMS-V1-FUNCTION-BY-FUNCTION-SECURITY-AUDIT-2026-11-18.md` with per-function authorization, validation, workflow, and P0/P1 findings.
 - Identified unnecessary authenticated EXECUTE on `cmms_private.cmms_user_has_active_role(uuid,text[])`; no CMMS RLS policy references this helper, and it accepts an arbitrary user UUID. The staging-only draft now revokes client EXECUTE on this helper.
-- Confirmed the existing narrow-wrapper pattern is viable for staging review only: exact public signatures, SECURITY DEFINER, empty search_path, REVOKE from PUBLIC/anon, GRANT to authenticated; private write routines and scheduler remain owner-only.
+- Confirmed the staging wrapper pattern: exact public signatures remain SECURITY INVOKER; approved private SECURITY DEFINER implementations receive exact authenticated EXECUTE; helper `cmms_user_has_active_role` and trigger-only routines remain owner-only; scheduler remains service-role/owner-only.
 - Added an acceptance assertion for the helper revoke and corrected the private routine count to 27.
 - No SQL was executed against Production or Staging. No database object, ACL, policy, trigger, storage, or scheduler was changed. No backup or restore was performed.
 - `feature/cmms-v1` only; `main` and production deployment remain unchanged.
@@ -114,7 +114,7 @@ The earlier statement that no Staging SQL had been executed is superseded by thi
 6. Purchase-link authorization hardening.
 7. Private evidence bucket and Storage object policies.
 
-All seven SQL layers returned success. Production was not targeted.
+All nine SQL layers (base schema, hardening, authorization, role seed, workflow RPCs, P1 rules, purchase-link hardening, FK indexes and Storage policies) returned success. Production was not targeted.
 
 ### Verified Staging outcomes
 - 15/15 CMMS tables have RLS enabled.
@@ -132,7 +132,7 @@ All seven SQL layers returned success. Production was not targeted.
 ### Remaining Staging validation
 - The current test run used synthetic database identities and SQL-level JWT claim simulation. It is not a substitute for real browser/Auth JWT and Storage HTTP API tests.
 - The Storage upload test validated RLS metadata authorization only; actual byte upload/download, signed URLs, MIME spoofing and content scanning remain untested.
-- Supabase Security Advisor reports no CMMS-specific ERROR after the build. Remaining items: INFO notices for the intentionally closed compatibility stubs (RLS enabled with no policies), a project-level leaked-password-protection warning, and performance INFO notices for 23 unindexed foreign keys plus unused indexes in the low-volume test database.
+- Supabase Security Advisor reports no CMMS-specific ERROR after the build. Remaining items: INFO notices for the intentionally closed compatibility stubs (RLS enabled with no policies), a project-level leaked-password-protection warning, and performance INFO notices for unused indexes only; the 23 unindexed CMMS foreign keys were addressed by the staging-only FK-index migration.
 - Confirm the Data API exposed-schema list in the Supabase dashboard and ensure `cmms_private` is not exposed. SQL session configuration did not reveal this project-level setting.
 - No scheduler has been installed or scheduled; cron runtime behavior still requires separate testing.
 - No actual mobile/browser workflow or purchase-module regression has been run because Staging contains only compatibility stubs, not the live purchase app schema/data.
