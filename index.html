@@ -1632,6 +1632,40 @@ async function cmmsRpcAction(name,args,success){try{const {error}=await cloud.rp
 async function cmmsAddWOAction(id){const desc=prompt("شرح اقدام انجام‌شده:");if(!desc||!desc.trim())return;const mins=prompt("مدت صرف‌شده به دقیقه (اختیاری):");await cmmsRpcAction("cmms_record_work_order_action",{p_work_order_id:id,p_action_type:"repair",p_description:desc.trim(),p_duration_minutes:mins?Number(mins):null,p_quantity:null,p_unit:null,p_meter_reading:null,p_attachment_paths:[]},"اقدام ثبت شد.");}
 async function cmmsSubmitTest(id){const result=prompt("نتیجه آزمون را وارد کنید: passed / failed / partial","passed");if(!["passed","failed","partial"].includes(result))return;const desc=prompt("شرح و مستندات آزمون:");if(!desc||!desc.trim())return;await cmmsRpcAction("cmms_submit_work_order_test",{p_work_order_id:id,p_test_result:result,p_return_to_service_status:result==="passed"?"returned":"not_returned",p_returned_to_service_at:result==="passed"?new Date().toISOString():null,p_test_description:desc.trim(),p_attachment_paths:[]},"نتیجه آزمون ثبت شد.");}
 async function cmmsDecideWO(id,stage,decision){let note=null;if(decision==="rejected"){note=prompt("علت عودت/رد را وارد کنید:");if(!note||!note.trim())return;}if(!confirm("این تصمیم در گردش تأیید ثبت شود؟"))return;await cmmsRpcAction("cmms_decide_work_order",{p_work_order_id:id,p_stage:stage,p_decision:decision,p_note:note},"تصمیم تأیید ثبت شد.");}
+function cmmsPMPlanForm(){
+ if(!cmmsCanCreateOperational())return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsCreatePMPlan(event)'><div class='cmms-form-head'><div><h4>تعریف برنامه نگهداری پیشگیرانه</h4><p>نسخه اول از برنامه‌های زمان‌محور پشتیبانی می‌کند.</p></div><span>PM جدید</span></div><div class='cmms-form-grid two'>"+
+ "<label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>عنوان برنامه *<input name='title' required maxlength='160'></label>"+
+ "<label>تناوب *<input name='frequency_value' type='number' min='1' step='1' value='1' required></label><label>واحد تناوب *<select name='frequency_unit'><option value='month'>ماه</option><option value='week'>هفته</option><option value='day'>روز</option><option value='year'>سال</option></select></label>"+
+ "<label>اولین سررسید *<input name='next_due_at' type='date' required></label><label class='wide'>چک‌لیست بازرسی *<textarea name='checklist' required rows='4' placeholder='هر مورد را در یک خط وارد کنید'></textarea></label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت برنامه PM</button></div></form>";
+}
+async function cmmsCreatePMPlan(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;const d=Object.fromEntries(new FormData(form).entries());
+ const checklist=d.checklist.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!checklist.length){alert("حداقل یک مورد چک‌لیست وارد کنید.");return false;}
+ try{const {error}=await cloud.rpc("cmms_create_pm_plan",{p_asset_id:d.asset_id,p_title:d.title.trim(),p_frequency_basis:"calendar",p_frequency_unit:d.frequency_unit,p_frequency_value:Number(d.frequency_value),p_meter_code:null,p_meter_unit:null,p_next_due_at:new Date(d.next_due_at+"T12:00:00").toISOString(),p_next_due_meter_value:null,p_checklist:checklist});if(error)throw error;alert("برنامه PM ثبت شد.");form.reset();await cmmsLoadData(true);}catch(x){alert("ثبت برنامه ناموفق: "+(x.message||String(x)));}return false;
+}
+function cmmsPMTaskList(){
+ const tasks=cmmsRows("pmTasks");if(!tasks.length)return "<div class='cmms-empty'>هنوز وظیفه PM ایجاد نشده است.</div>";
+ return "<div class='cmms-workorder-list'>"+tasks.map(t=>{
+ const asset=cmmsRows("assets").find(a=>a.id===t.asset_id);let buttons="";
+ const assigned=t.assigned_to===cloudUser.id;
+ if(["due","assigned","overdue"].includes(t.status)&&assigned)buttons+="<button type='button' onclick='cmmsStartPM("+JSON.stringify(t.id)+")'>شروع وظیفه</button>";
+ if(["due","assigned","in_progress","overdue"].includes(t.status)&&(assigned||["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)))buttons+="<button type='button' onclick='cmmsCompletePM("+JSON.stringify(t.id)+")'>ثبت تکمیل و چک‌لیست</button>";
+ if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)&&["due","overdue"].includes(t.status))buttons+="<button type='button' onclick='cmmsAssignPM("+JSON.stringify(t.id)+")'>ارجاع وظیفه</button>";
+ return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(t.title||t.task_title||"وظیفه PM")+"</b><span>"+cmmsEscAttr(cmmsStatus(t.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+"</p><small>سررسید: "+cmmsEscAttr(cmmsDate(t.due_at))+" | مسئول: "+cmmsEscAttr(t.assigned_to?String(t.assigned_to).slice(0,8):"تخصیص‌نیافته")+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
+ }).join("")+"</div>";
+}
+async function cmmsStartPM(id){await cmmsRpcAction("cmms_start_pm_task",{p_pm_task_id:id},"وظیفه PM شروع شد.");}
+async function cmmsCompletePM(id){const result=prompt("نتیجه چک‌لیست را شرح دهید:");if(!result||!result.trim())return;await cmmsRpcAction("cmms_complete_pm_task",{p_pm_task_id:id,p_checklist_result:{result:result.trim(),completed_at:new Date().toISOString()}},"وظیفه PM تکمیل شد.");}
+async function cmmsAssignPM(id){
+ const task=cmmsRows("pmTasks").find(x=>x.id===id),asset=cmmsRows("assets").find(x=>x.id===task?.asset_id);
+ const choices=cmmsRows("userRoles").filter(x=>x.is_active&&["technician","technical_expert"].includes(x.role)&&(!x.location_id||x.location_id===asset?.location_id));
+ if(!choices.length){alert("کاربر واجد شرایط برای این محل پیدا نشد.");return;}
+ const labels=choices.map((x,i)=>(i+1)+") "+x.role+" — "+x.user_id.slice(0,8)).join("\n");
+ const pick=prompt("شماره مسئول اجرا را انتخاب کنید:\n"+labels,"1"),idx=Number(pick)-1;
+ if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
+ await cmmsRpcAction("cmms_assign_pm_task",{p_pm_task_id:id,p_assignee_id:choices[idx].user_id},"وظیفه PM ارجاع شد.");
+}
 function cmmsRenderTab(){
  const a=cmmsRows("assets"),f=cmmsRows("failures"),o=cmmsRows("orders"),p=cmmsRows("pmTasks");
  const openFailures=f.filter(x=>!["rejected","converted","cancelled","closed"].includes(x.status));
@@ -1644,7 +1678,7 @@ function cmmsRenderTab(){
  assets:{title:"شناسنامه تجهیزات",desc:"ثبت مشخصات پایه و مشاهده فهرست تجهیزات؛ فرم در این مرحله آماده‌سازی و اعتبارسنجی محلی انجام می‌دهد.",metrics:[["کل تجهیزات",a.length],["در سرویس",a.filter(x=>x.operational_status==="operational").length],["متوقف",a.filter(x=>x.operational_status==="stopped").length],["دارای محدودیت",a.filter(x=>x.operational_status==="degraded").length]],body:cmmsAssetForm()+cmmsTable([["کد",r=>r.asset_code],["نام تجهیز",r=>r.name],["محل",r=>cmmsRows("locations").find(l=>l.id===r.location_id)?.name],["سازنده",r=>r.manufacturer],["مدل",r=>r.model],["وضعیت",r=>cmmsStatus(r.operational_status)]],a,"فهرست تجهیزات خالی است؛ پس از فعال‌شدن امن عملیات ثبت، اطلاعات پایه وارد می‌شود.")},
  failures:{title:"گزارش خرابی‌ها",desc:"گزارش‌های ثبت‌شده، شدت، زمان وقوع و وضعیت رسیدگی.",metrics:[["کل گزارش‌ها",f.length],["بحرانی",f.filter(x=>x.priority==="critical").length],["اولویت بالا",f.filter(x=>x.priority==="high").length],["در حال بررسی",f.filter(x=>x.status==="under_review").length]],body:cmmsFailureForm()+cmmsTable([["شماره",r=>r.report_no],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["اولویت",r=>r.priority],["شرح",r=>r.description],["وضعیت",r=>cmmsStatus(r.status)],["زمان",r=>cmmsDate(r.occurred_at)]],f,"هنوز گزارش خرابی ثبت نشده است.")+cmmsFailureTriageList()},
  orders:{title:"دستورکارهای تعمیراتی",desc:"وضعیت اجرا، ارجاع فعال، سوابق اقدام و مراحل تأیید دستورکارها.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsWorkOrderForm()+cmmsWorkOrderTable()},
- pm:{title:"نگهداری پیشگیرانه (PM)",desc:"برنامه‌ها و وظایف PM، سررسید و وضعیت اجرا.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsTable([["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["عنوان",r=>r.title||r.task_title],["سررسید",r=>cmmsDate(r.due_at)],["وضعیت",r=>cmmsStatus(r.status)]],p,"هنوز وظیفه PM ایجاد نشده است.")},
+ pm:{title:"نگهداری پیشگیرانه (PM)",desc:"برنامه‌ها و وظایف PM، سررسید و وضعیت اجرا.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsPMPlanForm()+cmmsPMTaskList()},
  reports:{title:"گزارش‌ها و سوابق",desc:"نمای اولیه سوابق ممیزی و داده‌های عملیاتی؛ شاخص‌های MTTR و MTBF تا وجود داده معتبر محاسبه نمی‌شوند.",metrics:[["رویدادهای ممیزی",cmmsRows("audit").length],["تجهیزات",a.length],["خرابی‌ها",f.length],["دستورکارها",o.length]],body:cmmsTable([["نوع موجودیت",r=>r.entity_type],["شناسه",r=>r.entity_id],["عملیات",r=>r.action],["زمان",r=>cmmsDate(r.created_at)]],cmmsRows("audit").slice().reverse().slice(0,30),"هنوز رویداد ممیزی ثبت نشده است.")}
  };
  return content[cmmsActiveTab]||content.overview;
