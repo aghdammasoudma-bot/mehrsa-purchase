@@ -58,7 +58,7 @@
 
 A second read-only catalog query enumerated all CMMS routines in `public` and `cmms_private`:
 
-- The 24 private routines in `cmms_private` are SECURITY DEFINER and currently have only the postgres owner EXECUTE ACL, except the two role-check helpers `cmms_has_any_role(text[])` and `cmms_has_role_at_location(text[], uuid)`, which additionally grant EXECUTE to `authenticated`.
+- The 27 private routines in `cmms_private` are SECURITY DEFINER with an empty search_path and postgres ownership. The two role-check helpers `cmms_has_any_role(text[])` and `cmms_has_role_at_location(text[], uuid)` additionally grant EXECUTE to `authenticated`; the remaining private routines, including `cmms_user_has_active_role` and the scheduler, are owner-only.
 - The public RPC wrappers for CMMS business operations have owner-only EXECUTE ACLs. Their `SECURITY DEFINER` attribute is false; they are invoker functions and are not directly executable by `anon` or `authenticated` under the observed ACL.
 - Public trigger functions also show owner-only EXECUTE ACLs. Trigger invocation is managed by trigger bindings; direct client execution is not enabled.
 - This confirms the client cannot currently invoke the CMMS write wrappers. Do not solve this by granting EXECUTE broadly on a schema or all functions.
