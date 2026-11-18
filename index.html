@@ -2950,6 +2950,28 @@ function printSection(elementId,title){
 #main-content .request-list-column{color:#17212F!important}
 #main-content .request-detail-column :is(p,span,small,label,strong,b,div){opacity:1}
 </style>
+<style id="mehrsa-request-title-final-contrast-20261118">
+/* Final fix: request titles were inheriting muted/low-opacity styles */
+#main-content .request-table td.request-title-cell,
+#main-content .request-table td.request-title-cell strong,
+#main-content .request-table td.request-title-cell strong *,
+#main-content .request-table .request-title-cell,
+#main-content .request-table .request-title-cell strong{
+ color:#101B2A!important;
+ opacity:1!important;
+ visibility:visible!important;
+ filter:none!important;
+ text-shadow:none!important;
+ font-weight:900!important;
+ -webkit-text-fill-color:#101B2A!important;
+}
+#main-content .request-table .request-title-cell strong{
+ font-size:13px!important;line-height:1.8!important;
+}
+#main-content .request-table .request-title-cell small{
+ color:#34465A!important;opacity:1!important;font-weight:800!important;
+}
+</style>
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
