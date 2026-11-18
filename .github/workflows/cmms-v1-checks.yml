@@ -48,7 +48,7 @@ jobs:
           from pathlib import Path
           import re
           html = Path("cmms/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>", html, flags=re.I)
+          scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, flags=re.I | re.S)
           inline = [s for s in scripts if s.strip()]
           if not inline:
               raise SystemExit("No inline JavaScript blocks found in cmms/index.html")
