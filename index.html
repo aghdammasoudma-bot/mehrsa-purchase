@@ -1485,14 +1485,14 @@ function cmmsMasterDataForms(){
  const activeLocs=locs.filter(x=>x.is_active!==false);
  const parentOptions=activeLocs.map(x=>"<option value='"+escapeHtml(x.id)+"'>"+escapeHtml((x.code?x.code+" — ":"")+x.name)+"</option>").join("");
  return "<div class='cmms-master-grid'>"+
- "<form class='cmms-master-form' onsubmit='return cmmsPreviewMaster(event,"category")'>"+
+ "<form class='cmms-master-form' data-kind='category' onsubmit='return cmmsPreviewMaster(event,this.dataset.kind)'>"+
  "<div class='cmms-form-head'><div><h4>تعریف دسته‌بندی تجهیزات</h4><p>گروه‌بندی استاندارد برای فهرست تجهیزات</p></div><span>فرم آماده‌سازی</span></div>"+
  "<div class='cmms-form-grid two'>"+
  "<label>کد دسته‌بندی *<input name='code' required maxlength='30' placeholder='مثلاً ELEC'></label>"+
  "<label>عنوان دسته‌بندی *<input name='name' required maxlength='100' placeholder='مثلاً تجهیزات برق'></label>"+
  "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی دسته‌بندی</button><button class='cmms-save-disabled' type='button' disabled>ثبت در سامانه — غیرفعال</button></div>"+
  "<div class='cmms-master-preview' aria-live='polite'></div></form>"+
- "<form class='cmms-master-form' onsubmit='return cmmsPreviewMaster(event,"location")'>"+
+ "<form class='cmms-master-form' data-kind='location' onsubmit='return cmmsPreviewMaster(event,this.dataset.kind)'>"+
  "<div class='cmms-form-head'><div><h4>تعریف محل استقرار</h4><p>ساختار سلسله‌مراتبی سایت، سالن و ناحیه</p></div><span>فرم آماده‌سازی</span></div>"+
  "<div class='cmms-form-grid two'>"+
  "<label>کد محل *<input name='code' required maxlength='30' placeholder='مثلاً HALL-PAINT'></label>"+
