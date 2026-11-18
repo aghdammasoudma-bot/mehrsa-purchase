@@ -1,0 +1,263 @@
+-- CMMS v1 integration acceptance tests.
+-- Run ONLY in a disposable staging project after reconciling and applying the final migration.
+-- Execute with psql/a PostgreSQL client that preserves transaction boundaries; do NOT run through
+-- the connected SQL execution action, which may commit DDL statements despite an explicit ROLLBACK.
+-- The enclosing transaction must be rolled back; fixtures are not production data.
+-- This script validates workflow RPCs/trigger logic with request JWT claims while
+-- executed by the database owner. It does NOT prove anon/authenticated RLS isolation;
+-- run the separate role-by-role API tests in CMMS-V1-ROLE-MATRIX-WORKFLOWS-TESTS.md.
+
+begin;
+
+do $cmms_test$
+declare
+  v_supervisor uuid;
+  v_manager uuid;
+  v_expert uuid;
+  v_technician uuid;
+  v_location uuid;
+  v_asset uuid;
+  v_report uuid;
+  v_wo uuid;
+  v_pm_plan uuid;
+  v_pm_task uuid;
+  v_assignment uuid;
+  v_new_assignment uuid;
+  v_rejected boolean;
+  v_status text;
+  v_downtime timestamptz;
+begin
+  select user_id into v_supervisor from public.user_profiles where username='masoud' and is_active;
+  select user_id into v_manager from public.user_profiles where username='biabani' and is_active;
+  select user_id into v_expert from public.user_profiles where username='reza' and is_active;
+  select user_id into v_technician from public.user_profiles where username='hamid' and is_active;
+
+  if v_supervisor is null or v_manager is null or v_expert is null or v_technician is null then
+    raise exception 'Required active CMMS test profiles are missing';
+  end if;
+
+  -- Test location and asset registration as technical supervisor.
+  perform set_config('request.jwt.claim.sub',v_supervisor::text,true);
+  v_location := public.cmms_create_location(
+    'TEST-CMMS-'||substr(gen_random_uuid()::text,1,8),
+    'CMMS disposable test area','production',null
+  );
+  v_asset := public.cmms_create_asset(
+    'TEST-ASSET-'||substr(gen_random_uuid()::text,1,8),
+    'Disposable test pump',v_location,'high',null,'Test manufacturer','Model X',
+    'TEST-SERIAL',jsonb_build_object('power_kw',5),'CMMS integration test'
+  );
+
+  -- Test the two-stage corrective maintenance flow.
+  perform set_config('request.jwt.claim.sub',v_technician::text,true);
+  v_report := public.cmms_report_failure(
+    v_asset,'high','Integration test: pump vibration detected',
+    'Abnormal vibration','Production line affected','No known safety impact',
+    'No known environmental impact','{}'::text[],now()-interval '1 hour'
+  );
+
+  perform set_config('request.jwt.claim.sub',v_expert::text,true);
+  v_wo := public.cmms_triage_failure(v_report,'convert','Approved for technical repair');
+  select downtime_started_at into v_downtime from public.cmms_work_orders where id=v_wo;
+  if v_downtime is null then raise exception 'Failure downtime start was not copied to work order'; end if;
+  perform public.cmms_release_work_order(v_wo);
+  perform public.cmms_assign_work_order(v_wo,v_technician);
+
+  perform set_config('request.jwt.claim.sub',v_technician::text,true);
+  perform public.cmms_set_work_order_progress(v_wo,'in_progress');
+  perform public.cmms_record_work_order_action(
+    v_wo,'diagnosis','Confirmed abnormal bearing vibration',30,null,null,null,'{}'::text[]
+  );
+  perform public.cmms_record_work_order_action(
+    v_wo,'repair','Bearing replaced and coupling aligned',90,null,null,null,'{}'::text[]
+  );
+  perform public.cmms_set_work_order_progress(v_wo,'testing');
+  perform public.cmms_submit_work_order_test(
+    v_wo,'passed','returned',now(),'Test run successful; normal vibration restored','{}'::text[]
+  );
+
+  -- Supervisor may approve, but cannot perform the manager's second approval.
+  perform set_config('request.jwt.claim.sub',v_supervisor::text,true);
+  perform public.cmms_decide_work_order(v_wo,'technical_supervisor','approved','Technical inspection passed');
+
+  -- Temporarily grant the supervisor the manager role in this disposable test only.
+  -- This proves the distinct-person guard, not merely the role check.
+  insert into public.cmms_user_roles(user_id,role,location_id,is_active)
+  values(v_supervisor,'responsible_manager',null,true);
+
+  v_rejected := false;
+  begin
+    perform public.cmms_decide_work_order(v_wo,'responsible_manager','approved','Must be denied: same person');
+  exception when others then
+    v_rejected := true;
+  end;
+  if not v_rejected then raise exception 'Negative test failed: same-person dual approval was accepted'; end if;
+
+  delete from public.cmms_user_roles
+  where user_id=v_supervisor and role='responsible_manager' and location_id is null;
+
+  perform set_config('request.jwt.claim.sub',v_manager::text,true);
+  v_status := public.cmms_decide_work_order(v_wo,'responsible_manager','approved','Manager final approval');
+  if v_status <> 'closed' then raise exception 'Work order did not close after both approvals'; end if;
+
+  select status into v_status from public.cmms_work_orders where id=v_wo;
+  if v_status <> 'closed' then raise exception 'Closed status was not persisted'; end if;
+
+  -- Test rejection requires a reason and sends the work order back to rework.
+  perform set_config('request.jwt.claim.sub',v_expert::text,true);
+  v_report := public.cmms_report_failure(v_asset,'normal','Second integration failure','Noise');
+  v_wo := public.cmms_triage_failure(v_report,'convert',null);
+  perform public.cmms_release_work_order(v_wo);
+  perform public.cmms_assign_work_order(v_wo,v_technician);
+  perform set_config('request.jwt.claim.sub',v_technician::text,true);
+  perform public.cmms_set_work_order_progress(v_wo,'in_progress');
+  perform public.cmms_set_work_order_progress(v_wo,'testing');
+  perform public.cmms_submit_work_order_test(v_wo,'passed','not_required',null,'Test passed','{}'::text[]);
+  perform set_config('request.jwt.claim.sub',v_supervisor::text,true);
+  v_status := public.cmms_decide_work_order(v_wo,'technical_supervisor','rejected','Alignment still outside tolerance');
+  if v_status <> 'rework' then raise exception 'Supervisor rejection did not return order to rework'; end if;
+
+  -- Reassignment must preserve the old assignment with a reason.
+  select id into v_assignment from public.cmms_work_order_assignments
+  where work_order_id=v_wo and user_id=v_technician and unassigned_at is null;
+  perform set_config('request.jwt.claim.sub',v_expert::text,true);
+  v_new_assignment := public.cmms_reassign_work_order(v_assignment,v_expert,'Technician handover test');
+  if not exists (
+    select 1 from public.cmms_work_order_assignments
+    where id=v_assignment and unassigned_at is not null and unassign_reason='Technician handover test'
+  ) then raise exception 'Reassignment did not preserve prior assignment history'; end if;
+
+  -- Cancellation must close every active assignment and preserve the reason.
+  perform public.cmms_cancel_work_order(v_wo,'Disposable acceptance-test cancellation');
+  select status into v_status from public.cmms_work_orders where id=v_wo;
+  if v_status <> 'cancelled' then raise exception 'Work order cancellation failed'; end if;
+  if exists (
+    select 1 from public.cmms_work_order_assignments
+    where work_order_id=v_wo and unassigned_at is null
+  ) then raise exception 'Cancellation left an active assignment'; end if;
+
+  -- Location hierarchy must reject self-parenting.
+  v_rejected := false;
+  begin
+    update public.cmms_locations set parent_id=id where id=v_location;
+  exception when others then
+    v_rejected := true;
+  end;
+  if not v_rejected then raise exception 'Negative test failed: location self-parenting was accepted'; end if;
+
+  -- Test calendar-based PM plan generation, assignment and checklist closeout.
+  perform set_config('request.jwt.claim.sub',v_expert::text,true);
+  v_pm_plan := public.cmms_create_pm_plan(
+    v_asset,'Daily pump inspection','calendar','day',1::numeric,
+    null::text,null::text,now()-interval '1 day',null::numeric,
+    jsonb_build_array(jsonb_build_object('item','Check vibration','required',true))
+  );
+
+  perform cmms_private.cmms_generate_due_pm_tasks();
+  select id into v_pm_task from public.cmms_pm_tasks
+  where pm_plan_id=v_pm_plan and status='due'
+  order by due_at desc limit 1;
+  if v_pm_task is null then raise exception 'PM scheduler did not generate a due task'; end if;
+
+  perform public.cmms_assign_pm_task(v_pm_task,v_technician);
+  perform set_config('request.jwt.claim.sub',v_technician::text,true);
+  perform public.cmms_complete_pm_task(
+    v_pm_task,jsonb_build_array(jsonb_build_object('item','Check vibration','result','pass','note','Within limit'))
+  );
+
+  select status into v_status from public.cmms_pm_tasks where id=v_pm_task;
+  if v_status <> 'completed' then raise exception 'PM task did not complete'; end if;
+
+  -- Technician must not be able to create a new asset or approve the manager stage.
+  v_rejected := false;
+  begin
+    perform public.cmms_create_asset(
+      'UNAUTHORIZED-'||substr(gen_random_uuid()::text,1,8),'Unauthorized asset',v_location
+    );
+  exception when others then
+    v_rejected := true;
+  end;
+  if not v_rejected then raise exception 'Negative test failed: technician created an asset'; end if;
+
+end;
+$cmms_test$;
+
+
+-- RLS/API tests run as the real authenticated database role, not postgres.
+select set_config(
+  'request.jwt.claim.sub',
+  (select user_id::text from public.user_profiles where username='hamid' and is_active),
+  true
+);
+set local role authenticated;
+
+do $cmms_rls_tech$
+declare
+  v_count integer;
+  v_denied boolean := false;
+  v_asset uuid;
+  v_report uuid;
+begin
+  select count(*) into v_count
+  from public.cmms_assets
+  where asset_code like 'TEST-ASSET-%';
+  if v_count < 1 then raise exception 'Technician should read assets in the technical scope'; end if;
+
+  select count(*) into v_count from public.cmms_user_roles;
+  if v_count <> 1 then raise exception 'Technician should only read their own CMMS role row'; end if;
+
+  select id into v_asset from public.cmms_assets where asset_code like 'TEST-ASSET-%' limit 1;
+  v_report := public.cmms_report_failure(v_asset,'low','Authenticated RPC smoke test');
+  if v_report is null then raise exception 'Authenticated failure-report RPC did not return an id'; end if;
+
+  begin
+    insert into public.cmms_assets(asset_code,name,location_id)
+    values('DIRECT-WRITE-FORBIDDEN','Must fail',(select location_id from public.cmms_assets where id=v_asset));
+  exception when insufficient_privilege then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Direct authenticated table INSERT was not denied'; end if;
+
+  v_denied := false;
+  begin
+    perform public.cmms_create_asset(
+      'TECH-CREATE-FORBIDDEN','Must fail',(select location_id from public.cmms_assets where id=v_asset)
+    );
+  exception when others then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Technician asset-creation RPC was not denied'; end if;
+
+  v_denied := false;
+  begin
+    perform cmms_private.cmms_generate_due_pm_tasks();
+  exception when insufficient_privilege then
+    v_denied := true;
+  end;
+  if not v_denied then raise exception 'Authenticated user must not execute server-only PM scheduler'; end if;
+end;
+$cmms_rls_tech$;
+
+reset role;
+
+select set_config(
+  'request.jwt.claim.sub',
+  (select user_id::text from public.user_profiles where username='mohammadi' and is_active),
+  true
+);
+set local role authenticated;
+
+do $cmms_rls_planner$
+declare
+  v_count integer;
+begin
+  select count(*) into v_count from public.cmms_assets;
+  if v_count <> 0 then raise exception 'Planner must not see CMMS assets by default'; end if;
+  select count(*) into v_count from public.cmms_user_roles;
+  if v_count <> 0 then raise exception 'Planner must not see CMMS role rows'; end if;
+end;
+$cmms_rls_planner$;
+
+reset role;
+
+rollback;
