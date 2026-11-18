@@ -23,7 +23,8 @@ Status: Production schema is installed but write-locked; Production has not been
 - [x] An earlier cut of the base schema, hardening, authorization, role-seed and workflow RPC SQL passed a single explicit PostgreSQL transaction that was rolled back; a subsequent catalog check found no CMMS relations or `cmms_private` schema remaining.
 - [x] Revalidated the latest workflow RPC additions (asset/location CRUD, cancellation guard and latest approval logic) and Storage policy draft in isolated Staging; all SQL layers compiled/applied there.
 - [x] Applied the base schema, hardening, authorization, workflow RPC, P1, purchase-link and Storage layers in isolated Staging.
-- [ ] Consolidate the tested layers into ordered, versioned Supabase migrations and verify migration replay from an empty database.
+- [x] Consolidated the tested layers into `supabase/migrations/20261118090000_cmms_v1_release_candidate.sql` and applied it to Staging (migration history version `20261118064059`).
+- [ ] Replay the migration from a clean project with the required legacy purchase-module baseline; current Staging was already manually bootstrapped and this does not prove clean-database replay.
 - [ ] Verify foreign keys, unique indexes, identity sequences and delete restrictions.
 - [ ] Verify location hierarchy cycle guard under insert, update and concurrent update.
 - [ ] Verify duplicate active work-order-per-failure protection.
