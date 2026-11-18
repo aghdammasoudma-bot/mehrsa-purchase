@@ -44,7 +44,7 @@
 - Browser-level rendering, mobile layout, form validation behavior, and authenticated category/location option reads still require a preview-browser test.
 - Master-data category/location create, edit, disable, and delete workflows are not enabled; uniqueness and hierarchy-cycle enforcement must be implemented server-side before writes are allowed.
 - Storage uploads, notifications, PM scheduler, and reporting exports.
-- Staging migration and isolated acceptance test execution.
+- Real browser/Auth API tests, Storage HTTP tests, full purchase regression and clean-project migration replay; Staging migration and SQL-level acceptance have since been completed.
 - Least-privilege EXECUTE grants for the intended authenticated RPC wrappers; current ACLs deny authenticated execution, so write workflows are not yet callable from the client.
 
 ## Release boundary
