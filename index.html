@@ -1435,10 +1435,11 @@ async function cmmsLoadData(force=false){
   // Audit logs are governance-only under RLS. Do not make the whole dashboard
   // fail for experts/technicians when they correctly lack audit-log access.
   if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)){
-    queries.push(["audit","cmms_audit_logs"],["userRoles","cmms_user_roles"]);
+    queries.push(["audit","cmms_audit_logs"]);
   }else{
     cmmsData.audit=[];
   }
+  if(cmmsAssignedRole==="technical_supervisor")queries.push(["userRoles","cmms_user_roles"]);
   const results=await Promise.all(queries.map(async ([key,table])=>{
     try{const {data,error}=await cloud.from(table).select("*").limit(500);if(error)throw error;return {key,data:data||[]};}
     catch(e){return {key,error:e};}
@@ -1607,7 +1608,7 @@ function cmmsWorkOrderTable(){
  const asset=cmmsRows("assets").find(a=>a.id===w.asset_id), actions=cmmsRows("actions").filter(x=>x.work_order_id===w.id);
  let buttons="";
  if(["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)&&w.status==="triage")buttons+="<button type='button' onclick='cmmsReleaseWO("+JSON.stringify(w.id)+")'>تأیید فنی و آزادسازی</button>";
- if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)&&w.status==="approved_for_execution")buttons+="<button type='button' onclick='cmmsAssignWO("+JSON.stringify(w.id)+")'>ارجاع به تکنسین</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&w.status==="approved_for_execution")buttons+="<button type='button' onclick='cmmsAssignWO("+JSON.stringify(w.id)+")'>ارجاع به تکنسین</button>";
  if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&["assigned","in_progress","waiting_parts","rework"].includes(w.status))buttons+="<button type='button' onclick='cmmsAddWOAction("+JSON.stringify(w.id)+")'>ثبت اقدام</button>";
  if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="assigned")buttons+="<button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"in_progress\")'>شروع اجرا</button>";
  if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="in_progress")buttons+="<button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"waiting_parts\")'>انتظار قطعه</button> <button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"testing\")'>ارسال به آزمون</button>";
@@ -1651,7 +1652,7 @@ function cmmsPMTaskList(){
  const assigned=t.assigned_to===cloudUser.id;
  if(["due","assigned","overdue"].includes(t.status)&&assigned)buttons+="<button type='button' onclick='cmmsStartPM("+JSON.stringify(t.id)+")'>شروع وظیفه</button>";
  if(["due","assigned","in_progress","overdue"].includes(t.status)&&(assigned||["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)))buttons+="<button type='button' onclick='cmmsCompletePM("+JSON.stringify(t.id)+")'>ثبت تکمیل و چک‌لیست</button>";
- if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)&&["due","overdue"].includes(t.status))buttons+="<button type='button' onclick='cmmsAssignPM("+JSON.stringify(t.id)+")'>ارجاع وظیفه</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&["due","overdue"].includes(t.status))buttons+="<button type='button' onclick='cmmsAssignPM("+JSON.stringify(t.id)+")'>ارجاع وظیفه</button>";
  return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(t.title||t.task_title||"وظیفه PM")+"</b><span>"+cmmsEscAttr(cmmsStatus(t.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+"</p><small>سررسید: "+cmmsEscAttr(cmmsDate(t.due_at))+" | مسئول: "+cmmsEscAttr(t.assigned_to?String(t.assigned_to).slice(0,8):"تخصیص‌نیافته")+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
  }).join("")+"</div>";
 }
