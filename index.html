@@ -1543,7 +1543,7 @@ function cmmsMasterDataForms(){
  "<label>عنوان محل *<input name='name' required maxlength='120' placeholder='مثلاً سالن تولید رنگ'></label>"+
  "<label>محل بالادستی<select name='parent_id'><option value=''>بدون والد / سطح اصلی</option>"+parentOptions+"</select></label>"+
  "<label>حوزه تخصصی<select name='discipline'><option value=''>نامشخص</option><option value='mechanical'>مکانیک</option><option value='electrical'>برق</option><option value='utilities'>تأسیسات</option><option value='production'>تولید</option><option value='general'>عمومی</option></select></label>"+
- "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی محل</button><button class='cmms-save-disabled' type='button' disabled>ثبت در سامانه — غیرفعال</button></div>"+
+ "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی محل</button><button class='cmms-save-btn' type='button' onclick='cmmsCreateLocation(this)' "+(cmmsAssignedRole==="technical_supervisor"?"":"disabled title='فقط سرپرست فنی مجاز به تعریف محل است'")+">ثبت محل در سامانه</button></div>"+
  "<div class='cmms-master-preview' aria-live='polite'></div></form></div>"+
  "<section class='cmms-master-list'><h4>دسته‌بندی‌های موجود ("+cats.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان",r=>r.name]],cats,"هنوز دسته‌بندی تعریف نشده است.")+"</section>"+
  "<section class='cmms-master-list'><h4>ساختار محل‌های استقرار ("+locs.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان محل",r=>r.name],["محل بالادستی",r=>locs.find(p=>p.id===r.parent_id)?.name||"سطح اصلی"],["حوزه",r=>({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[r.discipline]||"—"],["وضعیت",r=>r.is_active?"فعال":"غیرفعال"]],locs,"هنوز محل استقراری تعریف نشده است.")+"</section>";
@@ -1560,6 +1560,19 @@ function cmmsPreviewMaster(event,type){
  const duplicate=(type==="category"?cmmsRows("categories"):cmmsRows("locations")).some(x=>String(x.code||"").trim().replace(/\s+/g," ").toUpperCase()===normalizedCode);
  preview.innerHTML="<b>"+(duplicate?"هشدار: کد واردشده تکراری است":"پیش‌نمایش اطلاعات")+"</b><div>"+details.map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>"+(duplicate?"پیش از ثبت باید کد یکتا انتخاب شود. ":"")+"این پیش‌نمایش محلی است؛ هیچ داده‌ای به Supabase ارسال نشده است.</small>";
  return false;
+}
+async function cmmsCreateLocation(button){
+ const form=button.closest("form");if(!form||!form.reportValidity())return;
+ if(cmmsAssignedRole!=="technical_supervisor"){alert("فقط سرپرست فنی مجاز به تعریف محل است.");return;}
+ const d=Object.fromEntries(new FormData(form).entries());
+ const duplicate=cmmsRows("locations").some(x=>String(x.code||"").trim().toUpperCase()===String(d.code||"").trim().toUpperCase());
+ if(duplicate){alert("کد محل تکراری است.");return;}
+ if(!confirm("محل جدید ثبت شود؟\\n"+d.code+" — "+d.name))return;
+ try{
+  const {error}=await cloud.rpc("cmms_create_location",{p_code:d.code.trim(),p_name:d.name.trim(),p_discipline:d.discipline||null,p_parent_id:d.parent_id||null});
+  if(error)throw error;
+  alert("محل استقرار ثبت شد.");form.reset();await cmmsLoadData(true);
+ }catch(e){alert("ثبت محل ناموفق: "+(e.message||String(e)));}
 }
 function cmmsCanCreateOperational(){return ["technical_supervisor","technical_expert"].includes(cmmsAssignedRole);}
 function cmmsEscAttr(v){return escapeHtml(String(v??""));}
