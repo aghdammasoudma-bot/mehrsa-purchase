@@ -1,4 +1,6 @@
 -- Exactly one daily PM due-task generation job; PostgreSQL cron timezone is GMT.
+create extension if not exists pg_cron;
+
 do $$
 declare
   v_jobid bigint;
