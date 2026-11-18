@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102B3A"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="CMMS مهرسا"><link rel="manifest" href="./manifest.webmanifest"><title>سامانه تعمیرات و نگهداری مهرسا</title>
+<style>
+:root{font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#1e293b;background:#f2f6f8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#f2f6f8}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 15% 10%,#24616a,#102b3a 60%,#0b1d2b)}
+.login-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:28px;box-shadow:0 24px 70px #06172266}
+.brand{font-size:11px;letter-spacing:2px;color:#16828a;font-weight:800}.login-card h1{font-size:23px;margin:9px 0 5px;color:#102b3a}.login-card p{font-size:12px;color:#64748b;line-height:1.9;margin:0 0 22px}
+label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;direction:ltr}
+button{font-family:inherit;cursor:pointer}.login-btn{width:100%;padding:13px;border:0;border-radius:9px;background:#176b73;color:#fff;font-weight:800;margin-top:18px}
+#auth-msg{font-size:11px;color:#a14d12;line-height:1.8;margin-top:12px;min-height:20px}
+#app{display:none}.appbar{background:#102b3a;color:#fff;padding:15px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
+.appbar strong{font-size:15px}.appbar small{display:block;color:#b7d1d9;font-size:10px;margin-top:4px}
+.logout{border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:8px;padding:9px 13px;font-size:11px}
+#cmms-v1-view{display:block!important}
+@media(max-width:600px){.appbar{padding:12px}.appbar strong{font-size:13px}.login-card{padding:22px}}
+</style>
+<style id="cmms-v1-ui">
+#cmms-v1-view{max-width:1160px;margin:18px auto 110px;padding:0 16px;direction:rtl;color:#202939}
+.cmms-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px;background:linear-gradient(120deg,#122B42,#176B73);border-radius:16px;color:#fff;box-shadow:0 8px 24px rgba(25,50,70,.13)}
+.cmms-eyebrow{font-size:10px;letter-spacing:1.3px;color:#B8D9E7;font-weight:800}.cmms-head h2{font-size:22px;margin:5px 0;color:#fff}.cmms-head p{font-size:12px;color:#D3E4ED}
+.cmms-head-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.cmms-role{font-size:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:8px 12px;border-radius:10px;color:#fff}
+.cmms-refresh{padding:9px 13px;border-radius:9px;background:#fff;color:#176B73;font-size:11px;font-weight:800}
+.cmms-gate{display:flex;flex-direction:column;gap:4px;margin:13px 0;padding:13px 15px;background:#EAF5F3;border:1px solid #C9E6E1;border-right:4px solid #218A88;border-radius:10px;color:#18565A;font-size:12px;line-height:1.8}.cmms-gate span{font-size:11px;color:#466C70}.cmms-gate.cmms-error{background:#FFF0EF;border-color:#F2C7C4;border-right-color:#B4232D;color:#8B1E25}.cmms-gate.cmms-error span{color:#8B4B4F}
+.cmms-tabs{display:flex;gap:7px;overflow-x:auto;padding:5px 0 12px;scrollbar-width:thin}.cmms-tabs button{flex:none;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid #DCE3EA;border-radius:9px;background:#fff;color:#536274;font-size:11px;font-weight:700}.cmms-tabs button.active{background:#EAF2FB;border-color:#AFC9E1;color:#245B88;box-shadow:inset 0 -2px #398BC5}.cmms-tabs button span{font-size:15px}
+.cmms-panel,.cmms-flow{background:#fff;border:1px solid #DCE3EA;border-radius:14px;padding:18px;box-shadow:0 3px 13px rgba(30,50,70,.045);margin-bottom:13px}.cmms-panel-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cmms-panel-title h3,.cmms-flow h3{font-size:16px;color:#263746}.cmms-panel-title p{font-size:11px;color:#73808E;margin-top:5px;line-height:1.8}.cmms-readonly{font-size:10px;color:#65758A;background:#F1F4F7;border-radius:7px;padding:5px 8px;white-space:nowrap}
+.cmms-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 12px}.cmms-metric{background:#F7F9FB;border:1px solid #E5EAF0;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:7px}.cmms-metric small{font-size:11px;color:#687584}.cmms-metric strong{font-size:24px;color:#245B88}.cmms-metric em{font-style:normal;font-size:10px;color:#75808A}
+.cmms-table-wrap{overflow:auto;border:1px solid #E5EAF0;border-radius:10px}.cmms-table{width:100%;border-collapse:collapse;min-width:650px;background:#fff}.cmms-table th,.cmms-table td{text-align:right;padding:11px 12px;border-bottom:1px solid #EDF1F4;font-size:11px;line-height:1.7}.cmms-table th{background:#F4F7F9;color:#536777;font-weight:800;white-space:nowrap}.cmms-table td{color:#263746}.cmms-table tr:last-child td{border-bottom:0}.cmms-empty{padding:28px 15px;text-align:center;color:#778895;background:#F8FAFB;border:1px dashed #D7E1E6;border-radius:10px;font-size:12px}
+.cmms-inline-card{border:1px solid #dce7ec;border-radius:10px;padding:13px;margin:10px 0;background:#fff}.cmms-card-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.cmms-card-head span{color:#087e8b;font-weight:700}.cmms-inline-card p{margin:8px 0;color:#40515a}.cmms-inline-card small{color:#687982}.cmms-inline-card button{margin:5px 4px 0 0;padding:8px 12px;border:1px solid #b9cbd2;border-radius:7px;background:#edf5f7;color:#17434c;cursor:pointer}.cmms-inline-card .cmms-form-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.cmms-workorder-list{margin-top:16px}.cmms-master-form{margin:14px 0;padding:16px;border:1px solid #dce7ec;border-radius:12px;background:#fbfcfd}.cmms-master-form textarea,.cmms-master-form input,.cmms-master-form select{max-width:100%;box-sizing:border-box}.cmms-master-form .wide{grid-column:1/-1}.cmms-master-form .cmms-form-actions{margin-top:12px}.cmms-asset-form{margin:14px 0 18px;padding:16px;border:1px solid #DCE7EC;border-radius:12px;background:#FBFCFD}.cmms-form-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.cmms-form-head h4{font-size:14px;color:#263746;margin:0 0 5px}.cmms-form-head p{font-size:11px;color:#73808E;line-height:1.8}.cmms-form-head>span{font-size:10px;color:#176B73;background:#E8F4F2;padding:6px 9px;border-radius:7px;white-space:nowrap}.cmms-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cmms-form-grid label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:#526373;font-weight:700}.cmms-form-grid input,.cmms-form-grid select,.cmms-form-grid textarea{width:100%;min-width:0;padding:10px;border:1px solid #D7E0E7;border-radius:8px;background:#fff;color:#263746;font:inherit;font-weight:400;outline:none}.cmms-form-grid input:focus,.cmms-form-grid select:focus,.cmms-form-grid textarea:focus{border-color:#398BC5;box-shadow:0 0 0 3px rgba(57,139,197,.1)}.cmms-form-grid .wide{grid-column:1/-1}.cmms-form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.cmms-preview-btn,.cmms-save-disabled{padding:10px 14px;border-radius:8px;font-size:11px;font-weight:800}.cmms-preview-btn{background:#176B73;color:#fff}.cmms-save-disabled{background:#E9EDF1;color:#87939E;cursor:not-allowed}.cmms-asset-preview{display:none;margin-top:13px;padding:12px;background:#EFF7F5;border:1px solid #CDE4DF;border-radius:9px;color:#235D59;font-size:11px;line-height:1.9}.cmms-asset-preview:not(:empty){display:block}.cmms-asset-preview>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;margin:7px 0}.cmms-asset-preview small{color:#6C8581}@media(max-width:850px){.cmms-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-asset-preview>div{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.cmms-form-grid{grid-template-columns:1fr}.cmms-form-grid .wide{grid-column:auto}.cmms-form-head{flex-direction:column}.cmms-asset-preview>div{grid-template-columns:1fr}}.cmms-master-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:14px 0}.cmms-master-form{min-width:0;padding:15px;border:1px solid #DCE7EC;border-radius:12px;background:#FBFCFD}.cmms-form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-master-preview{display:none;margin-top:12px;padding:11px;border:1px solid #CDE4DF;background:#EFF7F5;border-radius:8px;color:#235D59;font-size:11px;line-height:1.9}.cmms-master-preview:not(:empty){display:block}.cmms-master-preview>div{display:grid;gap:4px;margin:6px 0}.cmms-master-preview small{color:#6C8581}.cmms-master-list{margin:18px 0}.cmms-master-list h4{font-size:13px;color:#334B5C;margin:0 0 9px}@media(max-width:900px){.cmms-master-grid{grid-template-columns:1fr}}@media(max-width:520px){.cmms-form-grid.two{grid-template-columns:1fr}}.cmms-flow h3{margin-bottom:13px}.cmms-steps{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0 8px;white-space:nowrap}.cmms-steps span{background:#EEF3F8;border:1px solid #DCE5EE;border-radius:8px;padding:9px 11px;font-size:10px;color:#38536B;font-weight:700}.cmms-steps i{font-style:normal;color:#9AA8B5}
+@media(max-width:700px){#cmms-v1-view{padding:0 11px}.cmms-head{padding:17px;align-items:stretch;flex-direction:column}.cmms-head h2{font-size:19px}.cmms-role{white-space:normal}.cmms-head-tools{justify-content:space-between}.cmms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-panel{padding:14px}.cmms-panel-title{flex-direction:column}}
+</style>
+</head>
+<body>
+<section id="login">
+ <div class="login-card">
+  <div class="brand">MEHRSA • TECHNICAL OPERATIONS</div>
+  <h1>تعمیرات و نگهداری مهرسا</h1>
+  <p>سامانه مستقل مدیریت تجهیزات، خرابی‌ها، دستورکارهای تعمیراتی و نگهداری پیشگیرانه</p>
+  <label for="auth-email">شناسه کاربری</label><input id="auth-email" autocomplete="username" placeholder="شناسه یا ایمیل">
+  <label for="auth-password">رمز عبور</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="رمز عبور">
+  <button class="login-btn" id="login-btn" onclick="cmmsLogin()">ورود به سامانه</button>
+  <div id="auth-msg">با حساب کاربری فعلی خود وارد شوید. دسترسی‌ها از پایگاه داده کنترل می‌شوند.</div>
+ </div>
+</section>
+<div id="app">
+ <header class="appbar"><div><strong>سامانه تعمیرات و نگهداری مهرسا</strong><small id="signed-user">CMMS مستقل • نسخه ۱</small></div><button class="logout" onclick="cmmsLogout()">خروج از حساب</button></header>
+ <main><section id="cmms-v1-view" aria-live="polite"></section></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://jpzgtbafrpjjbtwqwzlr.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Y_mc64kSyCr8bKpZNmUE8Q_uFbOI5m8";
+let cloud=null,cloudUser=null,currentRole="",currentUser="",currentTitle="";
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function authMessage(t){const el=document.getElementById("auth-msg");if(el)el.textContent=t;}
+async function ensureCloud(){if(!window.supabase?.createClient)throw new Error("کتابخانه اتصال بارگذاری نشد.");if(!cloud)cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);return cloud;}
+// CMMS V1 — standalone application. Mutations are performed only through authorized RPCs.
+let cmmsActiveTab="overview";
+let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};
+let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="",cmmsAssignedRoles=[];
+async function cmmsLoadUserRole(){
+  cmmsAssignedRole="";
+  cmmsAssignedRoles=[];
+  if(!cloudUser)return;
+  const {data,error}=await cloud.from("cmms_user_roles")
+    .select("role,location_id")
+    .eq("user_id",cloudUser.id)
+    .eq("is_active",true);
+  if(error)throw new Error("خطا در دریافت سطح دسترسی CMMS: "+error.message);
+  cmmsAssignedRoles=[...new Set((data||[]).map(x=>x.role).filter(Boolean))];
+  const precedence=["responsible_manager","technical_supervisor","technical_expert","technician"];
+  cmmsAssignedRole=precedence.find(role=>cmmsAssignedRoles.includes(role))||"";
+}
+function cmmsCanAccess(){
+  return !!cloudUser && ["technical_supervisor","responsible_manager","technical_expert","technician"].includes(cmmsAssignedRole);
+}
+function cmmsRoleLabel(){
+  const labels={technical_supervisor:"سرپرست فنی — تأیید فنی مرحله اول",responsible_manager:"مدیر مسئول — تأیید نهایی همه تجهیزات",technical_expert:"کارشناس فنی",technician:"تکنسین تعمیرات"};
+  const ordered=["responsible_manager","technical_supervisor","technical_expert","technician"].filter(role=>cmmsAssignedRoles.includes(role));
+  return ordered.map(role=>labels[role]).join(" / ")||"بدون دسترسی CMMS";
+}
+function cmmsSetTab(tab){cmmsActiveTab=tab;renderCMMSView();}
+function cmmsText(v){return v===null||v===undefined||v===""?"—":String(v);}
+function cmmsDate(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?cmmsText(v):d.toLocaleString("fa-IR",{dateStyle:"short",timeStyle:"short"});}
+function cmmsStatus(v){const map={operational:"در سرویس",degraded:"دارای محدودیت",stopped:"متوقف",under_maintenance:"در تعمیر",retired:"اسقاط‌شده",submitted:"ثبت‌شده",under_review:"در بررسی",rejected:"ردشده",converted:"تبدیل به دستورکار",cancelled:"لغوشده",open:"باز",triage:"در بررسی فنی",approved_for_execution:"آماده ارجاع",assigned:"ارجاع‌شده",in_progress:"در حال اجرا",waiting_parts:"در انتظار قطعه",testing:"در مرحله آزمون",pending_supervisor_approval:"در انتظار تأیید سرپرست",pending_manager_approval:"در انتظار تأیید مدیر مسئول",rework:"نیازمند اصلاح",due:"سررسیدشده",overdue:"عقب‌افتاده",completed:"تکمیل‌شده",closed:"بسته‌شده"};return map[v]||cmmsText(v);}
+function cmmsRows(key){return cmmsData[key]||[];}
+async function cmmsLoadData(force=false){
+  if(!cmmsCanAccess())return;
+  if(cmmsLoadState==="loading")return;
+  if(cmmsLoadState==="loaded"&&!force)return;
+  cmmsLoadState="loading";cmmsLoadError="";renderCMMSView();
+  const queries=[
+    ["assets","cmms_assets"],["locations","cmms_locations"],["categories","cmms_asset_categories"],
+    ["failures","cmms_failure_reports"],["orders","cmms_work_orders"],["pmPlans","cmms_pm_plans"],
+    ["pmTasks","cmms_pm_tasks"],["assignments","cmms_work_order_assignments"],
+    ["actions","cmms_work_order_actions"],["approvals","cmms_work_order_approvals"],
+    ["meterReadings","cmms_asset_meter_readings"]
+  ];
+  if(["technical_supervisor","responsible_manager","technical_expert"].some(role=>cmmsAssignedRoles.includes(role))){
+    queries.push(["purchaseLinks","cmms_work_order_purchase_links"]);
+  }else{
+    cmmsData.purchaseLinks=[];
+  }
+  // Audit logs are governance-only under RLS. Do not make the whole dashboard
+  // fail for experts/technicians when they correctly lack audit-log access.
+  if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)){
+    queries.push(["audit","cmms_audit_logs"]);
+  }else{
+    cmmsData.audit=[];
+  }
+  if(cmmsAssignedRole==="technical_supervisor")queries.push(["userRoles","cmms_user_roles"]);
+  const results=await Promise.all(queries.map(async ([key,table])=>{
+    try{const {data,error}=await cloud.from(table).select("*").limit(500);if(error)throw error;return {key,data:data||[]};}
+    catch(e){return {key,error:e};}
+  }));
+  const failed=results.filter(x=>x.error);
+  results.forEach(x=>{if(x.data)cmmsData[x.key]=x.data;});
+  if(failed.length){
+    cmmsLoadState="error";
+    cmmsLoadError=failed.map(x=>x.key+": "+(x.error.message||String(x.error))).join(" | ");
+  }else cmmsLoadState="loaded";
+  renderCMMSView();
+}
+function cmmsMetric(label,value,sub="") {
+ return "<div class='cmms-metric'><small>"+escapeHtml(label)+"</small><strong>"+escapeHtml(String(value))+"</strong>"+(sub?"<em>"+escapeHtml(sub)+"</em>":"")+"</div>";
+}
+function cmmsTable(headers,rows,emptyText){
+ if(!rows.length)return "<div class='cmms-empty'>"+escapeHtml(emptyText)+"</div>";
+ return "<div class='cmms-table-wrap'><table class='cmms-table'><thead><tr>"+headers.map(h=>"<th>"+escapeHtml(h[0])+"</th>").join("")+"</tr></thead><tbody>"+rows.map(row=>"<tr>"+headers.map(h=>"<td>"+escapeHtml(cmmsText(h[1](row)))+"</td>").join("")+"</tr>").join("")+"</tbody></table></div>";
+}
+function cmmsAssetForm(){
+ const categories=cmmsRows("categories"),locations=cmmsRows("locations").filter(x=>x.is_active!==false);
+ const optionList=(items,empty)=>items.length?items.map(x=>"<option value='"+escapeHtml(x.id)+"'>"+escapeHtml((x.code?x.code+" — ":"")+x.name)+"</option>").join(""):"<option value=''>"+empty+"</option>";
+ return "<form class='cmms-asset-form' id='cmms-asset-form' onsubmit='return cmmsPreviewAsset(event)'>"+
+ "<div class='cmms-form-head'><div><h4>ثبت شناسنامه تجهیز</h4><p>فیلدهای ستاره‌دار الزامی هستند. ثبت اطلاعات از طریق عملیات کنترل‌شده پایگاه داده انجام می‌شود.</p></div><span>فرم آماده‌سازی</span></div>"+
+ "<div class='cmms-form-grid'>"+
+ "<label>کد تجهیز *<input name='asset_code' required maxlength='40' placeholder='مثلاً PUMP-001'></label>"+
+ "<label>نام تجهیز *<input name='name' required maxlength='160' placeholder='مثلاً پمپ انتقال رزین'></label>"+
+ "<label>دسته‌بندی<select name='category_id'><option value=''>انتخاب دسته‌بندی</option>"+optionList(categories,"دسته‌بندی تعریف نشده")+"</select></label>"+
+ "<label>محل استقرار *<select name='location_id' required><option value=''>انتخاب محل</option>"+optionList(locations,"محلی تعریف نشده")+"</select></label>"+
+ "<label>سازنده<input name='manufacturer' maxlength='120'></label>"+
+ "<label>مدل<input name='model' maxlength='120'></label>"+
+ "<label>شماره سریال<input name='serial_number' maxlength='120'></label>"+
+ "<label>مسئول تجهیز<input name='equipment_owner' maxlength='120' placeholder='واحد یا مسئول بهره‌بردار'></label>"+
+ "<label>اهمیت تجهیز *<select name='criticality' required><option value='medium'>متوسط</option><option value='low'>پایین</option><option value='high'>بالا</option><option value='critical'>بحرانی</option></select></label>"+
+ ""+
+ ""+
+ ""+
+ "<label class='wide'>مشخصات فنی<textarea name='technical_specs' rows='3' placeholder='توان، ظرفیت، فشار، دما، ولتاژ، جریان، ابعاد و سایر مشخصات...'></textarea></label>"+
+ "</div><div class='cmms-form-actions'><button type='button' class='cmms-preview-btn' onclick='document.getElementById(&#39;cmms-asset-form&#39;).requestSubmit()'>بررسی اطلاعات</button><button type='button' class='cmms-save-btn' onclick='cmmsCreateAsset()' "+(cmmsCanCreateAsset()?"":"disabled title='فقط سرپرست فنی و کارشناس فنی مجاز به ثبت تجهیز هستند'")+">ثبت شناسنامه تجهیز</button></div>"+
+ "<div id='cmms-asset-preview' class='cmms-asset-preview' aria-live='polite'></div></form>";
+}
+function cmmsCanCreateAsset(){return ["technical_supervisor","technical_expert"].includes(cmmsAssignedRole);}
+async function cmmsCreateAsset(){
+ const form=document.getElementById("cmms-asset-form");
+ if(!form||!cmmsCanCreateAsset())return;
+ if(!form.reportValidity())return;
+ const d=Object.fromEntries(new FormData(form).entries());
+ if(!d.location_id){alert("انتخاب محل استقرار الزامی است.");return;}
+ const btn=form.querySelector(".cmms-save-btn");
+ if(btn){btn.disabled=true;btn.textContent="در حال ثبت...";}
+ try{
+  const {data,error}=await cloud.rpc("cmms_create_asset",{
+   p_asset_code:d.asset_code.trim(),p_name:d.name.trim(),p_location_id:d.location_id,
+   p_criticality:d.criticality,p_category_id:d.category_id||null,
+   p_manufacturer:d.manufacturer||null,p_model:d.model||null,
+   p_serial_number:d.serial_number||null,
+   p_technical_specs:{notes:d.technical_specs||""},
+   p_equipment_owner:d.equipment_owner||null
+  });
+  if(error)throw error;
+  alert("شناسنامه تجهیز با موفقیت ثبت شد. شناسه: "+data);
+  form.reset();
+  const preview=document.getElementById("cmms-asset-preview");if(preview)preview.innerHTML="";
+  await cmmsLoadData(true);
+ }catch(e){alert("ثبت تجهیز ناموفق بود: "+(e.message||String(e)));}
+ finally{if(btn){btn.disabled=!cmmsCanCreateAsset();btn.textContent="ثبت شناسنامه تجهیز";}}
+}
+function cmmsPreviewAsset(event){
+ event.preventDefault();
+ const form=event.currentTarget;
+ if(!form.reportValidity())return false;
+ const data=Object.fromEntries(new FormData(form).entries());
+ const category=cmmsRows("categories").find(x=>x.id===data.category_id);
+ const location=cmmsRows("locations").find(x=>x.id===data.location_id);
+ const criticality=({low:"پایین",medium:"متوسط",high:"بالا",critical:"بحرانی"})[data.criticality]||data.criticality;
+ const preview=document.getElementById("cmms-asset-preview");
+ preview.innerHTML="<b>اطلاعات واردشده بررسی شد</b><div>"+[
+ "کد: "+data.asset_code,"نام: "+data.name,"دسته‌بندی: "+(category?.name||"انتخاب نشده"),
+ "محل: "+(location?.name||"انتخاب نشده"),"سازنده/مدل: "+[data.manufacturer,data.model].filter(Boolean).join(" / "),
+ "شماره سریال: "+(data.serial_number||"—"),"اهمیت: "+criticality,
+ "مسئول: "+(data.equipment_owner||"—")
+ ].map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>این پیش‌نمایش محلی است؛ برای ذخیره، دکمه ثبت را انتخاب کنید.</small>";
+ return false;
+}
+function cmmsMasterDataForms(){
+ const cats=cmmsRows("categories"),locs=cmmsRows("locations");
+ const activeLocs=locs.filter(x=>x.is_active!==false);
+ const parentOptions=activeLocs.map(x=>"<option value='"+escapeHtml(x.id)+"'>"+escapeHtml((x.code?x.code+" — ":"")+x.name)+"</option>").join("");
+ return "<div class='cmms-master-grid'>"+
+ "<form class='cmms-master-form' data-kind='category' onsubmit='return cmmsPreviewMaster(event,this.dataset.kind)'>"+
+ "<div class='cmms-form-head'><div><h4>تعریف دسته‌بندی تجهیزات</h4><p>گروه‌بندی استاندارد برای فهرست تجهیزات</p></div><span>فرم آماده‌سازی</span></div>"+
+ "<div class='cmms-form-grid two'>"+
+ "<label>کد دسته‌بندی *<input name='code' required maxlength='30' placeholder='مثلاً ELEC'></label>"+
+ "<label>عنوان دسته‌بندی *<input name='name' required maxlength='100' placeholder='مثلاً تجهیزات برق'></label>"+
+ "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی دسته‌بندی</button><button class='cmms-save-disabled' type='button' disabled>ثبت در سامانه — غیرفعال</button></div>"+
+ "<div class='cmms-master-preview' aria-live='polite'></div></form>"+
+ "<form class='cmms-master-form' data-kind='location' onsubmit='return cmmsPreviewMaster(event,this.dataset.kind)'>"+
+ "<div class='cmms-form-head'><div><h4>تعریف محل استقرار</h4><p>ساختار سلسله‌مراتبی سایت، سالن و ناحیه</p></div><span>فرم آماده‌سازی</span></div>"+
+ "<div class='cmms-form-grid two'>"+
+ "<label>کد محل *<input name='code' required maxlength='30' placeholder='مثلاً HALL-PAINT'></label>"+
+ "<label>عنوان محل *<input name='name' required maxlength='120' placeholder='مثلاً سالن تولید رنگ'></label>"+
+ "<label>محل بالادستی<select name='parent_id'><option value=''>بدون والد / سطح اصلی</option>"+parentOptions+"</select></label>"+
+ "<label>حوزه تخصصی<select name='discipline'><option value=''>نامشخص</option><option value='mechanical'>مکانیک</option><option value='electrical'>برق</option><option value='utilities'>تأسیسات</option><option value='production'>تولید</option><option value='general'>عمومی</option></select></label>"+
+ "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی محل</button><button class='cmms-save-btn' type='button' onclick='cmmsCreateLocation(this)' "+(cmmsAssignedRole==="technical_supervisor"?"":"disabled title='فقط سرپرست فنی مجاز به تعریف محل است'")+">ثبت محل در سامانه</button></div>"+
+ "<div class='cmms-master-preview' aria-live='polite'></div></form></div>"+
+ "<section class='cmms-master-list'><h4>دسته‌بندی‌های موجود ("+cats.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان",r=>r.name]],cats,"هنوز دسته‌بندی تعریف نشده است.")+"</section>"+
+ "<section class='cmms-master-list'><h4>ساختار محل‌های استقرار ("+locs.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان محل",r=>r.name],["محل بالادستی",r=>locs.find(p=>p.id===r.parent_id)?.name||"سطح اصلی"],["حوزه",r=>({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[r.discipline]||"—"],["وضعیت",r=>r.is_active?"فعال":"غیرفعال"]],locs,"هنوز محل استقراری تعریف نشده است.")+"</section>";
+}
+function cmmsPreviewMaster(event,type){
+ event.preventDefault();
+ const form=event.currentTarget;if(!form.reportValidity())return false;
+ const d=Object.fromEntries(new FormData(form).entries());
+ const preview=form.querySelector(".cmms-master-preview");
+ const parent=cmmsRows("locations").find(x=>x.id===d.parent_id);
+ const discipline=({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[d.discipline]||"نامشخص";
+ const details=type==="category"?["کد دسته‌بندی: "+d.code,"عنوان: "+d.name]:["کد محل: "+d.code,"عنوان محل: "+d.name,"محل بالادستی: "+(parent?.name||"سطح اصلی"),"حوزه تخصصی: "+discipline];
+ const normalizedCode=String(d.code||"").trim().replace(/\s+/g," ").toUpperCase();
+ const duplicate=(type==="category"?cmmsRows("categories"):cmmsRows("locations")).some(x=>String(x.code||"").trim().replace(/\s+/g," ").toUpperCase()===normalizedCode);
+ preview.innerHTML="<b>"+(duplicate?"هشدار: کد واردشده تکراری است":"پیش‌نمایش اطلاعات")+"</b><div>"+details.map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>"+(duplicate?"پیش از ثبت باید کد یکتا انتخاب شود. ":"")+"این پیش‌نمایش محلی است؛ هیچ داده‌ای به Supabase ارسال نشده است.</small>";
+ return false;
+}
+async function cmmsCreateLocation(button){
+ const form=button.closest("form");if(!form||!form.reportValidity())return;
+ if(cmmsAssignedRole!=="technical_supervisor"){alert("فقط سرپرست فنی مجاز به تعریف محل است.");return;}
+ const d=Object.fromEntries(new FormData(form).entries());
+ const duplicate=cmmsRows("locations").some(x=>String(x.code||"").trim().toUpperCase()===String(d.code||"").trim().toUpperCase());
+ if(duplicate){alert("کد محل تکراری است.");return;}
+ if(!confirm("محل جدید ثبت شود؟\\n"+d.code+" — "+d.name))return;
+ try{
+  const {error}=await cloud.rpc("cmms_create_location",{p_code:d.code.trim(),p_name:d.name.trim(),p_discipline:d.discipline||null,p_parent_id:d.parent_id||null});
+  if(error)throw error;
+  alert("محل استقرار ثبت شد.");form.reset();await cmmsLoadData(true);
+ }catch(e){alert("ثبت محل ناموفق: "+(e.message||String(e)));}
+}
+function cmmsCanCreateOperational(){return ["technical_supervisor","technical_expert"].includes(cmmsAssignedRole);}
+function cmmsEscAttr(v){return escapeHtml(String(v??""));}
+function cmmsAssetOptions(){return cmmsRows("assets").filter(a=>a.operational_status!=="retired").map(a=>"<option value='"+cmmsEscAttr(a.id)+"'>"+cmmsEscAttr(a.asset_code+" — "+a.name)+"</option>").join("")||"<option value=''>تجهیز فعالی موجود نیست</option>";}
+function cmmsAssetStatusForm(){
+ if(!cmmsCanCreateOperational())return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsChangeAssetStatus(event)'><div class='cmms-form-head'><div><h4>تغییر وضعیت عملیاتی تجهیز</h4><p>هر تغییر وضعیت با علت ثبت و در تاریخچه ممیزی می‌شود.</p></div><span>کنترل وضعیت</span></div><div class='cmms-form-grid two'><label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>وضعیت جدید *<select name='new_status'><option value='operational'>در سرویس</option><option value='degraded'>دارای محدودیت</option><option value='stopped'>متوقف</option><option value='under_maintenance'>در تعمیر</option><option value='retired'>اسقاط‌شده</option></select></label><label class='wide'>علت تغییر *<textarea name='reason' required rows='2'></textarea></label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت تغییر وضعیت</button></div></form>";
+}
+async function cmmsChangeAssetStatus(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;const d=Object.fromEntries(new FormData(form).entries());
+ if(d.new_status==="retired"&&!confirm("اسقاط تجهیز قطعی است. ادامه می‌دهید؟"))return false;
+ await cmmsRpcAction("cmms_change_asset_status",{p_asset_id:d.asset_id,p_new_status:d.new_status,p_reason:d.reason.trim()},"وضعیت تجهیز تغییر کرد.");form.reset();return false;
+}
+function cmmsMeterReadingForm(){
+ if(!["technician","technical_expert","technical_supervisor"].includes(cmmsAssignedRole))return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsRecordMeter(event)'><div class='cmms-form-head'><div><h4>ثبت عدد کنتور / ساعت‌کارکرد</h4><p>مقادیر منفی یا نامعتبر در سمت پایگاه داده رد می‌شوند.</p></div><span>قرائت جدید</span></div><div class='cmms-form-grid two'><label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>کد کنتور *<input name='meter_code' required maxlength='60' placeholder='مثلاً RUN_HOURS'></label><label>واحد *<input name='meter_unit' required maxlength='20' placeholder='h / cycle / kWh'></label><label>مقدار *<input name='meter_value' type='number' min='0' step='any' required></label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت قرائت</button></div></form>";
+}
+async function cmmsRecordMeter(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;const d=Object.fromEntries(new FormData(form).entries());
+ await cmmsRpcAction("cmms_record_meter_reading",{p_asset_id:d.asset_id,p_meter_code:d.meter_code.trim(),p_meter_unit:d.meter_unit.trim(),p_meter_value:Number(d.meter_value)},"قرائت کنتور ثبت شد.");form.reset();return false;
+}
+function cmmsMeterReadingsTable(){
+ const rows=cmmsRows("meterReadings").slice().sort((a,b)=>new Date(b.recorded_at||b.created_at)-new Date(a.recorded_at||a.created_at)).slice(0,20);
+ return "<section class='cmms-master-list'><h4>آخرین قرائت‌ها</h4>"+cmmsTable([["تجهیز",r=>cmmsRows("assets").find(a=>a.id===r.asset_id)?.name],["کد کنتور",r=>r.meter_code],["مقدار",r=>r.meter_value],["واحد",r=>r.meter_unit],["زمان",r=>cmmsDate(r.reading_at||r.created_at)]],rows,"هنوز قرائتی ثبت نشده است.")+"</section>";
+}
+function cmmsFailureForm(){
+ const can=["technician","technical_expert","technical_supervisor"].includes(cmmsAssignedRole);
+ if(!can)return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsSubmitFailure(event)'><div class='cmms-form-head'><div><h4>ثبت گزارش خرابی</h4><p>گزارش برای بررسی فنی ثبت می‌شود؛ هنوز دستورکار ایجاد نمی‌شود.</p></div><span>گزارش جدید</span></div><div class='cmms-form-grid two'>"+
+ "<label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>اولویت *<select name='priority'><option value='normal'>عادی</option><option value='low'>پایین</option><option value='high'>بالا</option><option value='critical'>بحرانی</option></select></label>"+
+ "<label class='wide'>شرح خرابی *<textarea name='description' required maxlength='4000' rows='3'></textarea></label><label class='wide'>علائم مشاهده‌شده<textarea name='symptoms' rows='2'></textarea></label>"+
+ "<label>اثر بر تولید<input name='production_impact' maxlength='500'></label><label>اثر ایمنی<input name='safety_impact' maxlength='500'></label><label>اثر زیست‌محیطی<input name='environmental_impact' maxlength='500'></label><label>شروع توقف<input name='downtime_started_at' type='datetime-local'></label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت گزارش خرابی</button></div></form>";
+}
+async function cmmsSubmitFailure(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;
+ const d=Object.fromEntries(new FormData(form).entries());
+ try{const {data,error}=await cloud.rpc("cmms_report_failure",{p_asset_id:d.asset_id,p_priority:d.priority,p_description:d.description.trim(),p_symptoms:d.symptoms||null,p_production_impact:d.production_impact||null,p_safety_impact:d.safety_impact||null,p_environmental_impact:d.environmental_impact||null,p_attachment_paths:[],p_downtime_started_at:d.downtime_started_at?new Date(d.downtime_started_at).toISOString():null});if(error)throw error;alert("گزارش خرابی ثبت شد.");form.reset();await cmmsLoadData(true);}catch(x){alert("ثبت گزارش ناموفق بود: "+(x.message||String(x)));}return false;
+}
+function cmmsFailureTriageList(){
+ if(!cmmsCanCreateOperational())return "";
+ const pending=cmmsRows("failures").filter(x=>["submitted","under_review"].includes(x.status));
+ if(!pending.length)return "<div class='cmms-empty'>گزارش در انتظار بررسی فنی وجود ندارد.</div>";
+ return "<section class='cmms-master-list'><h4>بررسی فنی گزارش‌ها</h4>"+pending.map(r=>"<div class='cmms-inline-card'><div><b>"+cmmsEscAttr(r.report_no||r.id.slice(0,8))+"</b> — "+cmmsEscAttr(cmmsRows("assets").find(a=>a.id===r.asset_id)?.name||"تجهیز")+"</div><p>"+cmmsEscAttr(r.description)+"</p><button type='button' class='cmms-preview-btn' onclick='cmmsTriageFailure("+JSON.stringify(r.id)+",\"convert\")'>تبدیل به دستورکار</button> <button type='button' class='cmms-save-disabled' onclick='cmmsTriageFailure("+JSON.stringify(r.id)+",\"reject\")'>رد گزارش</button></div>").join("")+"</section>";
+}
+async function cmmsTriageFailure(id,decision){
+ let note=null;if(decision==="reject"){note=prompt("علت رد گزارش را وارد کنید:");if(!note||!note.trim())return;}
+ if(decision==="convert"&&!confirm("گزارش به دستورکار تعمیراتی تبدیل شود؟"))return;
+ try{const {error}=await cloud.rpc("cmms_triage_failure",{p_failure_report_id:id,p_decision:decision,p_note:note});if(error)throw error;alert(decision==="convert"?"دستورکار اولیه ایجاد شد.":"گزارش رد شد.");await cmmsLoadData(true);}catch(e){alert("عملیات ناموفق: "+(e.message||String(e)));}
+}
+function cmmsWorkOrderForm(){
+ if(!cmmsCanCreateOperational())return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsSubmitWorkOrder(event)'><div class='cmms-form-head'><div><h4>ایجاد دستورکار مستقل</h4><p>برای کار اصلاحی، بازرسی یا بهبود؛ دستورکار پس از ثبت در مرحله بررسی فنی قرار می‌گیرد.</p></div><span>دستورکار جدید</span></div><div class='cmms-form-grid two'>"+
+ "<label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>نوع کار *<select name='work_type'><option value='corrective'>اصلاحی</option><option value='preventive'>پیشگیرانه</option><option value='inspection'>بازرسی</option><option value='improvement'>بهبود</option></select></label>"+
+ "<label>عنوان دستورکار *<input name='title' required maxlength='160'></label><label>اولویت *<select name='priority'><option value='normal'>عادی</option><option value='low'>پایین</option><option value='high'>بالا</option><option value='critical'>بحرانی</option></select></label>"+
+ "<label class='wide'>شرح کار<textarea name='description' rows='2'></textarea></label><label class='wide'>محدوده و روش اجرا<textarea name='scope' rows='2'></textarea></label>"+
+ "<label>شروع برنامه‌ریزی‌شده<input name='planned_start_at' type='datetime-local'></label><label>سررسید<input name='due_at' type='datetime-local'></label><label>مدت تخمینی (دقیقه)<input name='estimated_duration_minutes' type='number' min='0' step='1'></label>"+
+ "<label><input name='permit_required' type='checkbox' value='true'> نیازمند مجوز کار</label><label>شماره مجوز<input name='permit_reference' maxlength='80'></label><label><input name='isolation_required' type='checkbox' value='true'> نیازمند ایزولاسیون</label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ایجاد دستورکار</button></div></form>";
+}
+async function cmmsSubmitWorkOrder(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;const d=Object.fromEntries(new FormData(form).entries());
+ const iso=v=>v?new Date(v).toISOString():null;
+ try{const {error}=await cloud.rpc("cmms_create_work_order",{p_asset_id:d.asset_id,p_title:d.title.trim(),p_work_type:d.work_type,p_priority:d.priority,p_description:d.description||null,p_scope:d.scope||null,p_planned_start_at:iso(d.planned_start_at),p_due_at:iso(d.due_at),p_estimated_duration_minutes:d.estimated_duration_minutes?Number(d.estimated_duration_minutes):null,p_permit_required:d.permit_required==="true",p_permit_reference:d.permit_reference||null,p_isolation_required:d.isolation_required==="true"});if(error)throw error;alert("دستورکار در صف بررسی فنی ایجاد شد.");form.reset();await cmmsLoadData(true);}catch(x){alert("ایجاد دستورکار ناموفق بود: "+(x.message||String(x)));}return false;
+}
+function cmmsWorkOrderTable(){
+ const rows=cmmsRows("orders");if(!rows.length)return "<div class='cmms-empty'>هنوز دستورکاری ثبت نشده است.</div>";
+ return "<div class='cmms-workorder-list'>"+rows.map(w=>{
+ const asset=cmmsRows("assets").find(a=>a.id===w.asset_id), actions=cmmsRows("actions").filter(x=>x.work_order_id===w.id);
+ let buttons="";
+ if(["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)&&w.status==="triage")buttons+="<button type='button' onclick='cmmsReleaseWO("+JSON.stringify(w.id)+")'>تأیید فنی و آزادسازی</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&w.status==="approved_for_execution")buttons+="<button type='button' onclick='cmmsAssignWO("+JSON.stringify(w.id)+")'>ارجاع به تکنسین</button>";
+ if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&["assigned","in_progress","waiting_parts","rework"].includes(w.status))buttons+="<button type='button' onclick='cmmsAddWOAction("+JSON.stringify(w.id)+")'>ثبت اقدام</button>";
+ if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="assigned")buttons+="<button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"in_progress\")'>شروع اجرا</button>";
+ if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="in_progress")buttons+="<button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"waiting_parts\")'>انتظار قطعه</button> <button type='button' onclick='cmmsProgressWO("+JSON.stringify(w.id)+",\"testing\")'>ارسال به آزمون</button>";
+ if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="testing")buttons+="<button type='button' onclick='cmmsSubmitTest("+JSON.stringify(w.id)+")'>ثبت نتیجه آزمون</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&w.status==="pending_supervisor_approval")buttons+="<button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"technical_supervisor\",\"approved\")'>تأیید سرپرست</button> <button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"technical_supervisor\",\"rejected\")'>عودت برای اصلاح</button>";
+ if(cmmsAssignedRole==="responsible_manager"&&w.status==="pending_manager_approval")buttons+="<button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"responsible_manager\",\"approved\")'>تأیید مدیر مسئول</button> <button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"responsible_manager\",\"rejected\")'>عودت برای اصلاح</button>";
+ const activeAssignments=cmmsRows("assignments").filter(x=>x.work_order_id===w.id&&!x.unassigned_at);
+ const assigneeLabel=activeAssignments.map(x=>x.user_id.slice(0,8)).join("، ")||"بدون ارجاع";
+ if(["technical_supervisor","technical_expert"].includes(cmmsAssignedRole)&&!["closed","cancelled","completed"].includes(w.status))buttons+="<button type='button' class='cmms-btn-muted' onclick='cmmsCancelWO("+JSON.stringify(w.id)+")'>لغو دستورکار</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&activeAssignments.length&&!["closed","cancelled","completed"].includes(w.status))buttons+="<button type='button' class='cmms-btn-muted' onclick='cmmsReassignWO("+JSON.stringify(activeAssignments[0].id)+","+JSON.stringify(w.id)+")'>تغییر مسئول اجرا</button>";
+ return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(w.wo_no||"WO-"+w.id.slice(0,8))+" — "+cmmsEscAttr(w.title)+"</b><span>"+cmmsEscAttr(cmmsStatus(w.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+" | "+cmmsEscAttr(w.work_type)+" | اولویت "+cmmsEscAttr(w.priority)+"</p><small>مسئول اجرا: "+cmmsEscAttr(assigneeLabel)+" | "+actions.length+" اقدام ثبت‌شده | سررسید: "+cmmsEscAttr(cmmsDate(w.due_at))+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
+ }).join("")+"</div>";
+}
+async function cmmsAssignWO(id){
+ const wo=cmmsRows("orders").find(x=>x.id===id), asset=cmmsRows("assets").find(x=>x.id===wo?.asset_id);
+ const choices=cmmsRows("userRoles").filter(x=>x.is_active&&["technician","technical_expert"].includes(x.role)&&(!x.location_id||x.location_id===asset?.location_id));
+ if(!choices.length){alert("فهرست کاربران مجاز برای ارجاع در دسترس نیست.");return;}
+ const labels=choices.map((x,i)=>(i+1)+") "+x.role+" — "+x.user_id.slice(0,8)).join("\n");
+ const pick=prompt("شماره فرد موردنظر برای ارجاع را وارد کنید:\n"+labels,"1");
+ const idx=Number(pick)-1;if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
+ await cmmsRpcAction("cmms_assign_work_order",{p_work_order_id:id,p_assignee_id:choices[idx].user_id},"دستورکار به فرد انتخاب‌شده ارجاع شد.");
+}
+async function cmmsCancelWO(id){
+ const reason=prompt("علت لغو دستورکار را دقیق وارد کنید:");
+ if(!reason||!reason.trim())return;
+ if(!confirm("دستورکار لغو و ارجاع‌های فعال آن بسته شود؟ این اقدام در سوابق ثبت می‌شود."))return;
+ await cmmsRpcAction("cmms_cancel_work_order",{p_work_order_id:id,p_reason:reason.trim()},"دستورکار لغو شد.");
+}
+async function cmmsReassignWO(assignmentId,workOrderId){
+ const wo=cmmsRows("orders").find(x=>x.id===workOrderId),asset=cmmsRows("assets").find(x=>x.id===wo?.asset_id);
+ const choices=cmmsRows("userRoles").filter(x=>x.is_active&&["technician","technical_expert"].includes(x.role)&&(!x.location_id||x.location_id===asset?.location_id));
+ if(!choices.length){alert("فهرست کاربران واجد شرایط برای تغییر مسئول اجرا در دسترس نیست.");return;}
+ const labels=choices.map((x,i)=>(i+1)+") "+x.role+" — "+x.user_id.slice(0,8)).join("\n");
+ const pick=prompt("مسئول جدید را انتخاب کنید:\n"+labels,"1"),idx=Number(pick)-1;
+ if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
+ const reason=prompt("علت تغییر مسئول اجرا را وارد کنید:");
+ if(!reason||!reason.trim())return;
+ await cmmsRpcAction("cmms_reassign_work_order",{p_assignment_id:assignmentId,p_new_assignee_id:choices[idx].user_id,p_reason:reason.trim()},"مسئول اجرای دستورکار تغییر کرد.");
+}
+async function cmmsReleaseWO(id){if(!confirm("دستورکار برای اجرا آزاد شود؟"))return;await cmmsRpcAction("cmms_release_work_order",{p_work_order_id:id},"دستورکار آزاد شد.");}
+async function cmmsProgressWO(id,status){await cmmsRpcAction("cmms_set_work_order_progress",{p_work_order_id:id,p_next_status:status},"وضعیت دستورکار به‌روزرسانی شد.");}
+async function cmmsRpcAction(name,args,success){try{const {error}=await cloud.rpc(name,args);if(error)throw error;alert(success);await cmmsLoadData(true);}catch(e){alert("عملیات ناموفق: "+(e.message||String(e)));}}
+async function cmmsAddWOAction(id){const desc=prompt("شرح اقدام انجام‌شده:");if(!desc||!desc.trim())return;const mins=prompt("مدت صرف‌شده به دقیقه (اختیاری):");await cmmsRpcAction("cmms_record_work_order_action",{p_work_order_id:id,p_action_type:"repair",p_description:desc.trim(),p_duration_minutes:mins?Number(mins):null,p_quantity:null,p_unit:null,p_meter_reading:null,p_attachment_paths:[]},"اقدام ثبت شد.");}
+async function cmmsSubmitTest(id){const result=prompt("نتیجه آزمون را وارد کنید: passed / failed / partial","passed");if(!["passed","failed","partial"].includes(result))return;const desc=prompt("شرح و مستندات آزمون:");if(!desc||!desc.trim())return;await cmmsRpcAction("cmms_submit_work_order_test",{p_work_order_id:id,p_test_result:result,p_return_to_service_status:result==="passed"?"returned":"not_returned",p_returned_to_service_at:result==="passed"?new Date().toISOString():null,p_test_description:desc.trim(),p_attachment_paths:[]},"نتیجه آزمون ثبت شد.");}
+async function cmmsDecideWO(id,stage,decision){let note=null;if(decision==="rejected"){note=prompt("علت عودت/رد را وارد کنید:");if(!note||!note.trim())return;}if(!confirm("این تصمیم در گردش تأیید ثبت شود؟"))return;await cmmsRpcAction("cmms_decide_work_order",{p_work_order_id:id,p_stage:stage,p_decision:decision,p_note:note},"تصمیم تأیید ثبت شد.");}
+function cmmsPMPlanForm(){
+ if(!cmmsCanCreateOperational())return "";
+ return "<form class='cmms-master-form' onsubmit='return cmmsCreatePMPlan(event)'><div class='cmms-form-head'><div><h4>تعریف برنامه نگهداری پیشگیرانه</h4><p>نسخه اول از برنامه‌های زمان‌محور پشتیبانی می‌کند.</p></div><span>PM جدید</span></div><div class='cmms-form-grid two'>"+
+ "<label>تجهیز *<select name='asset_id' required>"+cmmsAssetOptions()+"</select></label><label>عنوان برنامه *<input name='title' required maxlength='160'></label>"+
+ "<label>تناوب *<input name='frequency_value' type='number' min='1' step='1' value='1' required></label><label>واحد تناوب *<select name='frequency_unit'><option value='month'>ماه</option><option value='week'>هفته</option><option value='day'>روز</option><option value='year'>سال</option></select></label>"+
+ "<label>اولین سررسید *<input name='next_due_at' type='date' required></label><label class='wide'>چک‌لیست بازرسی *<textarea name='checklist' required rows='4' placeholder='هر مورد را در یک خط وارد کنید'></textarea></label></div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت برنامه PM</button></div></form>";
+}
+async function cmmsCreatePMPlan(e){
+ e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return false;const d=Object.fromEntries(new FormData(form).entries());
+ const checklist=d.checklist.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!checklist.length){alert("حداقل یک مورد چک‌لیست وارد کنید.");return false;}
+ try{const {error}=await cloud.rpc("cmms_create_pm_plan",{p_asset_id:d.asset_id,p_title:d.title.trim(),p_frequency_basis:"calendar",p_frequency_unit:d.frequency_unit,p_frequency_value:Number(d.frequency_value),p_meter_code:null,p_meter_unit:null,p_next_due_at:new Date(d.next_due_at+"T12:00:00").toISOString(),p_next_due_meter_value:null,p_checklist:checklist});if(error)throw error;alert("برنامه PM ثبت شد.");form.reset();await cmmsLoadData(true);}catch(x){alert("ثبت برنامه ناموفق: "+(x.message||String(x)));}return false;
+}
+function cmmsPMTaskList(){
+ const tasks=cmmsRows("pmTasks");if(!tasks.length)return "<div class='cmms-empty'>هنوز وظیفه PM ایجاد نشده است.</div>";
+ return "<div class='cmms-workorder-list'>"+tasks.map(t=>{
+ const asset=cmmsRows("assets").find(a=>a.id===t.asset_id);let buttons="";
+ const assigned=t.assigned_to===cloudUser.id;
+ if(["due","assigned","overdue"].includes(t.status)&&assigned)buttons+="<button type='button' onclick='cmmsStartPM("+JSON.stringify(t.id)+")'>شروع وظیفه</button>";
+ if(["due","assigned","in_progress","overdue"].includes(t.status)&&(assigned||["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)))buttons+="<button type='button' onclick='cmmsCompletePM("+JSON.stringify(t.id)+")'>ثبت تکمیل و چک‌لیست</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&["due","overdue"].includes(t.status))buttons+="<button type='button' onclick='cmmsAssignPM("+JSON.stringify(t.id)+")'>ارجاع وظیفه</button>";
+ return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(t.title||t.task_title||"وظیفه PM")+"</b><span>"+cmmsEscAttr(cmmsStatus(t.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+"</p><small>سررسید: "+cmmsEscAttr(cmmsDate(t.due_at))+" | مسئول: "+cmmsEscAttr(t.assigned_to?String(t.assigned_to).slice(0,8):"تخصیص‌نیافته")+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
+ }).join("")+"</div>";
+}
+async function cmmsStartPM(id){await cmmsRpcAction("cmms_start_pm_task",{p_pm_task_id:id},"وظیفه PM شروع شد.");}
+async function cmmsCompletePM(id){const result=prompt("نتیجه چک‌لیست را شرح دهید:");if(!result||!result.trim())return;await cmmsRpcAction("cmms_complete_pm_task",{p_pm_task_id:id,p_checklist_result:{result:result.trim(),completed_at:new Date().toISOString()}},"وظیفه PM تکمیل شد.");}
+async function cmmsAssignPM(id){
+ const task=cmmsRows("pmTasks").find(x=>x.id===id),asset=cmmsRows("assets").find(x=>x.id===task?.asset_id);
+ const choices=cmmsRows("userRoles").filter(x=>x.is_active&&["technician","technical_expert"].includes(x.role)&&(!x.location_id||x.location_id===asset?.location_id));
+ if(!choices.length){alert("کاربر واجد شرایط برای این محل پیدا نشد.");return;}
+ const labels=choices.map((x,i)=>(i+1)+") "+x.role+" — "+x.user_id.slice(0,8)).join("\n");
+ const pick=prompt("شماره مسئول اجرا را انتخاب کنید:\n"+labels,"1"),idx=Number(pick)-1;
+ if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
+ await cmmsRpcAction("cmms_assign_pm_task",{p_pm_task_id:id,p_assignee_id:choices[idx].user_id},"وظیفه PM ارجاع شد.");
+}
+function cmmsRenderTab(){
+ const a=cmmsRows("assets"),f=cmmsRows("failures"),o=cmmsRows("orders"),p=cmmsRows("pmTasks");
+ const openFailures=f.filter(x=>!["rejected","converted","cancelled","closed"].includes(x.status));
+ const activeOrders=o.filter(x=>!["completed","closed","cancelled"].includes(x.status));
+ const pendingApprovals=o.filter(x=>String(x.status||"").includes("approval")||String(x.status||"").includes("pending"));
+ const overdue=p.filter(x=>x.status==="overdue"||(x.due_at&&new Date(x.due_at)<new Date()&&!["completed","closed"].includes(x.status)));
+ const content={
+ overview:{title:"نمای کلی تعمیرات و نگهداری",desc:"شاخص‌ها مستقیماً از رکوردهای قابل‌مشاهده در پایگاه داده محاسبه می‌شوند.",metrics:[["تجهیزات ثبت‌شده",a.length],["خرابی‌های باز",openFailures.length],["دستورکارهای فعال",activeOrders.length],["وظایف PM عقب‌افتاده",overdue.length]],body:cmmsTable([["کد تجهیز",r=>r.asset_code],["نام تجهیز",r=>r.name],["محل",r=>cmmsRows("locations").find(l=>l.id===r.location_id)?.name],["وضعیت",r=>cmmsStatus(r.operational_status)],["اهمیت",r=>r.criticality]],a.slice(0,8),"هنوز تجهیزی در بانک اطلاعاتی ثبت نشده است.")},
+ masterdata:{title:"اطلاعات پایه تجهیزات",desc:"تعریف دسته‌بندی‌ها و ساختار سلسله‌مراتبی محل‌های استقرار.",metrics:[["دسته‌بندی‌ها",cmmsRows("categories").length],["محل‌های تعریف‌شده",cmmsRows("locations").length],["محل‌های فعال",cmmsRows("locations").filter(x=>x.is_active).length],["سطوح اصلی",cmmsRows("locations").filter(x=>!x.parent_id).length]],body:cmmsMasterDataForms()},
+ assets:{title:"شناسنامه تجهیزات",desc:"ثبت شناسنامه تجهیز از طریق RPC کنترل‌شده و مشاهده فهرست تجهیزات.",metrics:[["کل تجهیزات",a.length],["در سرویس",a.filter(x=>x.operational_status==="operational").length],["متوقف",a.filter(x=>x.operational_status==="stopped").length],["دارای محدودیت",a.filter(x=>x.operational_status==="degraded").length]],body:cmmsAssetForm()+cmmsAssetStatusForm()+cmmsMeterReadingForm()+cmmsTable([["کد",r=>r.asset_code],["نام تجهیز",r=>r.name],["محل",r=>cmmsRows("locations").find(l=>l.id===r.location_id)?.name],["سازنده",r=>r.manufacturer],["مدل",r=>r.model],["وضعیت",r=>cmmsStatus(r.operational_status)]],a,"فهرست تجهیزات خالی است.")+cmmsMeterReadingsTable()},
+ failures:{title:"گزارش خرابی‌ها",desc:"ثبت گزارش خرابی، بررسی فنی و تبدیل کنترل‌شده به دستورکار.",metrics:[["کل گزارش‌ها",f.length],["بحرانی",f.filter(x=>x.priority==="critical").length],["اولویت بالا",f.filter(x=>x.priority==="high").length],["در حال بررسی",f.filter(x=>x.status==="under_review").length]],body:cmmsFailureForm()+cmmsTable([["شماره",r=>r.report_no],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["اولویت",r=>r.priority],["شرح",r=>r.description],["وضعیت",r=>cmmsStatus(r.status)],["زمان",r=>cmmsDate(r.occurred_at)]],f,"هنوز گزارش خرابی ثبت نشده است.")+cmmsFailureTriageList()},
+ orders:{title:"دستورکارهای تعمیراتی",desc:"ایجاد، آزادسازی، ارجاع، ثبت اقدامات، آزمون و گردش تأیید دو مرحله‌ای.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsWorkOrderForm()+cmmsWorkOrderTable()},
+ pm:{title:"نگهداری پیشگیرانه (PM)",desc:"تعریف برنامه زمان‌محور، ارجاع وظیفه، ثبت اجرا و نتیجه چک‌لیست.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsPMPlanForm()+cmmsPMTaskList()},
+ reports:{title:"گزارش‌ها و سوابق",desc:"نمای اولیه سوابق ممیزی و داده‌های عملیاتی؛ شاخص‌های MTTR و MTBF تا وجود داده معتبر محاسبه نمی‌شوند.",metrics:[["رویدادهای ممیزی",cmmsRows("audit").length],["تجهیزات",a.length],["خرابی‌ها",f.length],["دستورکارها",o.length]],body:cmmsTable([["نوع موجودیت",r=>r.entity_type],["شناسه",r=>r.entity_id],["عملیات",r=>r.action],["زمان",r=>cmmsDate(r.created_at)]],cmmsRows("audit").slice().reverse().slice(0,30),"هنوز رویداد ممیزی ثبت نشده است.")}
+ };
+ return content[cmmsActiveTab]||content.overview;
+}
+function renderCMMSView(){
+ const root=document.getElementById("cmms-v1-view");if(!root)return;
+ if(!cmmsCanAccess()){root.innerHTML="<div class='cmms-empty'>دسترسی به ماژول تعمیرات و نگهداری برای این حساب تعریف نشده است.</div>";return;}
+ const tabs=[["overview","نمای کلی","▦"],["masterdata","دسته‌بندی و محل‌ها","⌖"],["assets","شناسنامه تجهیزات","⚙"],["failures","گزارش خرابی","⚠"],["orders","دستورکارها","☷"],["pm","نگهداری پیشگیرانه","◷"],["reports","گزارش‌ها","▤"]];
+ const x=cmmsRenderTab();
+ const tabHtml=tabs.map(t=>"<button type='button' role='tab' data-tab='"+t[0]+"' aria-selected='"+(cmmsActiveTab===t[0])+"' class='"+(cmmsActiveTab===t[0]?"active":"")+"' onclick='cmmsSetTab(this.dataset.tab)'><span>"+t[2]+"</span>"+t[1]+"</button>").join("");
+ const metrics=x.metrics.map(m=>cmmsMetric(m[0],m[1])).join("");
+ const gate=cmmsLoadState==="error"?"<div class='cmms-gate cmms-error'><b>خطا در خواندن داده‌ها</b><span>"+escapeHtml(cmmsLoadError)+"</span><span>هیچ تغییری در پایگاه داده ایجاد نشده است.</span></div>":cmmsLoadState==="loading"?"<div class='cmms-gate'><b>در حال دریافت اطلاعات زنده…</b><span>درخواست‌ها فقط خواندنی هستند.</span></div>":"<div class='cmms-gate'><b>اتصال عملیاتی فعال است</b><span>ثبت و تغییر اطلاعات فقط از مسیر RPCهای کنترل‌شده انجام می‌شود و سطح دسترسی در پایگاه داده بررسی می‌شود.</span></div>";
+ root.innerHTML="<div class='cmms-head'><div><div class='cmms-eyebrow'>MEHRSA • CMMS V1</div><h2>تعمیرات و نگهداری تجهیزات</h2><p>مدیریت تجهیزات، خرابی، دستورکار و نگهداری پیشگیرانه</p></div><div class='cmms-head-tools'><div class='cmms-role'>"+escapeHtml(cmmsRoleLabel())+"</div><button type='button' class='cmms-refresh' onclick='cmmsLoadData(true)'>↻ به‌روزرسانی</button></div></div>"+gate+"<div class='cmms-tabs' role='tablist'>"+tabHtml+"</div><section class='cmms-panel'><div class='cmms-panel-title'><div><h3>"+escapeHtml(x.title)+"</h3><p>"+escapeHtml(x.desc)+"</p></div><span class='cmms-readonly'>نمایش اطلاعات واقعی</span></div><div class='cmms-metrics'>"+metrics+"</div>"+x.body+"</section><section class='cmms-flow'><h3>گردش تأیید دستورکار</h3><div class='cmms-steps'><span>ثبت خرابی</span><i>←</i><span>بررسی و تخصیص</span><i>←</i><span>اجرای تعمیر و تست</span><i>←</i><span>تأیید سرپرست فنی</span><i>←</i><span>تأیید مهندس بیابانی</span><i>←</i><span>بستن دستورکار</span></div></section>";
+}
+
+async function cmmsLogin(){
+ const login=document.getElementById("auth-email").value.trim(),password=document.getElementById("auth-password").value;
+ if(!login||!password){authMessage("شناسه کاربری و رمز عبور را وارد کنید.");return;}
+ const btn=document.getElementById("login-btn");btn.disabled=true;btn.textContent="در حال ورود…";authMessage("در حال اتصال و بررسی سطح دسترسی…");
+ try{
+  await ensureCloud();
+  const loginEmails={masoud:"aghdam.masoud@yahoo.com",biabani:"biabani@mehrsa.local",reza:"reza@example.com",hamid:"hamid@example.com",mohammadi:"mohammadi@example.com",karami:"karami@example.com"};
+  const email=login.includes("@")?login:(loginEmails[login.toLowerCase()]||login+"@example.com");
+  const {data,error}=await cloud.auth.signInWithPassword({email,password});if(error)throw error;
+  cloudUser=data.user;await cmmsLoadUserRole();
+  if(!cmmsCanAccess()){await cloud.auth.signOut();cloudUser=null;throw new Error("برای این حساب نقش CMMS فعال تعریف نشده است.");}
+  currentUser=login;document.getElementById("login").style.display="none";document.getElementById("app").style.display="block";
+  document.getElementById("signed-user").textContent=login+" • "+cmmsRoleLabel();
+  await cmmsLoadData(true);
+ }catch(e){authMessage("ورود ناموفق: "+(e.message||String(e)));}
+ finally{btn.disabled=false;btn.textContent="ورود به سامانه";}
+}
+async function cmmsLogout(){try{if(cloud)await cloud.auth.signOut();}finally{cloudUser=null;cmmsLoadState="idle";cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};document.getElementById("app").style.display="none";document.getElementById("login").style.display="grid";authMessage("از حساب خارج شدید.");}}
+document.getElementById("auth-password").addEventListener("keydown",e=>{if(e.key==="Enter")cmmsLogin();});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(err=>console.warn("CMMS service worker:",err)));}
+</script>
+</body></html>
