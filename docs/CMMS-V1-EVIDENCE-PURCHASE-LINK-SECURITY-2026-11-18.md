@@ -53,3 +53,30 @@ Tests must cover role/location boundaries, record ownership/assignment, malforme
 - No API EXECUTE grant was issued.
 - No Staging SQL was run; SQL syntax and policy behavior remain unvalidated against isolated Staging.
 - The existing production CMMS tables are write-locked. Do not enable RPCs or deploy Storage until external backup/restore and Staging validation are complete.
+
+
+## 6. Staging execution results — 2026-11-18
+
+- The draft layers were applied to isolated project `mehrsa-cmms-staging`, not Production.
+- The first Storage upload test failed and identified a SQL name-shadowing defect: inside nested subqueries, unqualified `name` resolved to `cmms_assets.name`. The policy now explicitly references the outer Storage object path (`storage.objects.name`) in nested predicates.
+- After correction and reapplication, a valid technical-expert asset-evidence insert passed; an asset-master upload by a technician was denied; an authorized expert could read a linked evidence object.
+- The metadata-only test object was removed through the Storage lifecycle cleanup routine. No file bytes were uploaded.
+- Purchase-link tests passed for authorized technical expert, duplicate idempotency, denied technician and unknown PR.
+- All 15 CMMS tables have RLS enabled and 15 SELECT-only policies. Authenticated direct table writes are denied; anon table reads are denied.
+- The internal `cmms_user_has_active_role` helper is owner-only; approved RPC wrappers are SECURITY INVOKER, and the private workflow routines have narrow authenticated EXECUTE grants. Confirm `cmms_private` is not in the project's exposed Data API schemas before enabling the UI.
+- These are synthetic-identity SQL-level tests. Real Auth JWT, browser Storage API, signed URL, file-byte, malware-scanning and full purchase-module regression tests remain outstanding.
+
+## 7. Production backup-snapshot access reconciliation
+
+- Production `private_backup.snapshots` currently has RLS disabled, which triggers the Supabase Security Advisor critical lint.
+- A direct catalog check showed `anon`, `authenticated`, and `service_role` currently have neither USAGE on schema `private_backup` nor table SELECT/INSERT/UPDATE/DELETE privileges. The only table grants are to `postgres`. This means the Advisor's generic warning about client access is not supported by the effective current grants/schema privileges.
+- RLS should still be enabled as defense in depth, but this is a Production DDL change and remains blocked until an external backup/restore checkpoint and a separately approved change window.
+- Production Security Advisor also reports pre-existing legacy SECURITY DEFINER RPC exposure in the purchase/technical-mission module. Those functions were not changed as part of CMMS.
+
+## 8. Current safety gate
+
+- No Production Storage bucket/policy was created.
+- No Production purchase-link function was replaced.
+- No Production API EXECUTE grant was issued.
+- No Production DDL/ACL change was made.
+- Staging validation is partial and not a go-live approval.
