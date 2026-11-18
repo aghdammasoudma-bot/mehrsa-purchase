@@ -2790,6 +2790,16 @@ function printSection(elementId,title){
 }
 </style>
 
+<style id="mehrsa-glass-menu-grid-specificity-fix">
+@media(min-width:701px){
+#management-hero.has-profile-nav[style*="display: block"]{
+ grid-template-columns:minmax(286px,320px) minmax(0,1fr)!important;
+ grid-template-rows:auto auto!important;
+ align-items:start!important;
+}
+}
+</style>
+
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
