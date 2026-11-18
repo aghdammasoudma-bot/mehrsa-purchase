@@ -1498,7 +1498,7 @@ function cmmsMasterDataForms(){
  "<label>کد محل *<input name='code' required maxlength='30' placeholder='مثلاً HALL-PAINT'></label>"+
  "<label>عنوان محل *<input name='name' required maxlength='120' placeholder='مثلاً سالن تولید رنگ'></label>"+
  "<label>محل بالادستی<select name='parent_id'><option value=''>بدون والد / سطح اصلی</option>"+parentOptions+"</select></label>"+
- "<label>حوزه تخصصی<select name='discipline'><option value=''>نامشخص</option><option value='mechanical'>مکانیک</option><option value='electrical'>برق</option><option value='utilities'>تأسیسات</option><option value='production'>تولید</option><option value='instrumentation'>ابزار دقیق</option><option value='civil'>عمرانی</option></select></label>"+
+ "<label>حوزه تخصصی<select name='discipline'><option value=''>نامشخص</option><option value='mechanical'>مکانیک</option><option value='electrical'>برق</option><option value='utilities'>تأسیسات</option><option value='production'>تولید</option><option value='general'>عمومی</option></select></label>"+
  "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی محل</button><button class='cmms-save-disabled' type='button' disabled>ثبت در سامانه — غیرفعال</button></div>"+
  "<div class='cmms-master-preview' aria-live='polite'></div></form></div>"+
  "<section class='cmms-master-list'><h4>دسته‌بندی‌های موجود ("+cats.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان",r=>r.name]],cats,"هنوز دسته‌بندی تعریف نشده است.")+"</section>"+
@@ -1512,7 +1512,8 @@ function cmmsPreviewMaster(event,type){
  const parent=cmmsRows("locations").find(x=>x.id===d.parent_id);
  const discipline=({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[d.discipline]||"نامشخص";
  const details=type==="category"?["کد دسته‌بندی: "+d.code,"عنوان: "+d.name]:["کد محل: "+d.code,"عنوان محل: "+d.name,"محل بالادستی: "+(parent?.name||"سطح اصلی"),"حوزه تخصصی: "+discipline];
- const duplicate=(type==="category"?cmmsRows("categories"):cmmsRows("locations")).some(x=>String(x.code||"").toLowerCase()===d.code.trim().toLowerCase());
+ const normalizedCode=String(d.code||"").trim().replace(/\s+/g," ").toUpperCase();
+ const duplicate=(type==="category"?cmmsRows("categories"):cmmsRows("locations")).some(x=>String(x.code||"").trim().replace(/\s+/g," ").toUpperCase()===normalizedCode);
  preview.innerHTML="<b>"+(duplicate?"هشدار: کد واردشده تکراری است":"پیش‌نمایش اطلاعات")+"</b><div>"+details.map(x=>"<span>"+escapeHtml(x)+"</span>").join("")+"</div><small>"+(duplicate?"پیش از ثبت باید کد یکتا انتخاب شود. ":"")+"این پیش‌نمایش محلی است؛ هیچ داده‌ای به Supabase ارسال نشده است.</small>";
  return false;
 }
