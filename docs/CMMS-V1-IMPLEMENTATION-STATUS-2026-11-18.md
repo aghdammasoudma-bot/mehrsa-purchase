@@ -173,3 +173,23 @@ All nine SQL layers (base schema, hardening, authorization, role seed, workflow 
 - SQL-level role checks confirmed the relevant read queries succeed for a technician, expert and supervisor; governance-only audit reads remain limited to supervisor/manager.
 - Push and PR JavaScript syntax CI passed for the updated branch.
 - This is still a read model only. Operational write forms and browser/API tests remain outstanding.
+
+
+## Operational frontend milestone — 2026-11-18 (feature branch only)
+
+This section supersedes earlier statements that all CMMS forms were preview-only/read-only. The latest branch UI now calls the approved Staging-validated public RPC wrappers for:
+
+- Asset master creation, restricted in the UI to technical supervisor and technical expert; server-side role/location validation remains authoritative.
+- Failure reporting by technician, technical expert or technical supervisor; technical expert/supervisor triage can convert a report into a corrective work order or reject it with a reason.
+- Independent work-order creation by technical expert/supervisor; technical release; supervisor-only technician assignment; action logging; execution progress transitions; test result submission; technical-supervisor approval followed by separate responsible-manager approval.
+- Calendar-based PM plan creation, supervisor assignment of PM tasks, assigned technician/expert start, and checklist-backed completion.
+
+The frontend reads role-scoped assignment rows only for the technical supervisor; manager-only governance access does not expose assignment controls. Assignment candidates are filtered to global or matching asset-location roles before the RPC call. The database remains the final authorization boundary.
+
+### Verification in this milestone
+- Inline JavaScript syntax checks passed in both push and PR GitHub Actions for the current feature branch head.
+- Rollback-only SQL acceptance calls in isolated Staging validated the exact RPC signatures for failure report creation, failure triage/conversion, independent work-order creation, and calendar PM plan creation. Test transactions were rolled back; no durable fixture records were added.
+- No browser-based real-user JWT test has yet been performed. The frontend workflows are implemented but are not yet certified end-to-end in a browser.
+- Category/location master-data create/edit workflows, work-order reassignment/cancellation, meter-based PM setup, evidence upload UI, notifications, and reporting exports remain incomplete.
+
+Production and main remain unchanged. The PR remains Draft. This milestone does not authorize production deployment.
