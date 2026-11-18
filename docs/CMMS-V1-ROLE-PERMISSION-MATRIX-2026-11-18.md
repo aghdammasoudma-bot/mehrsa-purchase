@@ -101,3 +101,24 @@
 ممیزی تکمیلی کاتالوگ PostgreSQL نشان داد مالک تمام 23 wrapper عمومی کسب‌وکار و تمام توابع خصوصی بررسی‌شده `postgres` است. تمام توابع خصوصی `SECURITY DEFINER` با `search_path=""` تنظیم شده‌اند. فقط دو helper نقش (`cmms_has_any_role` و `cmms_has_role_at_location`) برای `authenticated` قابل اجرا هستند؛ سایر توابع خصوصی، از جمله همه write routineها و scheduler، برای authenticated و anon غیرقابل اجرا هستند. تمام 23 wrapper عمومی فعلی `SECURITY INVOKER` هستند و برای authenticated/anon مجوز EXECUTE ندارند.
 
 این یافته مالکیت wrapper را برای طرح پیشنهادی definer تأیید می‌کند؛ با این حال هنوز تست runtime و تست منفی نقش‌ها انجام نشده است. شمار wrapperهای تجاری در migration و تست ACL برابر 23 است.
+
+
+## 9) اصلاح تعداد کاتالوگ و ممیزی تابع‌به‌تابع — 2026-11-18
+
+ممیزی تکمیلی کاتالوگ تعداد واقعی توابع را روشن کرد: **27 تابع خصوصی** در `cmms_private` (23 عملیات، 3 helper و 1 scheduler) و 31 تابع در `public` (23 wrapper عملیاتی و 8 trigger function). اشاره قبلی به 24 تابع خصوصی نادرست بود و با عدد واقعی جایگزین می‌شود.
+
+گزارش کامل کنترل‌های هر 23 عملیات، helperها، scheduler، ریسک‌ها و gateهای P0/P1 در فایل زیر ثبت شد:
+`docs/CMMS-V1-FUNCTION-BY-FUNCTION-SECURITY-AUDIT-2026-11-18.md`
+
+نکته مهم ACL: `cmms_user_has_active_role(uuid,text[])` در ACL فعلی برای authenticated قابل اجراست، درحالی‌که هیچ policy CMMS به آن ارجاع نمی‌دهد و تابع شناسه هر کاربر دلخواه را می‌پذیرد. draft آزمایشی اکنون REVOKE دقیق این تابع از PUBLIC/anon/authenticated را اضافه می‌کند؛ این تغییر هنوز روی هیچ دیتابیسی اجرا نشده است.
+
+موارد مهم منطق کسب‌وکار برای رفع قبل از فعال‌سازی:
+- اعتبارسنجی غیرمنفی بودن `quantity` و `meter_reading` در ثبت اقدام؛
+- جلوگیری از قرائت کنتور روی تجهیز بازنشسته و تعیین قاعده قرائت نزولی؛
+- جلوگیری از ایجاد/ویرایش PM روی تجهیز بازنشسته و تولید task برای آن؛
+- interlock بازنشستگی تجهیز با دستورکار/PM فعال؛
+- بررسی دسترسی و ارتباط درخواست خرید پیش از link؛
+- بررسی وضعیت تجهیز هنگام triage خرابی؛
+- تصمیم‌گیری درباره چند assignment فعال و lifecycle وظایف PM.
+
+`cmms_private` در حال حاضر برای authenticated USAGE دارد. مقدار exposed schemas از کاتالوگ قابل تأیید نبود؛ پیش از هر migration باید از Dashboard تأیید شود که این schema در Data API exposed schemas قرار ندارد.
