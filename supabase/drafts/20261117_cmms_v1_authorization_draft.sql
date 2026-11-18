@@ -85,7 +85,9 @@ revoke all on function cmms_private.cmms_has_role_at_location(text[], uuid) from
 revoke all on function cmms_private.cmms_user_has_active_role(uuid,text[]) from public, anon;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
 grant execute on function cmms_private.cmms_has_role_at_location(text[], uuid) to authenticated;
-grant execute on function cmms_private.cmms_user_has_active_role(uuid,text[]) to authenticated;
+-- Deliberately keep cmms_user_has_active_role owner-only: it is an internal
+-- workflow authorization helper and exposes arbitrary-user role membership.
+-- SECURITY DEFINER workflow routines can call it as their owner.
 
 -- Role roster: users can see their own role rows; governance roles can audit all.
 alter table public.cmms_user_roles enable row level security;
