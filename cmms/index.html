@@ -441,5 +441,6 @@ async function cmmsLogin(){
 }
 async function cmmsLogout(){try{if(cloud)await cloud.auth.signOut();}finally{cloudUser=null;cmmsLoadState="idle";cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};document.getElementById("app").style.display="none";document.getElementById("login").style.display="grid";authMessage("از حساب خارج شدید.");}}
 document.getElementById("auth-password").addEventListener("keydown",e=>{if(e.key==="Enter")cmmsLogin();});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(err=>console.warn("CMMS service worker:",err)));}
 </script>
 </body></html>
