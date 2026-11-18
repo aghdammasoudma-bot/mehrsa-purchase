@@ -91,6 +91,7 @@ grant execute on function cmms_private.cmms_has_role_at_location(text[], uuid) t
 
 -- Role roster: users can see their own role rows; governance roles can audit all.
 alter table public.cmms_user_roles enable row level security;
+drop policy if exists cmms_roles_read_self_or_governance on public.cmms_user_roles;
 create policy cmms_roles_read_self_or_governance
 on public.cmms_user_roles for select to authenticated
 using (
@@ -99,6 +100,7 @@ using (
 );
 
 -- Locations and category dictionary.
+drop policy if exists cmms_locations_read_scope on public.cmms_locations;
 create policy cmms_locations_read_scope
 on public.cmms_locations for select to authenticated
 using (
@@ -108,6 +110,7 @@ using (
   ))
 );
 
+drop policy if exists cmms_categories_read_cmms on public.cmms_asset_categories;
 create policy cmms_categories_read_cmms
 on public.cmms_asset_categories for select to authenticated
 using (
@@ -117,6 +120,7 @@ using (
 );
 
 -- Asset register.
+drop policy if exists cmms_assets_read_scope on public.cmms_assets;
 create policy cmms_assets_read_scope
 on public.cmms_assets for select to authenticated
 using (
@@ -127,6 +131,7 @@ using (
 );
 
 -- Meter readings inherit access from the asset location.
+drop policy if exists cmms_meter_readings_read_scope on public.cmms_asset_meter_readings;
 create policy cmms_meter_readings_read_scope
 on public.cmms_asset_meter_readings for select to authenticated
 using (
@@ -141,6 +146,7 @@ using (
 );
 
 -- Failure reports inherit access from their asset location.
+drop policy if exists cmms_failures_read_scope on public.cmms_failure_reports;
 create policy cmms_failures_read_scope
 on public.cmms_failure_reports for select to authenticated
 using (
@@ -156,6 +162,7 @@ using (
 );
 
 -- Work orders inherit access from their asset location.
+drop policy if exists cmms_work_orders_read_scope on public.cmms_work_orders;
 create policy cmms_work_orders_read_scope
 on public.cmms_work_orders for select to authenticated
 using (
@@ -171,6 +178,7 @@ using (
 );
 
 -- Child records inherit access from the parent work order's asset location.
+drop policy if exists cmms_assignments_read_scope on public.cmms_work_order_assignments;
 create policy cmms_assignments_read_scope
 on public.cmms_work_order_assignments for select to authenticated
 using (
@@ -186,6 +194,7 @@ using (
   )
 );
 
+drop policy if exists cmms_actions_read_scope on public.cmms_work_order_actions;
 create policy cmms_actions_read_scope
 on public.cmms_work_order_actions for select to authenticated
 using (
@@ -201,6 +210,7 @@ using (
   )
 );
 
+drop policy if exists cmms_approvals_read_scope on public.cmms_work_order_approvals;
 create policy cmms_approvals_read_scope
 on public.cmms_work_order_approvals for select to authenticated
 using (
@@ -217,6 +227,7 @@ using (
 );
 
 -- Preventive maintenance.
+drop policy if exists cmms_pm_plans_read_scope on public.cmms_pm_plans;
 create policy cmms_pm_plans_read_scope
 on public.cmms_pm_plans for select to authenticated
 using (
@@ -231,6 +242,7 @@ using (
   )
 );
 
+drop policy if exists cmms_pm_tasks_read_scope on public.cmms_pm_tasks;
 create policy cmms_pm_tasks_read_scope
 on public.cmms_pm_tasks for select to authenticated
 using (
@@ -245,6 +257,7 @@ using (
   )
 );
 
+drop policy if exists cmms_asset_history_read_scope on public.cmms_asset_status_history;
 create policy cmms_asset_history_read_scope
 on public.cmms_asset_status_history for select to authenticated
 using (
@@ -260,12 +273,14 @@ using (
 );
 
 -- Audit records are visible only to the technical supervisor and responsible manager.
+drop policy if exists cmms_audit_read_governance on public.cmms_audit_logs;
 create policy cmms_audit_read_governance
 on public.cmms_audit_logs for select to authenticated
 using (
   (select cmms_private.cmms_has_any_role(array['technical_supervisor','responsible_manager']))
 );
 
+drop policy if exists cmms_purchase_links_read_scope on public.cmms_work_order_purchase_links;
 create policy cmms_purchase_links_read_scope
 on public.cmms_work_order_purchase_links for select to authenticated
 using (
