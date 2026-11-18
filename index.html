@@ -1636,7 +1636,11 @@ function cmmsWorkOrderTable(){
  if((["technical_expert","technical_supervisor"].includes(cmmsAssignedRole)||cmmsRows("assignments").some(x=>x.work_order_id===w.id&&x.user_id===cloudUser.id&&!x.unassigned_at))&&w.status==="testing")buttons+="<button type='button' onclick='cmmsSubmitTest("+JSON.stringify(w.id)+")'>ثبت نتیجه آزمون</button>";
  if(cmmsAssignedRole==="technical_supervisor"&&w.status==="pending_supervisor_approval")buttons+="<button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"technical_supervisor\",\"approved\")'>تأیید سرپرست</button> <button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"technical_supervisor\",\"rejected\")'>عودت برای اصلاح</button>";
  if(cmmsAssignedRole==="responsible_manager"&&w.status==="pending_manager_approval")buttons+="<button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"responsible_manager\",\"approved\")'>تأیید مدیر مسئول</button> <button type='button' onclick='cmmsDecideWO("+JSON.stringify(w.id)+",\"responsible_manager\",\"rejected\")'>عودت برای اصلاح</button>";
- return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(w.wo_no||"WO-"+w.id.slice(0,8))+" — "+cmmsEscAttr(w.title)+"</b><span>"+cmmsEscAttr(cmmsStatus(w.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+" | "+cmmsEscAttr(w.work_type)+" | اولویت "+cmmsEscAttr(w.priority)+"</p><small>"+actions.length+" اقدام ثبت‌شده | سررسید: "+cmmsEscAttr(cmmsDate(w.due_at))+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
+ const activeAssignments=cmmsRows("assignments").filter(x=>x.work_order_id===w.id&&!x.unassigned_at);
+ const assigneeLabel=activeAssignments.map(x=>x.user_id.slice(0,8)).join("، ")||"بدون ارجاع";
+ if(["technical_supervisor","technical_expert"].includes(cmmsAssignedRole)&&!["closed","cancelled","completed"].includes(w.status))buttons+="<button type='button' class='cmms-btn-muted' onclick='cmmsCancelWO("+JSON.stringify(w.id)+")'>لغو دستورکار</button>";
+ if(cmmsAssignedRole==="technical_supervisor"&&activeAssignments.length&&!["closed","cancelled","completed"].includes(w.status))buttons+="<button type='button' class='cmms-btn-muted' onclick='cmmsReassignWO("+JSON.stringify(activeAssignments[0].id)+","+JSON.stringify(w.id)+")'>تغییر مسئول اجرا</button>";
+ return "<article class='cmms-inline-card'><div class='cmms-card-head'><b>"+cmmsEscAttr(w.wo_no||"WO-"+w.id.slice(0,8))+" — "+cmmsEscAttr(w.title)+"</b><span>"+cmmsEscAttr(cmmsStatus(w.status))+"</span></div><p>"+cmmsEscAttr(asset?.asset_code+" — "+(asset?.name||"تجهیز نامشخص"))+" | "+cmmsEscAttr(w.work_type)+" | اولویت "+cmmsEscAttr(w.priority)+"</p><small>مسئول اجرا: "+cmmsEscAttr(assigneeLabel)+" | "+actions.length+" اقدام ثبت‌شده | سررسید: "+cmmsEscAttr(cmmsDate(w.due_at))+"</small>"+(buttons?"<div class='cmms-form-actions'>"+buttons+"</div>":"")+"</article>";
  }).join("")+"</div>";
 }
 async function cmmsAssignWO(id){
@@ -1647,6 +1651,23 @@ async function cmmsAssignWO(id){
  const pick=prompt("شماره فرد موردنظر برای ارجاع را وارد کنید:\n"+labels,"1");
  const idx=Number(pick)-1;if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
  await cmmsRpcAction("cmms_assign_work_order",{p_work_order_id:id,p_assignee_id:choices[idx].user_id},"دستورکار به فرد انتخاب‌شده ارجاع شد.");
+}
+async function cmmsCancelWO(id){
+ const reason=prompt("علت لغو دستورکار را دقیق وارد کنید:");
+ if(!reason||!reason.trim())return;
+ if(!confirm("دستورکار لغو و ارجاع‌های فعال آن بسته شود؟ این اقدام در سوابق ثبت می‌شود."))return;
+ await cmmsRpcAction("cmms_cancel_work_order",{p_work_order_id:id,p_reason:reason.trim()},"دستورکار لغو شد.");
+}
+async function cmmsReassignWO(assignmentId,workOrderId){
+ const wo=cmmsRows("orders").find(x=>x.id===workOrderId),asset=cmmsRows("assets").find(x=>x.id===wo?.asset_id);
+ const choices=cmmsRows("userRoles").filter(x=>x.is_active&&["technician","technical_expert"].includes(x.role)&&(!x.location_id||x.location_id===asset?.location_id));
+ if(!choices.length){alert("فهرست کاربران واجد شرایط برای تغییر مسئول اجرا در دسترس نیست.");return;}
+ const labels=choices.map((x,i)=>(i+1)+") "+x.role+" — "+x.user_id.slice(0,8)).join("\n");
+ const pick=prompt("مسئول جدید را انتخاب کنید:\n"+labels,"1"),idx=Number(pick)-1;
+ if(!Number.isInteger(idx)||idx<0||idx>=choices.length)return;
+ const reason=prompt("علت تغییر مسئول اجرا را وارد کنید:");
+ if(!reason||!reason.trim())return;
+ await cmmsRpcAction("cmms_reassign_work_order",{p_assignment_id:assignmentId,p_new_assignee_id:choices[idx].user_id,p_reason:reason.trim()},"مسئول اجرای دستورکار تغییر کرد.");
 }
 async function cmmsReleaseWO(id){if(!confirm("دستورکار برای اجرا آزاد شود؟"))return;await cmmsRpcAction("cmms_release_work_order",{p_work_order_id:id},"دستورکار آزاد شد.");}
 async function cmmsProgressWO(id,status){await cmmsRpcAction("cmms_set_work_order_progress",{p_work_order_id:id,p_next_status:status},"وضعیت دستورکار به‌روزرسانی شد.");}
