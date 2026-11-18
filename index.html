@@ -1387,7 +1387,7 @@ function showRoleScreen(){
 
 // CMMS V1 — connected read-only module. No writes are enabled.
 let cmmsActiveTab="overview";
-let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],audit:[]};
+let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};
 let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="",cmmsAssignedRoles=[];
 async function cmmsLoadUserRole(){
   cmmsAssignedRole="";
@@ -1423,8 +1423,15 @@ async function cmmsLoadData(force=false){
   const queries=[
     ["assets","cmms_assets"],["locations","cmms_locations"],["categories","cmms_asset_categories"],
     ["failures","cmms_failure_reports"],["orders","cmms_work_orders"],["pmPlans","cmms_pm_plans"],
-    ["pmTasks","cmms_pm_tasks"]
+    ["pmTasks","cmms_pm_tasks"],["assignments","cmms_work_order_assignments"],
+    ["actions","cmms_work_order_actions"],["approvals","cmms_work_order_approvals"],
+    ["meterReadings","cmms_asset_meter_readings"]
   ];
+  if(["technical_supervisor","responsible_manager","technical_expert"].some(role=>cmmsAssignedRoles.includes(role))){
+    queries.push(["purchaseLinks","cmms_work_order_purchase_links"]);
+  }else{
+    cmmsData.purchaseLinks=[];
+  }
   // Audit logs are governance-only under RLS. Do not make the whole dashboard
   // fail for experts/technicians when they correctly lack audit-log access.
   if(["technical_supervisor","responsible_manager"].includes(cmmsAssignedRole)){
@@ -1539,7 +1546,7 @@ function cmmsRenderTab(){
  masterdata:{title:"اطلاعات پایه تجهیزات",desc:"تعریف دسته‌بندی‌ها و ساختار سلسله‌مراتبی محل‌های استقرار.",metrics:[["دسته‌بندی‌ها",cmmsRows("categories").length],["محل‌های تعریف‌شده",cmmsRows("locations").length],["محل‌های فعال",cmmsRows("locations").filter(x=>x.is_active).length],["سطوح اصلی",cmmsRows("locations").filter(x=>!x.parent_id).length]],body:cmmsMasterDataForms()},
  assets:{title:"شناسنامه تجهیزات",desc:"ثبت مشخصات پایه و مشاهده فهرست تجهیزات؛ فرم در این مرحله آماده‌سازی و اعتبارسنجی محلی انجام می‌دهد.",metrics:[["کل تجهیزات",a.length],["در سرویس",a.filter(x=>x.operational_status==="operational").length],["متوقف",a.filter(x=>x.operational_status==="stopped").length],["دارای محدودیت",a.filter(x=>x.operational_status==="degraded").length]],body:cmmsAssetForm()+cmmsTable([["کد",r=>r.asset_code],["نام تجهیز",r=>r.name],["محل",r=>cmmsRows("locations").find(l=>l.id===r.location_id)?.name],["سازنده",r=>r.manufacturer],["مدل",r=>r.model],["وضعیت",r=>cmmsStatus(r.operational_status)]],a,"فهرست تجهیزات خالی است؛ پس از فعال‌شدن امن عملیات ثبت، اطلاعات پایه وارد می‌شود.")},
  failures:{title:"گزارش خرابی‌ها",desc:"گزارش‌های ثبت‌شده، شدت، زمان وقوع و وضعیت رسیدگی.",metrics:[["کل گزارش‌ها",f.length],["بحرانی",f.filter(x=>x.priority==="critical").length],["اولویت بالا",f.filter(x=>x.priority==="high").length],["در حال بررسی",f.filter(x=>x.status==="under_review").length]],body:cmmsTable([["شماره",r=>r.report_no],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["اولویت",r=>r.priority],["شرح",r=>r.description],["وضعیت",r=>cmmsStatus(r.status)],["زمان",r=>cmmsDate(r.occurred_at)]],f,"هنوز گزارش خرابی ثبت نشده است.")},
- orders:{title:"دستورکارهای تعمیراتی",desc:"وضعیت اجرا، نوع کار، تجهیز و زمان‌بندی دستورکارها.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsTable([["شماره",r=>r.wo_no],["عنوان",r=>r.title],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["نوع",r=>r.work_type],["وضعیت",r=>cmmsStatus(r.status)],["سررسید",r=>cmmsDate(r.due_at)]],o,"هنوز دستورکاری ثبت نشده است.")},
+ orders:{title:"دستورکارهای تعمیراتی",desc:"وضعیت اجرا، ارجاع فعال، سوابق اقدام و مراحل تأیید دستورکارها.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsTable([["شماره",r=>r.wo_no],["عنوان",r=>r.title],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["نوع",r=>r.work_type],["وضعیت",r=>cmmsStatus(r.status)],["ارجاع فعال",r=>cmmsRows("assignments").filter(x=>x.work_order_id===r.id&&!x.unassigned_at).map(x=>String(x.user_id||"").slice(0,8)).join("، ")||"—"],["اقدامات",r=>cmmsRows("actions").filter(x=>x.work_order_id===r.id).length],["تأییدها",r=>cmmsRows("approvals").filter(x=>x.work_order_id===r.id).map(x=>(x.stage||"")+" / "+(x.decision||"")).join("؛ ")||"—"],["سررسید",r=>cmmsDate(r.due_at)]],o,"هنوز دستورکاری ثبت نشده است.")},
  pm:{title:"نگهداری پیشگیرانه (PM)",desc:"برنامه‌ها و وظایف PM، سررسید و وضعیت اجرا.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsTable([["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["عنوان",r=>r.title||r.task_title],["سررسید",r=>cmmsDate(r.due_at)],["وضعیت",r=>cmmsStatus(r.status)]],p,"هنوز وظیفه PM ایجاد نشده است.")},
  reports:{title:"گزارش‌ها و سوابق",desc:"نمای اولیه سوابق ممیزی و داده‌های عملیاتی؛ شاخص‌های MTTR و MTBF تا وجود داده معتبر محاسبه نمی‌شوند.",metrics:[["رویدادهای ممیزی",cmmsRows("audit").length],["تجهیزات",a.length],["خرابی‌ها",f.length],["دستورکارها",o.length]],body:cmmsTable([["نوع موجودیت",r=>r.entity_type],["شناسه",r=>r.entity_id],["عملیات",r=>r.action],["زمان",r=>cmmsDate(r.created_at)]],cmmsRows("audit").slice().reverse().slice(0,30),"هنوز رویداد ممیزی ثبت نشده است.")}
  };
