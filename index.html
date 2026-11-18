@@ -742,7 +742,7 @@ body{background:#F1F3F6!important;color:#202833!important}
     z-index:500!important;
   }
 }
-</style>
+.request-delay-line{margin-top:5px}.delay-pill{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;font-size:10px;font-weight:750;line-height:1.5;border:1px solid transparent}.delay-ok{background:#ECFDF3;color:#067647;border-color:#ABEFC6}.delay-warning{background:#FFFAEB;color:#B54708;border-color:#FEDF89}.delay-late{background:#FEF3F2;color:#B42318;border-color:#FECDCA}.delay-unknown{background:#F2F4F7;color:#475467;border-color:#EAECF0}#request-detail-panel .delay-pill{margin-right:5px}</style>
 <style id="mehrsa-fiori-linear-refresh">
 /* Mehrsa visual refresh: SAP Fiori structure + Linear neutral palette.
    Presentation-only overrides; application logic and data workflows remain unchanged. */
@@ -1816,6 +1816,19 @@ function ensureRequestPrintButton(){
   bar.innerHTML='<b>فهرست درخواست‌ها</b><button class="btn btn-primary btn-sm" onclick="printSection(\'req-list\',\'فهرست درخواست‌های فنی\')">🖨 چاپ / ذخیره PDF</button>';
   req.insertBefore(bar,req.firstChild);
 }
+function requestDelayInfo(r){
+ if(["closed","delivered","planner_rejected","admin_rejected","cancelled"].includes(r.status)) return {level:"ok",label:"بسته"};
+ const events=(Array.isArray(r.timeline)?r.timeline:[]).slice().reverse(); let last=null;
+ for(const t of events){const d=new Date(String(t.ts||"").replaceAll("/","-"));if(!isNaN(d.getTime())){last=d;break;}}
+ if(!last&&r.updatedAt){const d=new Date(r.updatedAt);if(!isNaN(d.getTime()))last=d;}
+ if(!last)return {level:"unknown",label:"زمان اقدام نامشخص"};
+ const hours=Math.max(0,(Date.now()-last.getTime())/3600000);
+ const limit=r.status==="in_transit"?48:(["planner_approved","procurement_inquiry","procurement_ordered"].includes(r.status)?72:24);
+ const level=hours>=limit?"late":hours>=limit*.75?"warning":"ok";
+ const age=hours<1?"کمتر از یک ساعت":hours<24?Math.floor(hours)+" ساعت":Math.floor(hours/24)+" روز";
+ return {level,label:(level==="late"?"معوق · ":level==="warning"?"نزدیک مهلت · ":"در مهلت · ")+age};
+}
+function delayBadge(r){const d=requestDelayInfo(r);const cls=d.level==="late"?"delay-late":d.level==="warning"?"delay-warning":d.level==="unknown"?"delay-unknown":"delay-ok";return '<span class="delay-pill '+cls+'">'+d.label+'</span>';}
 function renderList(){
   if(currentView==="work"||currentView==="cmms") return;
   let list;
@@ -1831,7 +1844,7 @@ function renderList(){
     const isSelected=selected&&String(selected.id)===String(r.id);
     return `<tr class="request-row${isSelected?" selected":""}" onclick="openRequest('${r.id}')" tabindex="0" onkeydown="if(event.key==='Enter'){openRequest('${r.id}')}">
       <td class="request-code">${r.id}</td>
-      <td class="request-title-cell"><strong>${r.title}</strong>${r.prio?'<small>'+r.prio+'</small>':''}</td>
+      <td class="request-title-cell"><strong>${r.title}</strong>${r.prio?'<small>'+r.prio+'</small>':''}<div class="request-delay-line">${delayBadge(r)}</div></td>
       <td>${statusBadge(r.status)}</td>
       <td class="request-date">${r.date||"—"}</td>
       <td class="request-ops"><button type="button" class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openRequest('${r.id}')">مشاهده جزئیات ←</button></td>
@@ -1937,7 +1950,7 @@ function requestDetail(r){
       <span class="b ${PRIO_MAP[r.prio]||'b-grey'}">${r.prio}</span>
     </div>
 
-    <div style="margin-bottom:12px">${statusBadge(r.status)}</div>
+    <div style="margin-bottom:12px">${statusBadge(r.status)} ${delayBadge(r)}</div>
     ${editButton}
     <div style="overflow-x:auto">
       <div class="flow">${flowHtml}</div>
