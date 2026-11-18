@@ -1496,7 +1496,7 @@ revoke all on function cmms_private.cmms_generate_due_pm_tasks() from public,ano
 grant execute on function cmms_private.cmms_generate_due_pm_tasks() to service_role;
 grant execute on function cmms_private.cmms_has_any_role(text[]) to authenticated;
 grant execute on function cmms_private.cmms_has_role_at_location(text[],uuid) to authenticated;
-grant execute on function cmms_private.cmms_user_has_active_role(uuid,text[]) to authenticated;
+-- cmms_user_has_active_role remains owner-only; workflow SECURITY DEFINER routines call it as owner.
 
 revoke all on function public.cmms_report_failure(uuid,text,text,text,text,text,text,text[],timestamptz) from public, anon;
 revoke all on function public.cmms_triage_failure(uuid,text,text) from public, anon;
