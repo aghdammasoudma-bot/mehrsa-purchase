@@ -26,34 +26,34 @@ create policy cmms_evidence_read_by_location
 on storage.objects for select to authenticated
 using (
   bucket_id='cmms-evidence'
-  and array_length(string_to_array(name,'/'),1)=5
-  and split_part(name,'/',1)='cmms'
-  and split_part(name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-  and split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-  and split_part(name,'/',5) <> ''
-  and split_part(name,'/',5) not in ('.','..')
-  and position(chr(92) in name)=0
+  and array_length(string_to_array(storage.objects.name,'/'),1)=5
+  and split_part(storage.objects.name,'/',1)='cmms'
+  and split_part(storage.objects.name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and split_part(storage.objects.name,'/',5) <> ''
+  and split_part(storage.objects.name,'/',5) not in ('.','..')
+  and position(chr(92) in storage.objects.name)=0
   and exists (
     select 1
     from public.cmms_assets a
-    where a.id=case when split_part(name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',2)::uuid else null end
+    where a.id=case when split_part(storage.objects.name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',2)::uuid else null end
       and (select cmms_private.cmms_has_role_at_location(
         array['reporter','technician','technical_expert','technical_supervisor','responsible_manager'],
         a.location_id
       ))
       and (
-        (split_part(name,'/',3)='assets' and split_part(name,'/',4)=a.id::text)
-        or (split_part(name,'/',3)='failures' and exists (
+        (split_part(storage.objects.name,'/',3)='assets' and split_part(storage.objects.name,'/',4)=a.id::text)
+        or (split_part(storage.objects.name,'/',3)='failures' and exists (
           select 1 from public.cmms_failure_reports fr
-          where fr.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and fr.asset_id=a.id
+          where fr.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and fr.asset_id=a.id
         ))
-        or (split_part(name,'/',3)='work-orders' and exists (
+        or (split_part(storage.objects.name,'/',3)='work-orders' and exists (
           select 1 from public.cmms_work_orders wo
-          where wo.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and wo.asset_id=a.id
+          where wo.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and wo.asset_id=a.id
         ))
-        or (split_part(name,'/',3)='pm' and exists (
+        or (split_part(storage.objects.name,'/',3)='pm' and exists (
           select 1 from public.cmms_pm_tasks pt
-          where pt.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and pt.asset_id=a.id
+          where pt.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and pt.asset_id=a.id
         ))
       )
   )
@@ -63,27 +63,27 @@ create policy cmms_evidence_upload_by_location
 on storage.objects for insert to authenticated
 with check (
   bucket_id='cmms-evidence'
-  and array_length(string_to_array(name,'/'),1)=5
-  and split_part(name,'/',1)='cmms'
-  and split_part(name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-  and split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-  and split_part(name,'/',5) <> ''
-  and split_part(name,'/',5) not in ('.','..')
-  and position(chr(92) in name)=0
+  and array_length(string_to_array(storage.objects.name,'/'),1)=5
+  and split_part(storage.objects.name,'/',1)='cmms'
+  and split_part(storage.objects.name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and split_part(storage.objects.name,'/',5) <> ''
+  and split_part(storage.objects.name,'/',5) not in ('.','..')
+  and position(chr(92) in storage.objects.name)=0
   and exists (
     select 1 from public.cmms_assets a
-    where a.id=case when split_part(name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',2)::uuid else null end
+    where a.id=case when split_part(storage.objects.name,'/',2) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',2)::uuid else null end
       and (
-        (split_part(name,'/',3)='assets'
-          and split_part(name,'/',4)=a.id::text
+        (split_part(storage.objects.name,'/',3)='assets'
+          and split_part(storage.objects.name,'/',4)=a.id::text
           and (select cmms_private.cmms_has_role_at_location(
             array['technical_expert','technical_supervisor'],a.location_id
           )))
         or
-        (split_part(name,'/',3)='failures'
+        (split_part(storage.objects.name,'/',3)='failures'
           and exists (
             select 1 from public.cmms_failure_reports fr
-            where fr.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and fr.asset_id=a.id
+            where fr.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and fr.asset_id=a.id
               and (
                 fr.reported_by=(select auth.uid())
                 or (select cmms_private.cmms_has_role_at_location(
@@ -95,10 +95,10 @@ with check (
             array['reporter','technician','technical_expert','technical_supervisor'],a.location_id
           )))
         or
-        (split_part(name,'/',3)='work-orders'
+        (split_part(storage.objects.name,'/',3)='work-orders'
           and exists (
             select 1 from public.cmms_work_orders wo
-            where wo.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and wo.asset_id=a.id
+            where wo.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and wo.asset_id=a.id
               and wo.status not in ('closed','cancelled')
               and (
                 exists (
@@ -112,10 +112,10 @@ with check (
               )
           ))
         or
-        (split_part(name,'/',3)='pm'
+        (split_part(storage.objects.name,'/',3)='pm'
           and exists (
             select 1 from public.cmms_pm_tasks pt
-            where pt.id=case when split_part(name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(name,'/',4)::uuid else null end and pt.asset_id=a.id
+            where pt.id=case when split_part(storage.objects.name,'/',4) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then split_part(storage.objects.name,'/',4)::uuid else null end and pt.asset_id=a.id
               and pt.status not in ('completed','cancelled')
               and (
                 pt.assigned_to=(select auth.uid())
