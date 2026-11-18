@@ -59,16 +59,16 @@ ACL خصوصی: دو helper `cmms_has_any_role` و `cmms_has_role_at_location` �
 |---|---|---|
 | `cmms_has_any_role(text[])` | نقش فعال کاربر جاری و پروفایل فعال را بررسی می‌کند | برای policyها لازم است؛ دسترسی authenticated فقط در صورت نیاز policy حفظ شود؛ anon نباید اجرا کند. |
 | `cmms_has_role_at_location(text[],uuid)` | نقش فعال کاربر جاری، پروفایل فعال، نقش سراسری یا نقش در محل/ancestor را بررسی می‌کند | برای policyها و کنترل مکانی لازم است؛ تست hierarchy و cross-location ضروری است. |
-| `cmms_user_has_active_role(uuid,text[])` | شناسه کاربر دلخواه می‌گیرد؛ نقش فعال سراسری و پروفایل فعال را بررسی می‌کند | هیچ policy CMMS به این تابع ارجاع نمی‌دهد؛ authenticated در ACL فعلی مجوز غیرضروری دارد. در draft Staging باید EXECUTE از PUBLIC/anon/authenticated سلب شود؛ فراخوانی داخلی توابع SECURITY DEFINER با مالک postgres ادامه می‌یابد. |
-| `cmms_generate_due_pm_tasks()` | scheduler؛ قفل planها با SKIP LOCKED؛ ایجاد taskهای calendar/meter؛ سقف 100 تکرار برای هر plan | بدون auth guard بودن برای scheduler داخلی قابل قبول است؛ ACL باید owner-only بماند و هرگز wrapper عمومی نگیرد. planهای متصل به تجهیز retired فیلتر نمی‌شوند؛ باید پیش از فعال‌سازی scheduler اصلاح شود. |
+| `cmms_user_has_active_role(uuid,text[])` | شناسه کاربر دلخواه می‌گیرد؛ نقش فعال سراسری و پروفایل فعال را بررسی می‌کند | در Staging، EXECUTE برای authenticated/anon سلب و owner-only نگه داشته شد؛ توابع SECURITY DEFINER داخلی می‌توانند آن را به‌عنوان مالک فراخوانی کنند. |
+| `cmms_generate_due_pm_tasks()` | scheduler؛ قفل planها با SKIP LOCKED؛ ایجاد taskهای calendar/meter؛ سقف 100 تکرار برای هر plan | در P1 Staging، planهای متصل به asset بازنشسته فیلتر شدند. ACL فقط برای owner/service_role باقی مانده و هیچ wrapper عمومی ندارد؛ اجرای زمان‌بندی‌شده واقعی هنوز تست نشده است. |
 
 ## 4. ریسک‌های اولویت‌دار
 
 ### P0 — پیش از هر مجوزدهی RPC
 1. تأیید شود `cmms_private` در exposed schemas مربوط به Data API نیست.
 2. `cmms_user_has_active_role(uuid,text[])` از دسترسی مستقیم authenticated خارج شود؛ این تابع برای policyها لازم نیست.
-3. wrapperهای عمومی فقط به‌صورت narrow SECURITY DEFINER، با مالک postgres، `search_path = ''`، ارجاع کاملاً qualified و REVOKE از PUBLIC/anon قابل فعال‌سازی‌اند.
-4. private write routines و scheduler owner-only بمانند؛ هیچ GRANT روی کل schema یا همه توابع داده نشود.
+3. الگوی تأییدشده در Staging: public wrapperها SECURITY INVOKER بمانند؛ فقط امضای دقیق wrapper و private SECURITY DEFINER implementation متناظر به authenticated EXECUTE بگیرند؛ search_path خالی و ارجاع schema-qualified حفظ شود.
+4. helperهای policy فقط در حد نیاز RLS/Storage مجوز داشته باشند؛ `cmms_user_has_active_role` و trigger-only functions owner-only بمانند؛ scheduler فقط owner/service_role و بدون wrapper عمومی باشد. هیچ GRANT روی کل schema یا همه توابع داده نشود.
 5. تست منفی نقش‌ها، creator/assignee approval، cross-location و انتقال‌های workflow در Staging اجرا شود.
 
 ### P1 — منطق کسب‌وکار پیش از فعال‌سازی عملیات
@@ -84,21 +84,39 @@ ACL خصوصی: دو helper `cmms_has_any_role` و `cmms_has_role_at_location` �
 
 ## 5. ارزیابی draft زنجیره RPC
 
-فایل `supabase/drafts/cmms_v1_rpc_wrapper_hardening_STAGING_ONLY.sql` فقط برای Staging است. بررسی فعلی نشان می‌دهد الگوی wrapperهای آن به‌صورت محدود طراحی شده است:
-- 23 امضای دقیق public wrapper؛
-- SECURITY DEFINER فقط روی wrapper عمومی؛
-- `search_path = ''`؛
-- REVOKE از PUBLIC و anon؛
-- GRANT فقط به authenticated؛
-- عدم اعطای EXECUTE مستقیم به private write routines و scheduler.
+فایل قدیمی `supabase/drafts/cmms_v1_rpc_wrapper_hardening_STAGING_ONLY.sql` حاوی الگوی قدیمی SECURITY DEFINER برای wrapperهای عمومی است و **منسوخ/غیرقابل اجرا** محسوب می‌شود. الگوی جایگزین در migration release-candidate ثبت شده است:
+- public wrapperها SECURITY INVOKER هستند؛
+- هر wrapper فقط private implementation متناظر را صدا می‌زند؛
+- فقط امضای دقیق public wrapper و private routine لازم به authenticated EXECUTE می‌گیرند؛
+- `search_path = ''` و نام‌های schema-qualified حفظ شده‌اند؛
+- `cmms_user_has_active_role`، trigger-only functions و scheduler از RPC عمومی قابل فراخوانی نیستند.
 
-این طرح فقط وقتی پذیرفتنی است که owner تمام wrapperها postgres باشد (در Production مشاهده شد)، بدنه هر wrapper صرفاً تابع خصوصی متناظر را با نام schema-qualified صدا بزند، و تمام موارد P0/P1 در Staging اعتبارسنجی شوند. در draft، EXECUTE helper غیرضروری `cmms_user_has_active_role` نیز باید از authenticated برداشته شود.
+این الگو در Staging compile و ACL-check شده است. فعال‌سازی آن در Production همچنان به backup/restore، تأیید عدم exposure بودن `cmms_private`، و تست واقعی Auth/API نیاز دارد.
 
 ## 6. وضعیت اجرا و محدودیت‌ها
 
-- فقط SELECT روی Production اجرا شد.
-- هیچ بکاپ، restore، DDL، DML، GRANT، REVOKE، policy، trigger، function، storage یا scheduler تغییر نکرد.
-- هیچ migration روی Staging اجرا نشده است.
-- این ممیزی static/catalog review است؛ تست runtime مجوزها و رفتار workflow هنوز انجام نشده.
+- Production همچنان فقط با SELECT/catalog ممیزی شده؛ هیچ بکاپ، restore، DDL، DML، GRANT، REVOKE، policy، trigger، function، storage یا scheduler در Production تغییر نکرد.
+- Migration نسخه‌دار `20261118090000_cmms_v1_release_candidate.sql` در Staging با version `20261118064059` اعمال شد.
+- تست‌های runtime SQL-level با هویت‌های synthetic در Staging انجام شد: خرید-link، RLS و cross-location، جریان کامل WO با دو تأییدکننده متفاوت، جلوگیری از self-approval، PM scheduler idempotency، retirement interlocks، P1 مقدارهای نامعتبر و Storage RLS.
+- تست واقعی مرورگر/Auth JWT/Storage HTTP، full purchase-module regression و اجرای cron هنوز انجام نشده است.
 - `main` و deployment عملیاتی تغییر نکردند.
 - این سند به‌تنهایی مجوز فعال‌سازی CMMS نیست.
+
+
+## 7. Staging findings that supersede earlier P1 observations
+
+The following P1 findings from the initial static review have since been addressed in the release-candidate migration and partially exercised in Staging:
+- Retired-asset meter readings, PM-plan creation/update and failure-to-work-order conversion are blocked.
+- PM task generation skips retired assets.
+- Asset retirement is blocked while non-terminal work orders or active PM plans exist.
+- Action duration, quantity and meter values reject negative, NaN and Infinity inputs.
+- Purchase-link SECURITY DEFINER implementation reproduces the live `pr_requests` SELECT-policy role check, rejects unknown/closed requests and is idempotent on duplicate links.
+- Storage object policies now bind the path to a real record and explicitly qualify the outer `storage.objects.name`; the first Staging test found and corrected an outer-column shadowing defect.
+- Runtime tests confirmed location isolation, creator self-approval denial, full two-person approval and the PM completion/retirement path.
+
+Still open:
+- Meter rollover/reset/replacement semantics and whether readings must be monotonic.
+- Behavior for open PM tasks when a plan is deactivated.
+- Actual file-byte validation, malware scanning and MIME spoof resistance.
+- Full real-Auth API/Storage tests and scheduler cron recovery/monitoring.
+- Full purchase module regression because Staging uses minimal compatibility stubs rather than the live purchase schema/data.
