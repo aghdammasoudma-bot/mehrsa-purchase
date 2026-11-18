@@ -1156,7 +1156,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
  #main-content .detail-stepper *,#main-content .detail-progress-track span{transition:none!important}
 }
 </style>
-</head>
+\n<style id="mehrsa-detail-action-svg-20261118">#main-content .detail-action-icon{width:15px;height:15px;display:inline-block;vertical-align:-3px;margin-left:6px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}#main-content .detail-sticky-footer .actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:3px}</style>\n</head>
 <body>
 
 <!-- ROLE SCREEN -->
@@ -2035,7 +2035,8 @@ function requestDetail(r){
         ${t.note?`<div class="tl-note">${t.note}</div>`:""}
       </div>
     </div>`).join(""):"";
-  const actions=actionButtons(r);
+  const actionIcons={"📤":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M5 14v5h14v-5"/></svg>',"🗑":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>',"❌":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',"✅":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',"🔍":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>',"📦":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4Z M3 7l9 4 9-4M12 11v10"/></svg>',"🚚":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>',"🔒":'<svg class="detail-action-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'};
+  const actions=actionButtons(r).replace(/[📤🗑❌✅🔍📦🚚🔒]/gu,icon=>actionIcons[icon]||"");
   const editButton=currentIsAdmin?`<div class="actions detail-edit-actions"><button class="btn btn-amber detail-edit-btn" onclick="openEditPurchase('${r.id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z"/></svg>ویرایش مشخصات درخواست</button></div>`:"";
   const prioText=String(r.prio||"").replace(/[🔴🟠🟡🟢]/gu,"").trim()||"—";
   const prioClass=String(r.prio||"").includes("فوری")?"prio-urgent":String(r.prio||"").includes("متوسط")||String(r.prio||"").includes("بالا")?"prio-medium":"prio-low";
