@@ -150,3 +150,11 @@ All nine SQL layers (base schema, hardening, authorization, role seed, workflow 
 - A staging-only foreign-key index draft was added and applied. Supabase Performance Advisor no longer reports unindexed CMMS foreign keys. It now reports unused indexes only; this is expected on the low-volume staging database and is not a reason to remove workload-supporting indexes without production query evidence.
 - Front-end read-only bug fixed in `index.html`: the CMMS dashboard now fetches audit logs only for technical supervisor/responsible manager roles. Previously, a technician/expert could receive an RLS denial for the governance-only audit table and have the entire dashboard marked as failed.
 - UI write actions are still not implemented/enabled. The current UI contains read-only tables and local preview forms; this is not yet a complete operational CMMS frontend.
+
+
+### Release-candidate review boundary — 2026-11-18
+- Opened Draft PR #1 from `feature/cmms-v1` to `main`; PR is intentionally Draft and not merged.
+- PR-triggered JavaScript syntax CI completed successfully.
+- Final read-only Production check reconfirmed: 15 CMMS tables, 15 policies, four active CMMS roles, no `cmms-evidence` bucket, and no authenticated/anon EXECUTE on the public purchase-link wrapper.
+- Production migration history is empty; the current Production CMMS schema was not installed through tracked Supabase migrations. The release-candidate migration therefore still requires careful live-schema reconciliation after backup before it can be run in Production.
+- Production remains untouched by this Staging migration and test work; `main` remains at the PR base commit.
