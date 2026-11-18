@@ -6,6 +6,8 @@
 - Dashboard metrics are calculated from returned database rows; no sample/demo counts are used.
 - Added loading, query-error, empty-state, and manual-refresh states.
 - Added the first equipment master-data form with required-field validation, category/location selectors, technical metadata, criticality, operational status, commissioning and warranty dates, and a local review preview.
+- Added a dedicated master-data tab with separate category and hierarchical-location forms. Location fields include code, name, parent location and discipline (mechanical, electrical, utilities, production, instrumentation, civil); both forms include local required-field validation and duplicate-code warnings based on currently loaded rows.
+- Added read-only tables for existing categories and the location hierarchy. Database-submit controls remain disabled.
 - The form's database-submit control is intentionally disabled. The preview validates and displays entered data locally only; it does not create or change database records.
 - Switching into CMMS hides the purchase request workspace and its KPIs; switching back restores the existing purchase view.
 - CMMS access is now resolved from the authenticated user's active `cmms_user_roles` row, not a hardcoded username allowlist. Current production role assignments were read and matched to the four intended accounts: masoud (technical_supervisor), biabani (responsible_manager), reza (technical_expert), and hamid (technician).
@@ -17,7 +19,8 @@
 ## Verification performed
 - Read-only catalog queries confirmed the eight queried CMMS tables and their columns exist in production.
 - Current row counts: assets 0, locations 0, failure reports 0, work orders 0, PM plans 0, PM tasks 0.
-- The inline JavaScript blocks in the updated HTML passed a JavaScript syntax parse check after the database-backed role-resolution change and after adding the equipment form.
+- The inline JavaScript blocks in the updated HTML passed a JavaScript syntax parse check after the database-backed role-resolution change, equipment form, and master-data forms (all 4 script blocks parse successfully).
+- A read-only count confirmed `cmms_asset_categories` and `cmms_locations` remain at 0 rows; no master-data records were written.
 - A fresh read-only count confirmed `cmms_assets`, `cmms_locations`, and `cmms_asset_categories` remain at 0 rows; no equipment data was written.
 - A read-only catalog query confirmed `cmms_user_roles` has `user_id`, `role`, and `is_active` columns, with a self-read RLS policy; a read-only join confirmed the four current user-to-role assignments.
 - The production database was queried with SELECT statements only during this milestone.
@@ -28,6 +31,7 @@
 - End-to-end purchase regression tests in a browser.
 - Any create/edit/approval workflow; the asset form is present but database submission remains disabled, and all CMMS write controls remain disabled/not implemented.
 - Browser-level rendering, mobile layout, form validation behavior, and authenticated category/location option reads still require a preview-browser test.
+- Master-data category/location create, edit, disable, and delete workflows are not enabled; uniqueness and hierarchy-cycle enforcement must be implemented server-side before writes are allowed.
 - Storage uploads, notifications, PM scheduler, and reporting exports.
 - Staging migration and isolated acceptance test execution.
 
