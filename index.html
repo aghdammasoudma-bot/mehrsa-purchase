@@ -1278,6 +1278,7 @@ async function loadUserProfile(){
   currentUser=data.full_name;
   currentUsername=data.username;
   currentTitle=({admin:'مدیر سامانه',tech:'واحد فنی',maintenance:'تعمیرات',planner:'برنامه‌ریز',procurement:'کارشناس بازرگانی'})[data.role]||'کاربر سامانه';
+  await cmmsLoadUserRole();
   setRole(currentRole,currentUser,currentTitle);
 }
 async function cloudLogin(){
@@ -1302,7 +1303,7 @@ async function cloudLogin(){
 window.cloudLogin=cloudLogin;
 document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('#auth-box button');if(b){b.type='button';b.addEventListener('click',e=>{e.preventDefault();cloudLogin();});}});
 async function cloudLogout(){
- await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';
+ await cloud.auth.signOut();cloudUser=null;currentRole='';currentUser='';currentTitle='';currentIsAdmin=false;profileRole='';cmmsAssignedRole='';cmmsLoadState='idle';cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],audit:[]};
  showRoleScreen();authMessage('از حساب خارج شدید.');
 }
 async function refreshRequests(){
@@ -1387,13 +1388,23 @@ function showRoleScreen(){
 // CMMS V1 — connected read-only module. No writes are enabled.
 let cmmsActiveTab="overview";
 let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],audit:[]};
-let cmmsLoadState="idle",cmmsLoadError="";
+let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="";
+async function cmmsLoadUserRole(){
+  cmmsAssignedRole="";
+  if(!cloudUser)return;
+  const {data,error}=await cloud.from("cmms_user_roles")
+    .select("role,is_active")
+    .eq("user_id",cloudUser.id)
+    .eq("is_active",true)
+    .maybeSingle();
+  if(error)throw new Error("خطا در دریافت سطح دسترسی CMMS: "+error.message);
+  cmmsAssignedRole=data?.role||"";
+}
 function cmmsCanAccess(){
-  return !!cloudUser && ["masoud","biabani","reza","hamid"].includes(String(currentUsername||"").toLowerCase());
+  return !!cloudUser && ["technical_supervisor","responsible_manager","technical_expert","technician"].includes(cmmsAssignedRole);
 }
 function cmmsRoleLabel(){
-  const u=String(currentUsername||"").toLowerCase();
-  return ({masoud:"سرپرست فنی — تأیید فنی مرحله اول",biabani:"مدیر مسئول — تأیید نهایی همه تجهیزات",reza:"کارشناس فنی",hamid:"تکنسین تعمیرات"})[u]||"بدون دسترسی CMMS";
+  return ({technical_supervisor:"سرپرست فنی — تأیید فنی مرحله اول",responsible_manager:"مدیر مسئول — تأیید نهایی همه تجهیزات",technical_expert:"کارشناس فنی",technician:"تکنسین تعمیرات"})[cmmsAssignedRole]||"بدون دسترسی CMMS";
 }
 function cmmsSetTab(tab){cmmsActiveTab=tab;renderCMMSView();}
 function cmmsText(v){return v===null||v===undefined||v===""?"—":String(v);}
