@@ -94,3 +94,10 @@
 ## 7) وضعیت اجرا
 
 این ماتریس و migration پیشنهادی صرفاً artifact شاخه توسعه‌اند. هیچ GRANT، ALTER FUNCTION، DDL، DML یا migration روی پروژه production اجرا نشده است. Supabase project در حال حاضر هیچ development branch گزارش نکرد؛ بنابراین migration هنوز روی staging اجرا نشده است.
+
+
+## 8) تأیید تکمیلی ACL و مالکیت توابع
+
+ممیزی تکمیلی کاتالوگ PostgreSQL نشان داد مالک تمام 23 wrapper عمومی کسب‌وکار و تمام توابع خصوصی بررسی‌شده `postgres` است. تمام توابع خصوصی `SECURITY DEFINER` با `search_path=""` تنظیم شده‌اند. فقط دو helper نقش (`cmms_has_any_role` و `cmms_has_role_at_location`) برای `authenticated` قابل اجرا هستند؛ سایر توابع خصوصی، از جمله همه write routineها و scheduler، برای authenticated و anon غیرقابل اجرا هستند. تمام 23 wrapper عمومی فعلی `SECURITY INVOKER` هستند و برای authenticated/anon مجوز EXECUTE ندارند.
+
+این یافته مالکیت wrapper را برای طرح پیشنهادی definer تأیید می‌کند؛ با این حال هنوز تست runtime و تست منفی نقش‌ها انجام نشده است. شمار wrapperهای تجاری در migration و تست ACL برابر 23 است.
