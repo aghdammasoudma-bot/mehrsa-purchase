@@ -80,7 +80,7 @@ Inspection of representative public wrappers and private implementations found a
 - Preferred design for review: make each approved public wrapper a narrow SECURITY DEFINER entry point with a fixed empty search_path and fully-qualified private routine call, while retaining role/location/workflow authorization inside the private implementation; then grant EXECUTE on only that exact public signature to authenticated. Validate ownership, search_path, auth.uid propagation, and negative role tests in staging first. This is a design recommendation, not an applied change.
 - The sampled private implementations include authorization checks: asset creation requires technical_supervisor or technical_expert; work-order creation checks those roles at the asset location; failure reporting permits reporter/technician/technical_expert/technical_supervisor at the location; the two-stage approval function checks the designated role and prevents the same user approving both stages. The full set of routines still requires function-by-function review.
 
-This is a newly identified blocker to enabling CMMS writes. No database object or privilege was changed.
+This was a privilege-chain blocker before staging validation. The narrow invoker/private-definer chain now compiles and its ACLs have been verified in isolated Staging; Production remains unchanged.
 
 
 ## Function-by-function security audit — 2026-11-18
