@@ -1502,7 +1502,7 @@ function cmmsMasterDataForms(){
  "</div><div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>بررسی محل</button><button class='cmms-save-disabled' type='button' disabled>ثبت در سامانه — غیرفعال</button></div>"+
  "<div class='cmms-master-preview' aria-live='polite'></div></form></div>"+
  "<section class='cmms-master-list'><h4>دسته‌بندی‌های موجود ("+cats.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان",r=>r.name]],cats,"هنوز دسته‌بندی تعریف نشده است.")+"</section>"+
- "<section class='cmms-master-list'><h4>ساختار محل‌های استقرار ("+locs.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان محل",r=>r.name],["محل بالادستی",r=>locs.find(p=>p.id===r.parent_id)?.name||"سطح اصلی"],["حوزه",r=>({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[r.discipline]||"—"),["وضعیت",r=>r.is_active?"فعال":"غیرفعال"]],locs,"هنوز محل استقراری تعریف نشده است.")+"</section>";
+ "<section class='cmms-master-list'><h4>ساختار محل‌های استقرار ("+locs.length+")</h4>"+cmmsTable([["کد",r=>r.code],["عنوان محل",r=>r.name],["محل بالادستی",r=>locs.find(p=>p.id===r.parent_id)?.name||"سطح اصلی"],["حوزه",r=>({mechanical:"مکانیک",electrical:"برق",utilities:"تأسیسات",production:"تولید",instrumentation:"ابزار دقیق",civil:"عمرانی"})[r.discipline]||"—"],["وضعیت",r=>r.is_active?"فعال":"غیرفعال"]],locs,"هنوز محل استقراری تعریف نشده است.")+"</section>";
 }
 function cmmsPreviewMaster(event,type){
  event.preventDefault();
