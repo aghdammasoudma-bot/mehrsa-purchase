@@ -42,8 +42,8 @@ begin
     end if;
   end loop;
 
-  if v_count <> 24 then
-    raise exception 'Expected 24 public business wrappers, found %', v_count;
+  if v_count <> 23 then
+    raise exception 'Expected 23 public business wrappers, found %', v_count;
   end if;
 
   if has_function_privilege('authenticated', 'cmms_private.cmms_create_asset(text,text,uuid,text,uuid,text,text,text,jsonb,text)', 'EXECUTE') then
