@@ -1,0 +1,42 @@
+name: CMMS V1 branch checks
+
+on:
+  push:
+    branches:
+      - feature/cmms-v1
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  javascript-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Extract and syntax-check inline JavaScript
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>", html, flags=re.I)
+          inline = [s for s in scripts if s.strip()]
+          if not inline:
+              raise SystemExit("No inline JavaScript blocks found")
+          for i, script in enumerate(inline, 1):
+              Path(f"/tmp/cmms-inline-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Extracted {len(inline)} inline JavaScript block(s)")
+          PY
+          for file in /tmp/cmms-inline-*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
