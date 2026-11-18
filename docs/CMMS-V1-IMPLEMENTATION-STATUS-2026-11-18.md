@@ -28,15 +28,24 @@
 - A read-only constraint inspection confirmed unique constraints on category/location codes and the location self-reference foreign key; no schema was changed.
 - The production database was queried with SELECT statements only during this milestone.
 
+## Security review — read-only production inspection
+
+- All 15 public CMMS tables inspected have RLS enabled and currently expose SELECT policies only; no INSERT/UPDATE/DELETE policy was found in this inspection.
+- The public CMMS RPC wrapper functions inspected are not executable by either `anon` or `authenticated` in the current database ACL. Therefore, do not assume the write workflows can currently be called by the frontend; explicit least-privilege grants are a required reviewed migration step.
+- The `cmms_private` schema is not usable by `anon`, but currently has USAGE for `authenticated`. The two role-check helper functions have EXECUTE for authenticated users because RLS policies call them. This should be included in the security review; do not expose additional private functions through grants.
+- Private workflow functions are SECURITY DEFINER but their ACLs deny EXECUTE to anon/authenticated. The public SECURITY DEFINER functions observed are trigger functions and their ACLs also deny direct execution to anon/authenticated.
+- This was a metadata/ACL inspection only. No GRANT, REVOKE, schema, policy, or function change was made.
+
 ## Not yet verified
 - Authenticated browser reads through the Supabase Data API under each of the four CMMS user accounts.
-- Cross-role and direct REST access behavior.
+- Cross-role and direct REST access behavior, including validation that the current helper-function exposure does not leak location-role information beyond the intended scope.
 - End-to-end purchase regression tests in a browser.
 - Any create/edit/approval workflow; the asset form is present but database submission remains disabled, and all CMMS write controls remain disabled/not implemented.
 - Browser-level rendering, mobile layout, form validation behavior, and authenticated category/location option reads still require a preview-browser test.
 - Master-data category/location create, edit, disable, and delete workflows are not enabled; uniqueness and hierarchy-cycle enforcement must be implemented server-side before writes are allowed.
 - Storage uploads, notifications, PM scheduler, and reporting exports.
 - Staging migration and isolated acceptance test execution.
+- Least-privilege EXECUTE grants for the intended authenticated RPC wrappers; current ACLs deny authenticated execution, so write workflows are not yet callable from the client.
 
 ## Release boundary
 - This work is on `feature/cmms-v1` only.
