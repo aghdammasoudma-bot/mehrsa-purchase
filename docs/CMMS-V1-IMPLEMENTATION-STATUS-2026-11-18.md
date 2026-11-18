@@ -158,3 +158,10 @@ All nine SQL layers (base schema, hardening, authorization, role seed, workflow 
 - Final read-only Production check reconfirmed: 15 CMMS tables, 15 policies, four active CMMS roles, no `cmms-evidence` bucket, and no authenticated/anon EXECUTE on the public purchase-link wrapper.
 - Production migration history is empty; the current Production CMMS schema was not installed through tracked Supabase migrations. The release-candidate migration therefore still requires careful live-schema reconciliation after backup before it can be run in Production.
 - Production remains untouched by this Staging migration and test work; `main` remains at the PR base commit.
+
+
+### Backup preparation
+- Added `docs/CMMS-V1-PRODUCTION-BACKUP-CODESPACES-RUNBOOK.md` for a safe Codespaces-based export workflow, including hidden credential entry, no-commit/no-public-artifact rules, checksums and restore gates.
+- Read-only Production counts: 6 Auth users, 6 Auth identities, 6 user profiles; zero Storage buckets and zero Storage objects.
+- The runbook explicitly requires verifying whether the actual CLI dump contains Auth users/identities. If it does not, the logical dump is not treated as a complete recovery package; use a supported clone/backup or verified Auth export/restore process.
+- No backup file has been generated, downloaded or restored.
