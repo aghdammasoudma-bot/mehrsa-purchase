@@ -141,3 +141,12 @@ All seven SQL layers returned success. Production was not targeted.
 - Production schema, functions, grants, Storage and scheduler remain unchanged.
 - `main` remains unchanged.
 - External backup/restore, real API tests, UI integration/regression, scheduler validation and explicit release approval remain mandatory.
+
+
+### Expanded Staging negative tests and performance follow-up — 2026-11-18
+- Added a scoped technician in a separate sibling location; the user could not read an asset in another location (0 rows), confirming location isolation.
+- Work-order creator self-approval was rejected by the database trigger.
+- P1 negative tests passed: negative duration, NaN quantity, infinite meter reading, meter reading on a retired asset, PM-plan creation for a retired asset, and failure reporting for a retired asset were all rejected.
+- A staging-only foreign-key index draft was added and applied. Supabase Performance Advisor no longer reports unindexed CMMS foreign keys. It now reports unused indexes only; this is expected on the low-volume staging database and is not a reason to remove workload-supporting indexes without production query evidence.
+- Front-end read-only bug fixed in `index.html`: the CMMS dashboard now fetches audit logs only for technical supervisor/responsible manager roles. Previously, a technician/expert could receive an RLS denial for the governance-only audit table and have the entire dashboard marked as failed.
+- UI write actions are still not implemented/enabled. The current UI contains read-only tables and local preview forms; this is not yet a complete operational CMMS frontend.
