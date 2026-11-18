@@ -4166,3 +4166,279 @@ textarea::placeholder {
   }
 }
 </style>
+
+
+<style id="mehrsa-accessibility-and-accordion-20261118">
+:root{
+  --ui-text:#F5F7FF;
+  --ui-muted:#D2DDF0;
+  --ui-soft:#BFCDE5;
+  --ui-surface:#111D34;
+  --ui-surface-raised:#182844;
+  --ui-border:rgba(210,225,250,.24);
+  --ui-link:#AFCBFF;
+  --ui-focus:#FFD166;
+}
+/* High-contrast text tokens for the dark operational interface */
+body,#main-content,#dashboard-kpis,#req-list,#work-orders,
+.request-workspace,.request-detail-column,.request-list-column,
+.request-detail-panel,.request-detail-column *,.request-list-column *{
+  color:var(--ui-text);
+}
+#main-content :is(h1,h2,h3,h4,h5,h6,.stitle,.req-card-title,.request-detail-heading,
+.request-code,.request-title-cell strong,.request-date,.detail-empty strong,
+label,strong,b,th,td,.req-card-id,.req-card-meta,.req-card-bot),
+#work-orders :is(h1,h2,h3,h4,h5,h6,.stitle,.req-card-title,.req-card-id,
+.req-card-meta,.req-card-bot,label,strong,b){
+  color:var(--ui-text)!important;
+}
+#main-content :is(p,small,.muted,.sub,.req-card-bot-left,.req-card-id,
+.request-detail-heading small,.detail-empty,.detail-empty p,.tl-meta,.tl-note),
+#work-orders :is(p,small,.muted,.sub,.req-card-bot-left,.mission-hint){
+  color:var(--ui-muted)!important;
+}
+#main-content :is(input,select,textarea),#work-orders :is(input,select,textarea){
+  color:var(--ui-text)!important;
+  background:#101B30!important;
+  border-color:rgba(210,225,250,.38)!important;
+}
+#main-content :is(input,textarea)::placeholder,#work-orders :is(input,textarea)::placeholder{
+  color:#C2CEE3!important;opacity:1!important;
+}
+#main-content :is(button,.btn),#work-orders :is(button,.btn){
+  color:#F8FAFF;
+}
+#main-content :is(a),#work-orders :is(a){color:var(--ui-link)!important}
+#main-content :is(.req-card,.request-detail-column,.request-list-column,.request-table-wrap),
+#work-orders .req-card{
+  border-color:var(--ui-border)!important;
+}
+#main-content .req-card,#work-orders .req-card{
+  background:linear-gradient(145deg,rgba(25,42,69,.96),rgba(15,27,47,.98))!important;
+}
+#main-content .req-card-top,#work-orders .req-card-top{
+  border-bottom-color:rgba(210,225,250,.20)!important;
+}
+#main-content .req-card-bot,#work-orders .req-card-bot{
+  background:rgba(255,255,255,.07)!important;
+}
+#main-content .request-table thead th{color:#F5F7FF!important;background:#1A2B49!important}
+#main-content .request-table tbody td{color:#F5F7FF!important}
+#main-content .request-table tbody tr{border-color:rgba(210,225,250,.2)!important}
+#main-content .flow-lbl{color:#E3EBFA!important}
+#main-content .chip{color:#F5F7FF!important;background:#263957!important}
+#main-content .b-green{color:#D8FFEA!important;background:#145438!important}
+#main-content .b-amber{color:#FFF0BF!important;background:#65480D!important}
+#main-content .b-red{color:#FFE0E2!important;background:#70252D!important}
+#main-content .b-orange{color:#FFE5D5!important;background:#713A20!important}
+#main-content .b-purple{color:#F0E3FF!important;background:#4D3370!important}
+#main-content .b-blue{color:#DFEAFF!important;background:#244477!important}
+#main-content .b-grey{color:#EDF2FA!important;background:#3A4659!important}
+#main-content .btn-amber{background:#805000!important;color:#fff!important}
+#main-content .btn-ghost{color:#F5F7FF!important;border-color:#AFC0D8!important;background:#1B2B46!important}
+#main-content .request-detail-column [style*="background:var(--pale)"]{
+  background:#182844!important;color:#F5F7FF!important;border:1px solid var(--ui-border)!important
+}
+#main-content .request-detail-column [style*="background:var(--pale)"] *{color:#F5F7FF!important}
+#main-content :focus-visible,#work-orders :focus-visible,#cmms-v1-view :focus-visible{
+  outline:3px solid var(--ui-focus)!important;outline-offset:2px!important
+}
+/* The CMMS module retains its light surfaces, with centralized dark text tokens */
+#cmms-v1-view{
+  --cmms-text:#1D2938;--cmms-muted:#46576B;--cmms-border:#C8D2DE;
+  color:var(--cmms-text)!important
+}
+#cmms-v1-view :is(h1,h2,h3,h4,h5,h6,p,label,small,span,strong,b,td,th,em){
+  color:var(--cmms-text)
+}
+#cmms-v1-view .cmms-head :is(h2,p,.cmms-eyebrow,.cmms-role){color:#FFFFFF!important}
+#cmms-v1-view .cmms-head .cmms-eyebrow{color:#D5EAF2!important}
+#cmms-v1-view .cmms-head p{color:#E4F0F5!important}
+#cmms-v1-view .cmms-gate{color:#174D4D!important}
+#cmms-v1-view .cmms-gate span{color:#315B5D!important}
+#cmms-v1-view .cmms-gate.cmms-error{color:#7A1821!important}
+#cmms-v1-view .cmms-gate.cmms-error span{color:#71363B!important}
+#cmms-v1-view .cmms-panel-title p,#cmms-v1-view .cmms-metric small,
+#cmms-v1-view .cmms-metric em,#cmms-v1-view .cmms-readonly{color:#46576B!important}
+#cmms-v1-view .cmms-table th{color:#34475B!important}
+#cmms-v1-view .cmms-table td{color:#1D2938!important}
+#cmms-v1-view .cmms-empty{color:#46576B!important}
+#cmms-v1-view .cmms-tabs button{color:#34475B!important}
+#cmms-v1-view .cmms-tabs button.active{color:#194C78!important}
+/* Compact work-order cards; details expand directly beneath their own item */
+#work-orders .req-card{margin:0 0 9px!important;border-radius:13px!important}
+#work-orders .req-card-top{padding:10px 13px 8px!important}
+#work-orders .req-card-title{font-size:13px!important;margin:3px 0 6px!important}
+#work-orders .req-card-bot{padding:7px 13px!important;font-size:10px!important}
+.mission-accordion-trigger{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  width:100%!important;gap:10px!important;padding:0!important;margin:0!important;
+  border:0!important;background:transparent!important;color:inherit!important;text-align:right!important;
+  cursor:pointer!important;font:inherit!important
+}
+.mission-accordion-trigger .mission-accordion-label{font-size:11px!important;font-weight:800!important;color:#DCE8FF!important}
+.mission-accordion-trigger .mission-accordion-chevron{
+  display:inline-grid;place-items:center;width:25px;height:25px;flex:0 0 25px;
+  border:1px solid rgba(210,225,250,.25);border-radius:8px;color:#F5F7FF;
+  transition:transform .18s ease,background .18s ease
+}
+.mission-accordion-trigger[aria-expanded="true"] .mission-accordion-chevron{
+  transform:rotate(180deg);background:rgba(90,130,210,.25)
+}
+.mission-accordion-panel{
+  display:none;margin:9px 0 0;padding:12px;
+  border:1px solid rgba(210,225,250,.22);border-radius:11px;
+  background:rgba(6,15,30,.58);color:#F5F7FF;
+  animation:missionAccordionIn .18s ease-out
+}
+.mission-accordion-panel.is-open{display:block}
+.mission-accordion-panel :is(h2,h3,h4,label,strong,b,p,span){color:#F5F7FF}
+.mission-accordion-panel p,.mission-accordion-panel small{color:#D2DDF0}
+.mission-accordion-panel textarea,.mission-accordion-panel select{
+  color:#F5F7FF!important;background:#0D192D!important;border-color:#647894!important
+}
+@keyframes missionAccordionIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+/* CMMS table rows use an inline detail row, never a detached page/card */
+#cmms-v1-view .cmms-table tbody tr.cmms-data-row{cursor:pointer}
+#cmms-v1-view .cmms-table tbody tr.cmms-data-row:hover td{background:#EAF1F8}
+#cmms-v1-view .cmms-table tbody tr.cmms-detail-row td{
+  padding:0!important;background:#F2F6FA!important;border-bottom:1px solid #CCD7E2!important
+}
+.cmms-row-detail{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  padding:12px;background:#F2F6FA;color:#1D2938
+}
+.cmms-row-detail-item{min-width:0;padding:8px 10px;background:#FFFFFF;border:1px solid #D5DEE8;border-radius:8px}
+.cmms-row-detail-item b{display:block;margin-bottom:4px;color:#34475B!important;font-size:10px}
+.cmms-row-detail-item span{display:block;color:#1D2938!important;font-size:11px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-wrap}
+.cmms-row-detail-toggle{
+  padding:4px 8px;border:1px solid #AEBECD;border-radius:7px;background:#FFFFFF;
+  color:#24415D!important;font-size:10px;font-weight:800;cursor:pointer
+}
+@media(max-width:700px){
+  .cmms-row-detail{grid-template-columns:1fr}
+  #work-orders .req-card-top{padding:9px 10px 7px!important}
+  .mission-accordion-panel{padding:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mission-accordion-panel{animation:none!important}
+  .mission-accordion-trigger .mission-accordion-chevron{transition:none!important}
+}
+</style>
+<script id="mehrsa-inline-details-20261118">
+/* Mission details stay in the selected mission card */
+window.loadWorkOrders=async function(){
+  if(!cloudUser)return;
+  const box=document.getElementById("work-orders");if(!box)return;
+  const {data,error}=await cloud.from("technical_work_orders").select("*").order("created_at",{ascending:false});
+  if(error){box.innerHTML='<div class="empty">بارگذاری مأموریت‌ها ناموفق بود: '+escapeHtml(error.message)+'</div>';return;}
+  const visible=(data||[]).filter(w=>currentIsAdmin||w.assigned_username===currentUsername);
+  const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+  box.innerHTML=(currentIsAdmin?'<div class="actions"><button class="btn btn-primary" onclick="newWorkOrder()">＋ تعریف مأموریت جدید</button></div>':'')+
+    '<div class="stitle">مأموریت‌های فنی</div>'+
+    (visible.length?visible.map(w=>`
+      <article class="req-card mission-accordion-card" id="mission-card-${w.id}">
+        <div class="req-card-top">
+          <div class="req-card-id">مأموریت-${w.id} · مسئول: ${escapeHtml(w.assigned_username)}</div>
+          <div class="req-card-title">${escapeHtml(w.title)}</div>
+          <div class="req-card-meta"><span class="b b-blue">${labels[w.status]||escapeHtml(w.status)}</span>${w.due_date?'<span class="chip">مهلت: '+escapeHtml(w.due_date)+'</span>':''}</div>
+          <div style="margin-top:7px;font-size:11px;color:#D2DDF0;line-height:1.8">${escapeHtml(w.description)}</div>
+        </div>
+        <div class="req-card-bot">
+          <span class="req-card-bot-left">${escapeHtml(w.report||"گزارش اجرا ثبت نشده")}</span>
+          <button type="button" class="mission-accordion-trigger" aria-expanded="false" aria-controls="mission-detail-${w.id}" onclick="toggleMissionAccordion(${w.id})">
+            <span class="mission-accordion-label">جزئیات و ثبت گزارش</span><span class="mission-accordion-chevron" aria-hidden="true">⌄</span>
+          </button>
+        </div>
+        <div class="mission-accordion-panel" id="mission-detail-${w.id}" data-loaded="false"></div>
+      </article>`).join(""):'<div class="empty">مأموریتی برای نمایش وجود ندارد.</div>');
+};
+window.toggleMissionAccordion=function(id){
+  const panel=document.getElementById("mission-detail-"+id);
+  const card=document.getElementById("mission-card-"+id);
+  const trigger=card?.querySelector(".mission-accordion-trigger");
+  if(!panel||!trigger)return;
+  const opening=!panel.classList.contains("is-open");
+  document.querySelectorAll(".mission-accordion-panel.is-open").forEach(p=>{
+    p.classList.remove("is-open");
+    const t=p.closest(".mission-accordion-card")?.querySelector(".mission-accordion-trigger");
+    if(t)t.setAttribute("aria-expanded","false");
+  });
+  if(!opening)return;
+  panel.classList.add("is-open");trigger.setAttribute("aria-expanded","true");
+  if(panel.dataset.loaded!=="true")window.openWorkDetail(id);
+};
+window.openWorkDetail=async function(id){
+  const {data,error}=await cloud.from("technical_work_orders").select("*").eq("id",id).single();
+  if(error||!data){alert("دریافت جزئیات مأموریت ناموفق بود.");return;}
+  const panel=document.getElementById("mission-detail-"+id);
+  if(!panel)return;
+  const admin=currentIsAdmin;
+  const canEdit=!admin&&data.assigned_username===currentUsername&&["assigned","in_progress","needs_material"].includes(data.status);
+  const canApprove=admin&&data.status==="completed";
+  const labels={assigned:"ارجاع‌شده",in_progress:"در حال انجام",completed:"انجام‌شده — در انتظار تأیید",needs_material:"نیازمند تأمین متریال",approved:"تأیید نهایی مدیر"};
+  panel.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px">
+      <strong style="font-size:12px">مأموریت-${data.id} · ${escapeHtml(data.assigned_username)}</strong>
+      <span class="b b-blue">${labels[data.status]||escapeHtml(data.status)}</span>
+    </div>
+    <h3 style="font-size:14px;margin:5px 0 8px">${escapeHtml(data.title)}</h3>
+    <p style="font-size:11px;line-height:1.9;margin:0 0 10px">${escapeHtml(data.description)}</p>
+    <div style="font-size:11px;line-height:1.9;background:rgba(255,255,255,.07);border:1px solid rgba(210,225,250,.18);border-radius:8px;padding:9px;white-space:pre-wrap">
+      <b>گزارش ثبت‌شده</b><br>${escapeHtml(data.report||"هنوز گزارشی ثبت نشده است.")}
+    </div>
+    ${canEdit?`
+      <label style="display:block;font-weight:800;margin:12px 0 6px" for="work-report-${id}">گزارش اقدامات انجام‌شده</label>
+      <textarea id="work-report-${id}" style="width:100%;min-height:95px;padding:10px;border:1px solid #647894;border-radius:8px;font:inherit;line-height:1.8">${escapeHtml(data.report||"")}</textarea>
+      <label style="display:block;font-weight:800;margin:10px 0 6px" for="work-status-${id}">وضعیت مأموریت</label>
+      <select id="work-status-${id}" style="width:100%;padding:9px;border:1px solid #647894;border-radius:8px;font:inherit">
+        <option value="in_progress" ${["assigned","in_progress"].includes(data.status)?"selected":""}>در حال انجام</option>
+        <option value="completed">انجام‌شده — ارسال برای تأیید مدیر</option>
+        <option value="needs_material" ${data.status==="needs_material"?"selected":""}>نیازمند تأمین متریال</option>
+      </select>
+      <div class="actions"><button class="btn btn-primary" onclick="saveWorkDetail(${data.id})">ثبت گزارش و وضعیت</button></div>`:''}
+    ${canApprove?'<div class="actions"><button class="btn btn-success" onclick="approveWork('+data.id+')">تأیید نهایی مأموریت</button></div>':''}
+    ${!canEdit&&!canApprove?'<p style="font-size:11px;margin-top:10px">این مأموریت در وضعیت فعلی قابل ویرایش نیست.</p>':''}`;
+  panel.dataset.loaded="true";
+};
+window.backToWorkOrders=async function(id){
+  const panel=document.getElementById("mission-detail-"+id);
+  const card=document.getElementById("mission-card-"+id);
+  if(panel){panel.classList.remove("is-open");panel.dataset.loaded="false";panel.innerHTML="";}
+  const trigger=card?.querySelector(".mission-accordion-trigger");
+  if(trigger)trigger.setAttribute("aria-expanded","false");
+};
+window.saveWorkDetail=async function(id){
+  const report=document.getElementById("work-report-"+id)?.value.trim();
+  const status=document.getElementById("work-status-"+id)?.value;
+  if(!report){alert("لطفاً گزارش اقدامات را وارد کنید.");return;}
+  if(status==="completed"&&report.length<10){alert("گزارش برای ارسال به تأیید مدیر کافی نیست.");return;}
+  const {error}=await cloud.rpc("update_work_order",{p_id:id,p_status:status,p_report:report});
+  if(error){alert("ثبت گزارش ناموفق: "+error.message);return;}
+  await window.openWorkDetail(id);
+};
+/* Generic CMMS tables: row details expand immediately below the clicked row */
+window.cmmsToggleRow=function(btn){
+  const row=btn.closest("tr"),detail=row?.nextElementSibling;
+  if(!row||!detail||!detail.classList.contains("cmms-detail-row"))return;
+  const opening=detail.hidden;
+  detail.hidden=!opening;
+  btn.setAttribute("aria-expanded",String(opening));
+  btn.textContent=opening?"بستن جزئیات":"جزئیات";
+};
+window.cmmsTable=function(headers,rows,emptyText){
+  if(!rows.length)return "<div class='cmms-empty'>"+escapeHtml(emptyText)+"</div>";
+  const body=rows.map((row,index)=>{
+    const cells=headers.map(h=>"<td>"+escapeHtml(cmmsText(h[1](row)))+"</td>").join("");
+    const details=Object.entries(row||{}).map(([key,value])=>{
+      const v=value===null||value===undefined||value===""?"—":(typeof value==="object"?JSON.stringify(value):String(value));
+      return "<div class='cmms-row-detail-item'><b>"+escapeHtml(key)+"</b><span>"+escapeHtml(v)+"</span></div>";
+    }).join("");
+    const detailId="cmms-row-detail-"+String(row.id||index).replace(/[^a-zA-Z0-9_-]/g,"");
+    return "<tr class='cmms-data-row' onclick='cmmsToggleRow(this.querySelector(\".cmms-row-detail-toggle\"))'>"+cells+
+      "<td><button type='button' class='cmms-row-detail-toggle' aria-expanded='false' onclick='event.stopPropagation();cmmsToggleRow(this)'>جزئیات</button></td></tr>"+
+      "<tr class='cmms-detail-row' hidden><td colspan='"+(headers.length+1)+"'><div class='cmms-row-detail' id='"+detailId+"'>"+details+"</div></td></tr>";
+  }).join("");
+  return "<div class='cmms-table-wrap'><table class='cmms-table'><thead><tr>"+headers.map(h=>"<th>"+escapeHtml(h[0])+"</th>").join("")+"<th>جزئیات</th></tr></thead><tbody>"+body+"</tbody></table></div>";
+};
+</script>
