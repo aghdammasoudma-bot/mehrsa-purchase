@@ -165,3 +165,11 @@ All nine SQL layers (base schema, hardening, authorization, role seed, workflow 
 - Read-only Production counts: 6 Auth users, 6 Auth identities, 6 user profiles; zero Storage buckets and zero Storage objects.
 - The runbook explicitly requires verifying whether the actual CLI dump contains Auth users/identities. If it does not, the logical dump is not treated as a complete recovery package; use a supported clone/backup or verified Auth export/restore process.
 - No backup file has been generated, downloaded or restored.
+
+
+### Frontend read-model enrichment
+- The CMMS frontend now loads work-order assignments, action logs, approvals and meter readings under their existing RLS policies; purchase links are loaded only for technical expert/supervisor/responsible manager roles.
+- The work-order table now shows active assignee IDs, action counts and approval-stage summaries.
+- SQL-level role checks confirmed the relevant read queries succeed for a technician, expert and supervisor; governance-only audit reads remain limited to supervisor/manager.
+- Push and PR JavaScript syntax CI passed for the updated branch.
+- This is still a read model only. Operational write forms and browser/API tests remain outstanding.
