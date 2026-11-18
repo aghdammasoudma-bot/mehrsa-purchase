@@ -6,7 +6,7 @@
 - Dashboard metrics are calculated from returned database rows; no sample/demo counts are used.
 - Added loading, query-error, empty-state, and manual-refresh states.
 - Added the first equipment master-data form with required-field validation, category/location selectors, technical metadata, criticality, operational status, commissioning and warranty dates, and a local review preview.
-- Added a dedicated master-data tab with separate category and hierarchical-location forms. Location fields include code, name, parent location and discipline (mechanical, electrical, utilities, production, instrumentation, civil); both forms include local required-field validation and duplicate-code warnings based on currently loaded rows.
+- Added a dedicated master-data tab with separate category and hierarchical-location forms. Location fields include code, name, parent location and discipline values aligned to the database CHECK constraint (mechanical, electrical, utilities, production, general); both forms include local required-field validation and case/whitespace-normalized duplicate-code warnings based on currently loaded rows.
 - Added read-only tables for existing categories and the location hierarchy. Database-submit controls remain disabled.
 - The form's database-submit control is intentionally disabled. The preview validates and displays entered data locally only; it does not create or change database records.
 - Switching into CMMS hides the purchase request workspace and its KPIs; switching back restores the existing purchase view.
@@ -23,6 +23,9 @@
 - A read-only count confirmed `cmms_asset_categories` and `cmms_locations` remain at 0 rows; no master-data records were written.
 - A fresh read-only count confirmed `cmms_assets`, `cmms_locations`, and `cmms_asset_categories` remain at 0 rows; no equipment data was written.
 - A read-only catalog query confirmed `cmms_user_roles` has `user_id`, `role`, and `is_active` columns, with a self-read RLS policy; a read-only join confirmed the four current user-to-role assignments.
+- Compared the location discipline form options against the live production CHECK constraint and corrected the form to offer only accepted values (`mechanical`, `electrical`, `utilities`, `production`, `general`).
+- JavaScript syntax parsing was rerun after this correction; all four inline script blocks parse successfully.
+- A read-only constraint inspection confirmed unique constraints on category/location codes and the location self-reference foreign key; no schema was changed.
 - The production database was queried with SELECT statements only during this milestone.
 
 ## Not yet verified
