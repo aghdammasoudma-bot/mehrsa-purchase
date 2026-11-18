@@ -1113,8 +1113,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 <div class="content" id="main-content" style="display:none">
   <div id="quick-actions" class="quick-actions" aria-hidden="true" style="display:none"></div>
   <div id="dashboard-kpis"></div>
-  <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div></section></div><div id="work-orders" style="display:none"></div>
-  <section id="cmms-v1-view" style="display:none" aria-live="polite"></section>
+  <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div><section id="cmms-v1-view" style="display:none" aria-live="polite"></section></section></div>
 </div>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
@@ -1768,8 +1767,10 @@ function switchView(v){
   if(cmms)cmms.style.display=v==="cmms"?"block":"none";
   const workspace=document.querySelector(".request-workspace");
   const kpis=document.getElementById("dashboard-kpis");
-  if(workspace)workspace.style.display=v==="cmms"?"none":"";
-  if(kpis)kpis.style.display=v==="cmms"?"none":"";
+  /* Keep the shared two-column workspace visible for requests, missions and CMMS.
+     The selected module occupies the list column beside the request-details panel. */
+  if(workspace)workspace.style.display="";
+  if(kpis)kpis.style.display=(v==="cmms"||v==="work")?"none":"";
   if(v==="work") loadWorkOrders();
   if(v==="cmms"){renderCMMSView();cmmsLoadData();}
   document.querySelectorAll(".pipe-step").forEach(el=>{el.classList.toggle("active",el.dataset.view===v);});
@@ -4442,3 +4443,94 @@ window.cmmsTable=function(headers,rows,emptyText){
   return "<div class='cmms-table-wrap'><table class='cmms-table'><thead><tr>"+headers.map(h=>"<th>"+escapeHtml(h[0])+"</th>").join("")+"<th>جزئیات</th></tr></thead><tbody>"+body+"</tbody></table></div>";
 };
 </script>
+
+
+<style id="mehrsa-final-layout-and-readable-text-20261118">
+/* Shared two-column application workspace: request details stay beside active module */
+#main-content .request-workspace{
+ display:grid!important;
+ grid-template-columns:minmax(280px,.78fr) minmax(0,1.72fr)!important;
+ gap:14px!important;align-items:start!important;width:100%!important;
+}
+#main-content .request-detail-column,
+#main-content .request-list-column{
+ min-width:0!important;box-sizing:border-box!important;
+}
+#main-content .request-detail-column{display:block!important}
+#main-content .request-list-column{grid-column:2!important}
+#main-content #req-list,#main-content #work-orders,#main-content #cmms-v1-view{
+ width:100%!important;min-width:0!important;box-sizing:border-box!important
+}
+#main-content #work-orders[style*="display: block"],
+#main-content #cmms-v1-view[style*="display: block"]{display:block!important}
+#main-content #req-list[style*="display: none"]{display:none!important}
+@media(max-width:760px){
+ #main-content .request-workspace{display:flex!important;flex-direction:column!important;gap:12px!important}
+ #main-content .request-detail-column{display:block!important;position:static!important;order:2!important;width:100%!important;max-height:none!important}
+ #main-content .request-list-column{order:1!important;width:100%!important}
+ #main-content #work-orders,#main-content #cmms-v1-view{width:100%!important}
+}
+/* Centralized readable palette for the actual LIGHT application surface */
+:root{
+ --app-text:#17212F;--app-muted:#465568;--app-subtle:#536276;
+ --app-link:#124F91;--app-border:#C8D2DE;--app-panel:#FFFFFF;
+ --app-panel-soft:#F3F6F9;--app-focus:#9A5700;
+}
+html,body,#main-content{color:var(--app-text)!important}
+#main-content :is(h1,h2,h3,h4,h5,h6,p,span,div,label,strong,b,small,em,th,td,li,summary,legend,dt,dd){
+ color:var(--app-text)!important;
+}
+#main-content :is(.muted,.sub,.hint,.help,.req-card-id,.req-card-meta,.req-card-bot-left,
+.request-detail-heading small,.detail-empty,.detail-empty p,.cmms-eyebrow,.cmms-readonly,
+.cmms-panel-title p,.cmms-metric small,.cmms-metric em,.mission-hint){
+ color:var(--app-muted)!important;
+}
+#main-content :is(a,.link){color:var(--app-link)!important}
+#main-content :is(input,select,textarea){
+ color:#17212F!important;background:#FFFFFF!important;
+ border:1px solid #8796A8!important;
+}
+#main-content :is(input,select,textarea)::placeholder{color:#536276!important;opacity:1!important}
+#main-content :is(button,.btn){color:#17212F!important}
+#main-content .btn-primary,#main-content .btn-success,
+#main-content .top-nav-primary{background:#174F79!important;color:#FFFFFF!important}
+#main-content .btn-primary *,#main-content .btn-success *,
+#main-content .top-nav-primary *{color:#FFFFFF!important}
+#main-content .btn-ghost{background:#FFFFFF!important;color:#17212F!important;border:1px solid #8796A8!important}
+#main-content .req-card,#main-content .cmms-panel,#main-content .cmms-metric,
+#main-content .cmms-flow,#main-content .cmms-gate{
+ background:#FFFFFF!important;color:#17212F!important;border-color:#C8D2DE!important
+}
+#main-content .req-card :is(*),#main-content .cmms-panel :is(*),
+#main-content .cmms-flow :is(*),#main-content .cmms-gate :is(*){
+ text-shadow:none!important
+}
+#main-content .request-table-wrap,#main-content .request-table,
+#main-content .request-table tbody td,#main-content .cmms-table,
+#main-content .cmms-table tbody td{background:#FFFFFF!important;color:#17212F!important}
+#main-content .request-table thead th,#main-content .cmms-table thead th{
+ background:#E9EEF4!important;color:#263548!important
+}
+#main-content .request-table .b-blue{background:#DCEBFA!important;color:#174B7A!important}
+#main-content .request-table .b-amber{background:#FFF0C2!important;color:#654500!important}
+#main-content .request-table .b-orange{background:#FCE5D5!important;color:#743A12!important}
+#main-content .request-table .b-purple{background:#EDE3FA!important;color:#4E3476!important}
+#main-content .request-table .b-green{background:#DDF3E5!important;color:#155B31!important}
+#main-content .request-table .b-red{background:#FBE1E1!important;color:#7A2020!important}
+#main-content .request-table .b-grey{background:#E8EDF2!important;color:#344255!important}
+/* Dark header/menu surfaces are explicitly white-on-dark */
+#management-hero :is(.hero-eyebrow,.hero-copy h2,.hero-copy p,.hero-caption,
+.top-profile-trigger,.top-profile-identity,.top-profile-identity strong,
+.top-profile-identity small,.top-profile-chevron,.top-quick-nav button,
+.top-quick-nav button span,.top-profile-menu,.top-profile-menu-title,
+.profile-menu-logout){color:#FFFFFF!important}
+#management-hero .top-quick-nav button{background:#1C2D47!important;border-color:#526783!important}
+#management-hero .top-quick-nav button.top-nav-primary{background:#146C78!important}
+#management-hero .top-profile-trigger{background:#1C2D47!important}
+#management-hero .top-profile-identity small{color:#E1EAF5!important}
+#management-hero .top-profile-menu{background:#17263D!important}
+#management-hero .top-profile-menu *{color:#FFFFFF!important}
+#topbar :is(.h1,.top-sub){color:#17212F!important}
+#main-content :focus-visible{outline:3px solid #9A5700!important;outline-offset:2px!important}
+@media(prefers-reduced-motion:reduce){#main-content *{animation:none!important;transition:none!important}}
+</style>
