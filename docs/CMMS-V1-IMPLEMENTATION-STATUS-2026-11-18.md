@@ -52,3 +52,19 @@
 - `main` was not merged or deployed.
 - No production schema, grants, RLS policies, triggers, functions, storage buckets, or scheduler jobs were changed in this milestone.
 - Do not merge or publish until authenticated read tests, role tests, backup/recovery decision, and purchase regression checks are complete.
+
+
+## Follow-up ACL inventory — 2026-11-18 (read-only)
+
+A second read-only catalog query enumerated all CMMS routines in `public` and `cmms_private`:
+
+- The 24 private routines in `cmms_private` are SECURITY DEFINER and currently have only the postgres owner EXECUTE ACL, except the two role-check helpers `cmms_has_any_role(text[])` and `cmms_has_role_at_location(text[], uuid)`, which additionally grant EXECUTE to `authenticated`.
+- The public RPC wrappers for CMMS business operations have owner-only EXECUTE ACLs. Their `SECURITY DEFINER` attribute is false; they are invoker functions and are not directly executable by `anon` or `authenticated` under the observed ACL.
+- Public trigger functions also show owner-only EXECUTE ACLs. Trigger invocation is managed by trigger bindings; direct client execution is not enabled.
+- This confirms the client cannot currently invoke the CMMS write wrappers. Do not solve this by granting EXECUTE broadly on a schema or all functions.
+- Before enabling writes, inspect each wrapper's full definition and its corresponding private routine's authorization checks, verify caller identity/role and workflow stage, then draft explicit per-function grants to `authenticated` only for approved wrappers. Keep private routines owner-only. Validate in an isolated staging project and test allowed/denied role cases before any production migration.
+- No database writes, grants, revokes, policy changes, or function changes were made during this follow-up inspection.
+
+## Next engineering gate
+
+The next implementation milestone is a function-by-function authorization matrix for the public CMMS RPC wrappers, cross-checked against the four seeded CMMS roles and the intended approval chain (technical supervisor then responsible manager). A wrapper must not be enabled until its authorization contract and negative tests are documented. In parallel, the branch UI remains read-only until this gate and staging validation pass.
