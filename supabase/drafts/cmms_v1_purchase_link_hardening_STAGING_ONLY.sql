@@ -24,19 +24,22 @@ begin
     raise exception 'Purchase request id is required';
   end if;
 
+  -- Serialize against concurrent status transitions so a closed/cancelled WO
+  -- cannot pass this check while another transaction closes it.
   select w.* into v_wo
   from public.cmms_work_orders w
   where w.id=p_work_order_id
-  for key share;
+  for update;
 
   if not found or v_wo.status in ('closed','cancelled') then
     raise exception 'Only an open work order can be linked to a purchase request';
   end if;
 
+  -- Lock asset location while authorization is evaluated.
   select a.location_id into v_location_id
   from public.cmms_assets a
   where a.id=v_wo.asset_id
-  for key share;
+  for share;
 
   if not found then
     raise exception 'Work order asset not found';
@@ -59,16 +62,16 @@ begin
     raise exception 'User is not authorized to access purchase requests';
   end if;
 
+  -- Lock the request row so its existence/creator cannot change during linking.
   select pr.created_by into v_request_created_by
   from public.pr_requests pr
   where pr.id=p_purchase_request_id
-  for key share;
+  for share;
 
   if not found then
     raise exception 'Purchase request not found';
   end if;
 
-  -- The request must remain attributable to an authenticated creator.
   if v_request_created_by is null then
     raise exception 'Purchase request has no accountable creator';
   end if;
