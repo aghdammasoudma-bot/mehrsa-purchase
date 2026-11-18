@@ -104,7 +104,8 @@ Status: Production schema is installed but write-locked; Production has not been
 - [ ] Regression-test existing purchase request create/edit/submit/approve/reject/procurement/close/delete/print.
 - [ ] Regression-test existing technical work-order list, assignment, progress and approval.
 - [x] Fix the frontend audit-log query so non-governance roles do not request a table they cannot read under RLS.
-- [ ] Run JavaScript syntax, browser tests, real API/Storage tests and full end-to-end acceptance suite.
+- [x] Run JavaScript syntax CI on `feature/cmms-v1`; latest GitHub Actions run passed all inline script blocks.
+- [ ] Run browser tests, real API/Storage tests and full end-to-end acceptance suite.
 
 ## I. Deployment and rollback
 - [ ] Prepare a versioned migration and release notes.
