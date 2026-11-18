@@ -214,3 +214,36 @@ Production and main remain unchanged. The PR remains Draft. This milestone does 
 - Staging Security Advisor still reports only the two intentionally isolated compatibility stubs (`pr_requests`, `user_profiles`) with RLS but no policies, plus the pre-existing leaked-password protection warning. Performance Advisor reports 31 unused-index INFO notices on the low-traffic synthetic Staging project; no unindexed CMMS foreign-key warning returned.
 
 Production and `main` remain unchanged. PR #1 remains Draft and unmerged. Real browser/JWT/Storage HTTP tests, actual purchase-module regression, Data API exposure verification, scheduler setup and explicit go-live authorization remain release blockers.
+
+
+## Production activation and final Staging acceptance — 2026-11-18
+
+This section supersedes earlier statements above that Production grants, Storage, scheduler and workflow functions remain unchanged.
+
+### Production changes applied
+- Applied and recorded migration `cmms_v1_production_runtime_activation` (20261118090316): current 9-argument failure-report routine and public wrapper, exact authenticated EXECUTE grants for approved public wrappers and matching private routines, and the private `cmms-evidence` Storage bucket with location/record-scoped SELECT and INSERT policies.
+- Applied and recorded migration `cmms_v1_production_logic_alignment_and_cron` (20261118090414): aligned eight business-rule functions with the Staging-validated release candidate and installed `pg_cron`.
+- Applied and recorded migration `cmms_v1_triage_downtime_fix` (20261118090617): failure-to-work-order conversion now copies `downtime_started_at`.
+- Applied and recorded migration `cmms_v1_pm_scheduler_job` (20261118090759): exactly one daily PM generation job is scheduled at 00:15 GMT (03:45 Asia/Tehran).
+- Production's private evidence bucket is non-public with a 10 MiB limit. It has only the intended SELECT and INSERT policies; no UPDATE/DELETE policy exists.
+- Production retains its four active global CMMS role assignments: masoud (technical_supervisor), biabani (responsible_manager), reza (technical_expert), hamid (technician).
+- Production CMMS data remains empty: 0 locations, 0 assets, 0 failure reports, 0 work orders, 0 PM plans. No sample operational data was inserted.
+
+### Staging acceptance
+- Updated `cmms_triage_failure` after the first acceptance run exposed that downtime start was not propagated to the generated work order.
+- Re-ran the Staging acceptance SQL suite after the fix. It completed without error, covering failure conversion, downtime propagation, corrective execution, two-person approval, rejection/rework, reassignment history, cancellation, PM task generation/assignment/completion, and negative authorization checks.
+- The acceptance test ran only against isolated Staging. Its transaction left the existing Staging fixtures unchanged.
+- Production and Staging now have identical definitions (matching definition hashes) for all 27 shared private CMMS routines. Production retains one legacy 8-argument private failure-report overload; it has no authenticated EXECUTE grant, and the matching old public wrapper is revoked. The active 9-argument interface matches the current frontend.
+
+### Final verification and remaining limits
+- Production and Staging both have the daily `cmms-generate-due-pm-tasks` cron job.
+- Production has all 15 CMMS tables with RLS enabled and SELECT-only client table policies; writes go through the specifically granted, authorization-checked RPC wrappers.
+- Supabase Security Advisor shows no CMMS-specific security ERROR. Existing warnings relate to legacy purchase RPCs and project-level leaked-password protection; these were not changed because they are outside this CMMS release and need separate regression review.
+- The project-level Data API exposed-schema list could not be read through the connected Supabase tools. The Dashboard must confirm `cmms_private` is not exposed; the design assumes only `public` and `graphql_public` are exposed.
+- Real browser sign-in/API tests with the four existing user accounts, real Storage byte upload/download tests, and full browser regression of the live purchase module have not been performed. SQL-level Staging tests and JavaScript syntax CI are not substitutes for those tests.
+- Production contains no equipment/location master data yet. The system is ready for controlled master-data entry; the actual asset register must be loaded/entered before operational work orders and PM plans can be used.
+
+### Current branch/release state
+- Current feature head at this status update: `75e2e031b4fd71d821ea49a435885af3a30be237`.
+- GitHub Actions syntax checks passed (run `44273044296`).
+- PR #1 remains open and unmerged at this point. `main` has not yet been changed.
