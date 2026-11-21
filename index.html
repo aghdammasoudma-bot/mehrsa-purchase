@@ -4266,6 +4266,27 @@ textarea::placeholder {
 .cmms-inline-card{border:1px solid #dce7ec;border-radius:10px;padding:13px;margin:10px 0;background:#fff}.cmms-card-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.cmms-card-head span{color:#087e8b;font-weight:700}.cmms-inline-card p{margin:8px 0;color:#40515a}.cmms-inline-card small{color:#687982}.cmms-inline-card button{margin:5px 4px 0 0;padding:8px 12px;border:1px solid #b9cbd2;border-radius:7px;background:#edf5f7;color:#17434c;cursor:pointer}.cmms-inline-card .cmms-form-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.cmms-workorder-list{margin-top:16px}.cmms-master-form{margin:14px 0;padding:16px;border:1px solid #dce7ec;border-radius:12px;background:#fbfcfd}.cmms-master-form textarea,.cmms-master-form input,.cmms-master-form select{max-width:100%;box-sizing:border-box}.cmms-master-form .wide{grid-column:1/-1}.cmms-master-form .cmms-form-actions{margin-top:12px}.cmms-asset-form{margin:14px 0 18px;padding:16px;border:1px solid #DCE7EC;border-radius:12px;background:#FBFCFD}.cmms-form-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.cmms-form-head h4{font-size:14px;color:#263746;margin:0 0 5px}.cmms-form-head p{font-size:11px;color:#73808E;line-height:1.8}.cmms-form-head>span{font-size:10px;color:#176B73;background:#E8F4F2;padding:6px 9px;border-radius:7px;white-space:nowrap}.cmms-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cmms-form-grid label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:#526373;font-weight:700}.cmms-form-grid input,.cmms-form-grid select,.cmms-form-grid textarea{width:100%;min-width:0;padding:10px;border:1px solid #D7E0E7;border-radius:8px;background:#fff;color:#263746;font:inherit;font-weight:400;outline:none}.cmms-form-grid input:focus,.cmms-form-grid select:focus,.cmms-form-grid textarea:focus{border-color:#398BC5;box-shadow:0 0 0 3px rgba(57,139,197,.1)}.cmms-form-grid .wide{grid-column:1/-1}.cmms-form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.cmms-preview-btn,.cmms-save-disabled{padding:10px 14px;border-radius:8px;font-size:11px;font-weight:800}.cmms-preview-btn{background:#176B73;color:#fff}.cmms-save-disabled{background:#E9EDF1;color:#87939E;cursor:not-allowed}.cmms-asset-preview{display:none;margin-top:13px;padding:12px;background:#EFF7F5;border:1px solid #CDE4DF;border-radius:9px;color:#235D59;font-size:11px;line-height:1.9}.cmms-asset-preview:not(:empty){display:block}.cmms-asset-preview>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;margin:7px 0}.cmms-asset-preview small{color:#6C8581}@media(max-width:850px){.cmms-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-asset-preview>div{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.cmms-form-grid{grid-template-columns:1fr}.cmms-form-grid .wide{grid-column:auto}.cmms-form-head{flex-direction:column}.cmms-asset-preview>div{grid-template-columns:1fr}}.cmms-master-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:14px 0}.cmms-master-form{min-width:0;padding:15px;border:1px solid #DCE7EC;border-radius:12px;background:#FBFCFD}.cmms-form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-master-preview{display:none;margin-top:12px;padding:11px;border:1px solid #CDE4DF;background:#EFF7F5;border-radius:8px;color:#235D59;font-size:11px;line-height:1.9}.cmms-master-preview:not(:empty){display:block}.cmms-master-preview>div{display:grid;gap:4px;margin:6px 0}.cmms-master-preview small{color:#6C8581}.cmms-master-list{margin:18px 0}.cmms-master-list h4{font-size:13px;color:#334B5C;margin:0 0 9px}@media(max-width:900px){.cmms-master-grid{grid-template-columns:1fr}}@media(max-width:520px){.cmms-form-grid.two{grid-template-columns:1fr}}.cmms-flow h3{margin-bottom:13px}.cmms-steps{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0 8px;white-space:nowrap}.cmms-steps span{background:#EEF3F8;border:1px solid #DCE5EE;border-radius:8px;padding:9px 11px;font-size:10px;color:#38536B;font-weight:700}.cmms-steps i{font-style:normal;color:#9AA8B5}
 @media(max-width:700px){#cmms-v1-view{padding:0 11px}.cmms-head{padding:17px;align-items:stretch;flex-direction:column}.cmms-head h2{font-size:19px}.cmms-role{white-space:normal}.cmms-head-tools{justify-content:space-between}.cmms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cmms-panel{padding:14px}.cmms-panel-title{flex-direction:column}}
 </style>
+
+<style id="mehrsa-banner-background-final-fix-20261121">
+/* Final override: legacy background shorthand was hiding the uploaded banner */
+#management-hero .hero-industrial,
+#management-hero.has-profile-nav>.hero-industrial{
+  background-color:transparent!important;
+  background-image:url("./mehrsa-banner.png?v=20261121")!important;
+  background-repeat:no-repeat!important;
+  background-position:center center!important;
+  background-size:100% 100%!important;
+  min-height:245px!important;
+  height:auto!important;
+}
+@media(max-width:700px){
+  #management-hero .hero-industrial,
+  #management-hero.has-profile-nav>.hero-industrial{
+    min-height:190px!important;
+    background-size:cover!important;
+  }
+}
+</style>
 </body>
 </html>
 
