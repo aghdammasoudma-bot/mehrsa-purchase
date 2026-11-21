@@ -1062,44 +1062,13 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 
 \n\n
 <style id="mehrsa-control-center-kpi-contrast-20261121">
-/* Uniform, high-contrast control-center metrics; status accents remain unchanged. */
-#mehrsa-control-center .cc-metrics{
-  align-items:stretch!important;
-}
-#mehrsa-control-center .cc-metric{
-  min-height:104px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:center!important;
-  text-align:center!important;
-  padding:14px 12px!important;
-}
-#mehrsa-control-center .cc-metric strong{
-  display:block!important;
-  width:100%!important;
-  font-size:34px!important;
-  line-height:1.05!important;
-  font-weight:900!important;
-  letter-spacing:-.5px!important;
-  color:#10283A!important;
-  font-variant-numeric:tabular-nums!important;
-}
-#mehrsa-control-center .cc-metric span{
-  min-height:30px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:11px!important;
-  line-height:1.45!important;
-  font-weight:750!important;
-  color:#40596A!important;
-}
-@media(max-width:650px){
-  #mehrsa-control-center .cc-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  #mehrsa-control-center .cc-metric{min-height:96px!important}
-  #mehrsa-control-center .cc-metric strong{font-size:32px!important}
-}
+/* Match the real CMMS KPI classes rather than obsolete cc-metric selectors. */
+#cmms-v1-view .cmms-metrics{align-items:stretch!important}
+#cmms-v1-view .cmms-metric{min-height:104px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding:14px 12px!important}
+#cmms-v1-view .cmms-metric strong{display:block!important;width:100%!important;font-size:34px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:-.5px!important;color:#10283A!important;font-variant-numeric:tabular-nums!important}
+#cmms-v1-view .cmms-metric small{min-height:30px!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;font-size:11px!important;line-height:1.45!important;font-weight:750!important;color:#40596A!important}
+#cmms-v1-view .cmms-metric em{font-size:10px!important;color:#647887!important}
+@media(max-width:650px){#cmms-v1-view .cmms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}#cmms-v1-view .cmms-metric{min-height:96px!important}#cmms-v1-view .cmms-metric strong{font-size:32px!important}}
 </style>
 
 </head>
@@ -1429,7 +1398,7 @@ function showRoleScreen(){
 
 // CMMS V1 — connected read-only module. No writes are enabled.
 let cmmsActiveTab="overview";
-let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[]};
+let cmmsData={assets:[],locations:[],categories:[],failures:[],orders:[],pmPlans:[],pmTasks:[],assignments:[],actions:[],approvals:[],meterReadings:[],purchaseLinks:[],audit:[],candidates:[]};
 let cmmsLoadState="idle",cmmsLoadError="",cmmsAssignedRole="",cmmsAssignedRoles=[];
 async function cmmsLoadUserRole(){
   cmmsAssignedRole="";
@@ -1482,6 +1451,8 @@ async function cmmsLoadData(force=false){
     cmmsData.audit=[];
   }
   if(cmmsAssignedRole==="technical_supervisor")queries.push(["userRoles","cmms_user_roles"]);
+  // Candidate register is restricted by RLS to technical supervisors; it is read-only here.
+  if(cmmsAssignedRoles.includes("technical_supervisor"))queries.push(["candidates","cmms_asset_import_candidates"]);else cmmsData.candidates=[];
   const results=await Promise.all(queries.map(async ([key,table])=>{
     try{const {data,error}=await cloud.from(table).select("*").limit(500);if(error)throw error;return {key,data:data||[]};}
     catch(e){return {key,error:e};}
@@ -1765,7 +1736,7 @@ async function cmmsAssignPM(id){
  await cmmsRpcAction("cmms_assign_pm_task",{p_pm_task_id:id,p_assignee_id:choices[idx].user_id},"وظیفه PM ارجاع شد.");
 }
 function cmmsRenderTab(){
- const a=cmmsRows("assets"),f=cmmsRows("failures"),o=cmmsRows("orders"),p=cmmsRows("pmTasks");
+ const a=cmmsRows("assets"),f=cmmsRows("failures"),o=cmmsRows("orders"),p=cmmsRows("pmTasks"),c=cmmsRows("candidates");
  const openFailures=f.filter(x=>!["rejected","converted","cancelled","closed"].includes(x.status));
  const activeOrders=o.filter(x=>!["completed","closed","cancelled"].includes(x.status));
  const pendingApprovals=o.filter(x=>String(x.status||"").includes("approval")||String(x.status||"").includes("pending"));
@@ -1777,6 +1748,7 @@ function cmmsRenderTab(){
  failures:{title:"گزارش خرابی‌ها",desc:"ثبت گزارش خرابی، بررسی فنی و تبدیل کنترل‌شده به دستورکار.",metrics:[["کل گزارش‌ها",f.length],["بحرانی",f.filter(x=>x.priority==="critical").length],["اولویت بالا",f.filter(x=>x.priority==="high").length],["در حال بررسی",f.filter(x=>x.status==="under_review").length]],body:cmmsFailureForm()+cmmsTable([["شماره",r=>r.report_no],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["اولویت",r=>r.priority],["شرح",r=>r.description],["وضعیت",r=>cmmsStatus(r.status)],["زمان",r=>cmmsDate(r.occurred_at)]],f,"هنوز گزارش خرابی ثبت نشده است.")+cmmsFailureTriageList()},
  orders:{title:"دستورکارهای تعمیراتی",desc:"ایجاد، آزادسازی، ارجاع، ثبت اقدامات، آزمون و گردش تأیید دو مرحله‌ای.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsWorkOrderForm()+cmmsWorkOrderTable()},
  pm:{title:"نگهداری پیشگیرانه (PM)",desc:"تعریف برنامه زمان‌محور، ارجاع وظیفه، ثبت اجرا و نتیجه چک‌لیست.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsPMPlanForm()+cmmsPMTaskList()},
+ candidates:{title:"پیشنهادهای بازدید میدانی",desc:"فهرست پیشنهادی واردشده از برنامه زاپاس موتور؛ هیچ‌کدام دارایی تأییدشده یا فعال محسوب نمی‌شوند.",metrics:[["کل پیشنهادها",c.length],["نیازمند بازدید",c.filter(x=>x.candidate_status==="pending_field_verification").length],["تأییدشده",c.filter(x=>x.candidate_status==="verified").length],["تبدیل‌شده به دارایی",c.filter(x=>x.candidate_status==="converted").length]],body:"<div class='cmms-gate'><b>ثبت پیشنهادی — نه شناسنامه تجهیز</b><span>وجود، محل دقیق و مشخصات هر مورد باید در بازدید میدانی تأیید شود. این صفحه فقط‌خواندنی است و هیچ موردی را به بانک دارایی‌ها تبدیل نمی‌کند.</span></div>"+cmmsTable([["ردیف منبع",r=>r.source_row],["بخش پیشنهادی",r=>r.proposed_section],["کاربرد پیشنهادی",r=>r.proposed_name],["محل پیشنهادی",r=>cmmsRows("locations").find(l=>l.id===r.suggested_location_id)?.name],["وضعیت بررسی",r=>({pending_field_verification:"نیازمند تأیید میدانی",verified:"تأییدشده",rejected:"ردشده",converted:"تبدیل‌شده"})[r.candidate_status]||r.candidate_status],["یادداشت",r=>r.source_data?.notes]],c.slice().sort((x,y)=>x.source_row-y.source_row),"فهرست پیشنهادها خالی است.")},
  reports:{title:"گزارش‌ها و سوابق",desc:"نمای اولیه سوابق ممیزی و داده‌های عملیاتی؛ شاخص‌های MTTR و MTBF تا وجود داده معتبر محاسبه نمی‌شوند.",metrics:[["رویدادهای ممیزی",cmmsRows("audit").length],["تجهیزات",a.length],["خرابی‌ها",f.length],["دستورکارها",o.length]],body:cmmsTable([["نوع موجودیت",r=>r.entity_type],["شناسه",r=>r.entity_id],["عملیات",r=>r.action],["زمان",r=>cmmsDate(r.created_at)]],cmmsRows("audit").slice().reverse().slice(0,30),"هنوز رویداد ممیزی ثبت نشده است.")}
  };
  return content[cmmsActiveTab]||content.overview;
@@ -1785,6 +1757,7 @@ function renderCMMSView(){
  const root=document.getElementById("cmms-v1-view");if(!root)return;
  if(!cmmsCanAccess()){root.innerHTML="<div class='cmms-empty'>دسترسی به ماژول تعمیرات و نگهداری برای این حساب تعریف نشده است.</div>";return;}
  const tabs=[["overview","نمای کلی","▦"],["masterdata","دسته‌بندی و محل‌ها","⌖"],["assets","شناسنامه تجهیزات","⚙"],["failures","گزارش خرابی","⚠"],["orders","دستورکارها","☷"],["pm","نگهداری پیشگیرانه","◷"],["reports","گزارش‌ها","▤"]];
+ if(cmmsAssignedRoles.includes("technical_supervisor"))tabs.splice(3,0,["candidates","پیشنهادهای بازدید","◎"]);
  const x=cmmsRenderTab();
  const tabHtml=tabs.map(t=>"<button type='button' role='tab' data-tab='"+t[0]+"' aria-selected='"+(cmmsActiveTab===t[0])+"' class='"+(cmmsActiveTab===t[0]?"active":"")+"' onclick='cmmsSetTab(this.dataset.tab)'><span>"+t[2]+"</span>"+t[1]+"</button>").join("");
  const metrics=x.metrics.map(m=>cmmsMetric(m[0],m[1])).join("");
