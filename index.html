@@ -1649,6 +1649,46 @@ async function cmmsSubmitWorkOrder(e){
  const iso=v=>v?new Date(v).toISOString():null;
  try{const {error}=await cloud.rpc("cmms_create_work_order",{p_asset_id:d.asset_id,p_title:d.title.trim(),p_work_type:d.work_type,p_priority:d.priority,p_description:d.description||null,p_scope:d.scope||null,p_planned_start_at:iso(d.planned_start_at),p_due_at:iso(d.due_at),p_estimated_duration_minutes:d.estimated_duration_minutes?Number(d.estimated_duration_minutes):null,p_permit_required:d.permit_required==="true",p_permit_reference:d.permit_reference||null,p_isolation_required:d.isolation_required==="true"});if(error)throw error;alert("دستورکار در صف بررسی فنی ایجاد شد.");form.reset();await cmmsLoadData(true);}catch(x){alert("ایجاد دستورکار ناموفق بود: "+(x.message||String(x)));}return false;
 }
+function cmmsCanLinkPurchaseRequest(){return ["technical_expert","technical_supervisor"].includes(cmmsAssignedRole);}
+function cmmsPurchaseLinksTable(){
+ const links=cmmsRows("purchaseLinks");
+ return cmmsTable(
+  [["دستورکار",r=>{const w=cmmsRows("orders").find(x=>x.id===r.work_order_id);return w?(w.wo_no||("WO-"+w.id.slice(0,8)))+" — "+w.title:r.work_order_id;}],
+   ["درخواست خرید",r=>{const q=(requests||[]).find(x=>x.id===r.purchase_request_id);return q?(q.id+" — "+(q.title||"بدون عنوان")):r.purchase_request_id;}],
+   ["وضعیت درخواست",r=>{const q=(requests||[]).find(x=>x.id===r.purchase_request_id);return q?(STATUS_LABEL[q.status]||q.status):"—";}],
+   ["زمان اتصال",r=>cmmsDate(r.created_at)]],
+  links.slice().reverse(),"هنوز ارتباطی بین دستورکار و درخواست خرید ثبت نشده است."
+ );
+}
+function cmmsPurchaseLinkForm(){
+ if(!cmmsCanLinkPurchaseRequest())return "";
+ const openOrders=cmmsRows("orders").filter(w=>!["closed","cancelled"].includes(w.status));
+ const requestRows=(requests||[]).filter(r=>r&&r.id);
+ if(!openOrders.length)return "<div class='cmms-empty'>برای اتصال درخواست خرید، ابتدا باید یک دستورکار مرتبط با تجهیز ثبت شود. در حال حاضر دستورکاری برای انتخاب وجود ندارد.</div>"+cmmsPurchaseLinksTable();
+ if(!requestRows.length)return "<div class='cmms-empty'>درخواست خرید قابل انتخابی از پایگاه داده دریافت نشد.</div>"+cmmsPurchaseLinksTable();
+ const woOptions=openOrders.map(w=>"<option value='"+escapeHtml(w.id)+"'>"+escapeHtml((w.wo_no||("WO-"+w.id.slice(0,8)))+" — "+w.title)+"</option>").join("");
+ const prOptions=requestRows.map(r=>"<option value='"+escapeHtml(r.id)+"'>"+escapeHtml(r.id+" — "+(r.title||"بدون عنوان")+" — "+(STATUS_LABEL[r.status]||r.status||"بدون وضعیت"))+"</option>").join("");
+ return "<form class='cmms-master-form' id='cmms-purchase-link-form' onsubmit='return cmmsLinkPurchaseRequest(event)'>"+
+  "<div class='cmms-form-head'><div><h4>اتصال درخواست خرید به دستورکار</h4><p>ارتباط برای ردیابی قطعه، خرید و رفع خرابی؛ ثبت از طریق تابع کنترل‌شده پایگاه داده انجام می‌شود.</p></div><span>پیوند عملیاتی</span></div>"+
+  "<div class='cmms-form-grid two'><label>دستورکار باز *<select name='work_order_id' required>"+woOptions+"</select></label><label>درخواست خرید *<select name='purchase_request_id' required>"+prOptions+"</select></label></div>"+
+  "<div class='cmms-form-actions'><button class='cmms-preview-btn' type='submit'>ثبت ارتباط</button></div></form>"+cmmsPurchaseLinksTable();
+}
+async function cmmsLinkPurchaseRequest(event){
+ event.preventDefault();
+ const form=event.currentTarget;
+ if(!form.reportValidity()||!cmmsCanLinkPurchaseRequest())return false;
+ const d=Object.fromEntries(new FormData(form).entries());
+ const btn=form.querySelector("button[type='submit']");
+ if(btn){btn.disabled=true;btn.textContent="در حال ثبت ارتباط…";}
+ try{
+  const {data,error}=await cloud.rpc("cmms_link_purchase_request",{p_work_order_id:d.work_order_id,p_purchase_request_id:d.purchase_request_id});
+  if(error)throw error;
+  alert("ارتباط درخواست خرید و دستورکار ثبت شد. شناسه ارتباط: "+data);
+  await cmmsLoadData(true);
+ }catch(e){alert("ثبت ارتباط ناموفق بود: "+(e.message||String(e)));}
+ finally{if(btn){btn.disabled=false;btn.textContent="ثبت ارتباط";}}
+ return false;
+}
 function cmmsWorkOrderTable(){
  const rows=cmmsRows("orders");if(!rows.length)return "<div class='cmms-empty'>هنوز دستورکاری ثبت نشده است.</div>";
  return "<div class='cmms-workorder-list'>"+rows.map(w=>{
@@ -1746,7 +1786,7 @@ function cmmsRenderTab(){
  masterdata:{title:"اطلاعات پایه تجهیزات",desc:"تعریف دسته‌بندی‌ها و ساختار سلسله‌مراتبی محل‌های استقرار.",metrics:[["دسته‌بندی‌ها",cmmsRows("categories").length],["محل‌های تعریف‌شده",cmmsRows("locations").length],["محل‌های فعال",cmmsRows("locations").filter(x=>x.is_active).length],["سطوح اصلی",cmmsRows("locations").filter(x=>!x.parent_id).length]],body:cmmsMasterDataForms()},
  assets:{title:"شناسنامه تجهیزات",desc:"ثبت شناسنامه تجهیز از طریق RPC کنترل‌شده و مشاهده فهرست تجهیزات.",metrics:[["کل تجهیزات",a.length],["در سرویس",a.filter(x=>x.operational_status==="operational").length],["متوقف",a.filter(x=>x.operational_status==="stopped").length],["دارای محدودیت",a.filter(x=>x.operational_status==="degraded").length]],body:cmmsAssetForm()+cmmsAssetStatusForm()+cmmsMeterReadingForm()+cmmsTable([["کد",r=>r.asset_code],["نام تجهیز",r=>r.name],["محل",r=>cmmsRows("locations").find(l=>l.id===r.location_id)?.name],["سازنده",r=>r.manufacturer],["مدل",r=>r.model],["وضعیت",r=>cmmsStatus(r.operational_status)]],a,"فهرست تجهیزات خالی است.")+cmmsMeterReadingsTable()},
  failures:{title:"گزارش خرابی‌ها",desc:"ثبت گزارش خرابی، بررسی فنی و تبدیل کنترل‌شده به دستورکار.",metrics:[["کل گزارش‌ها",f.length],["بحرانی",f.filter(x=>x.priority==="critical").length],["اولویت بالا",f.filter(x=>x.priority==="high").length],["در حال بررسی",f.filter(x=>x.status==="under_review").length]],body:cmmsFailureForm()+cmmsTable([["شماره",r=>r.report_no],["تجهیز",r=>a.find(x=>x.id===r.asset_id)?.name],["اولویت",r=>r.priority],["شرح",r=>r.description],["وضعیت",r=>cmmsStatus(r.status)],["زمان",r=>cmmsDate(r.occurred_at)]],f,"هنوز گزارش خرابی ثبت نشده است.")+cmmsFailureTriageList()},
- orders:{title:"دستورکارهای تعمیراتی",desc:"ایجاد، آزادسازی، ارجاع، ثبت اقدامات، آزمون و گردش تأیید دو مرحله‌ای.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsWorkOrderForm()+cmmsWorkOrderTable()},
+ orders:{title:"دستورکارهای تعمیراتی",desc:"ایجاد، آزادسازی، ارجاع، ثبت اقدامات، آزمون و گردش تأیید دو مرحله‌ای.",metrics:[["کل دستورکارها",o.length],["فعال",activeOrders.length],["تکمیل‌شده",o.filter(x=>x.status==="completed"||x.status==="closed").length],["در انتظار تأیید",pendingApprovals.length]],body:cmmsWorkOrderForm()+cmmsPurchaseLinkForm()+cmmsWorkOrderTable()},
  pm:{title:"نگهداری پیشگیرانه (PM)",desc:"تعریف برنامه زمان‌محور، ارجاع وظیفه، ثبت اجرا و نتیجه چک‌لیست.",metrics:[["برنامه‌ها",cmmsRows("pmPlans").length],["وظایف ایجادشده",p.length],["عقب‌افتاده",overdue.length],["تکمیل‌شده",p.filter(x=>x.status==="completed").length]],body:cmmsPMPlanForm()+cmmsPMTaskList()},
  candidates:{title:"پیشنهادهای بازدید میدانی",desc:"فهرست پیشنهادی واردشده از برنامه زاپاس موتور؛ هیچ‌کدام دارایی تأییدشده یا فعال محسوب نمی‌شوند.",metrics:[["کل پیشنهادها",c.length],["نیازمند بازدید",c.filter(x=>x.candidate_status==="pending_field_verification").length],["تأییدشده",c.filter(x=>x.candidate_status==="verified").length],["تبدیل‌شده به دارایی",c.filter(x=>x.candidate_status==="converted").length]],body:"<div class='cmms-gate'><b>ثبت پیشنهادی — نه شناسنامه تجهیز</b><span>وجود، محل دقیق و مشخصات هر مورد باید در بازدید میدانی تأیید شود. این صفحه فقط‌خواندنی است و هیچ موردی را به بانک دارایی‌ها تبدیل نمی‌کند.</span></div>"+cmmsTable([["ردیف منبع",r=>r.source_row],["بخش پیشنهادی",r=>r.proposed_section],["کاربرد پیشنهادی",r=>r.proposed_name],["محل پیشنهادی",r=>cmmsRows("locations").find(l=>l.id===r.suggested_location_id)?.name],["وضعیت بررسی",r=>({pending_field_verification:"نیازمند تأیید میدانی",verified:"تأییدشده",rejected:"ردشده",converted:"تبدیل‌شده"})[r.candidate_status]||r.candidate_status],["یادداشت",r=>r.source_data?.notes]],c.slice().sort((x,y)=>x.source_row-y.source_row),"فهرست پیشنهادها خالی است.")},
  reports:{title:"گزارش‌ها و سوابق",desc:"نمای اولیه سوابق ممیزی و داده‌های عملیاتی؛ شاخص‌های MTTR و MTBF تا وجود داده معتبر محاسبه نمی‌شوند.",metrics:[["رویدادهای ممیزی",cmmsRows("audit").length],["تجهیزات",a.length],["خرابی‌ها",f.length],["دستورکارها",o.length]],body:cmmsTable([["نوع موجودیت",r=>r.entity_type],["شناسه",r=>r.entity_id],["عملیات",r=>r.action],["زمان",r=>cmmsDate(r.created_at)]],cmmsRows("audit").slice().reverse().slice(0,30),"هنوز رویداد ممیزی ثبت نشده است.")}
