@@ -3215,6 +3215,23 @@ function printSection(elementId,title){
 }
 </style>
 
+
+<style id="mehrsa-control-center-final-kpi-logo-fix-20261121">
+#mehrsa-control-center .cc-metrics .cc-metric strong{
+ display:block!important;font-size:34px!important;line-height:1.05!important;
+ font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;
+ letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important;
+}
+#mehrsa-control-center .cc-head-brand{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important}
+#mehrsa-control-center .cc-brand-logo{display:block!important;width:180px!important;height:60px!important;max-width:34vw!important;object-fit:contain!important;flex:0 0 auto!important;border-radius:8px!important}
+#mehrsa-control-center .cc-head-copy{min-width:0!important}
+@media(max-width:650px){
+ #mehrsa-control-center .cc-metrics .cc-metric strong{font-size:30px!important;font-weight:950!important}
+ #mehrsa-control-center .cc-head-brand{gap:7px!important}
+ #mehrsa-control-center .cc-brand-logo{width:116px!important;height:42px!important;max-width:34vw!important}
+ #mehrsa-control-center .cc-title{font-size:14px!important}
+}
+</style>
 </body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
@@ -4432,12 +4449,12 @@ function renderControlCenter(){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  host.innerHTML=`
   <div class="cc-dashboard-layout"><div class="cc-dashboard-main">
-  <div class="cc-head"><div><div class="cc-title">مرکز کنترل عملیات فنی</div><div class="cc-sub">نمای متمرکز کارهای نیازمند پیگیری و تصمیم</div></div><span class="cc-live">● وضعیت زنده</span></div>
+  <div class="cc-head"><div class="cc-head-brand"><img class="cc-brand-logo" src="./mehrsa-control-logo.jpg" alt="لوگوی مهرسا"><div class="cc-head-copy"><div class="cc-title">مرکز کنترل عملیات فنی</div><div class="cc-sub">نمای متمرکز کارهای نیازمند پیگیری و تصمیم</div></div></div><span class="cc-live">● وضعیت زنده</span></div>
   <div class="cc-metrics">
-   <div class="cc-metric action"><strong>${queue.length}</strong><span>نیازمند اقدام در نقش فعلی</span></div>
-   <div class="cc-metric late"><strong>${late}</strong><span>معوق بر اساس شاخص فعلی</span></div>
-   <div class="cc-metric warn"><strong>${warning}</strong><span>نزدیک به مهلت</span></div>
-   <div class="cc-metric urgent"><strong>${urgent}</strong><span>درخواست فوری</span></div>
+   <div class="cc-metric action"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${queue.length}</strong><span>نیازمند اقدام در نقش فعلی</span></div>
+   <div class="cc-metric late"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${late}</strong><span>معوق بر اساس شاخص فعلی</span></div>
+   <div class="cc-metric warn"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${warning}</strong><span>نزدیک به مهلت</span></div>
+   <div class="cc-metric urgent"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${urgent}</strong><span>درخواست فوری</span></div>
   </div>
   <div class="cc-queue-title">اولویت پیگیری</div>
   ${ordered.length?`<div class="cc-list">${ordered.map(r=>{const d=delay(r),lv=level(d);return `<button class="cc-item" type="button" onclick="openRequest('${esc(r.id)}')"><span class="cc-severity ${lv}">${lv==="late"?"معوق":lv==="warning"?"نزدیک مهلت":"در مهلت"}</span><span class="cc-item-main"><span class="cc-item-name">${esc(r.title||"بدون عنوان")}</span><span class="cc-item-meta"><span>${esc(r.id)}</span><span>${esc(statusLabel(r.status))}</span><span>${esc(r.by||"—")}</span></span></span><span aria-hidden="true">←</span></button>`}).join("")}</div>`:'<div class="cc-empty">در حال حاضر در نقش شما موردی برای اقدام ثبت نشده است.</div>'}
