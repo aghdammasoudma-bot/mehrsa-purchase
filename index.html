@@ -1061,6 +1061,19 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 </style>
 
 \n\n
+<style id="mehrsa-navigation-focus-fix-20261121">
+/* Keep the selected work area visible instead of leaving dashboard panels above it. */
+#main-content .request-workspace{scroll-margin-top:78px}
+#main-content .request-workspace.module-focus{display:block!important;width:100%!important;max-width:none!important;grid-template-columns:minmax(0,1fr)!important;direction:rtl!important}
+#main-content .request-workspace.module-focus .request-detail-column{display:none!important}
+#main-content .request-workspace.module-focus .request-list-column{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}
+@media(max-width:700px){
+ #main-content .request-workspace{scroll-margin-top:12px}
+ #main-content .request-workspace.module-focus{display:flex!important;flex-direction:column!important}
+ #main-content .request-workspace.module-focus .request-list-column{width:100%!important}
+}
+</style>
+
 <style id="mehrsa-control-center-kpi-contrast-20261121">
 /* Match the real CMMS KPI classes rather than obsolete cc-metric selectors. */
 #cmms-v1-view .cmms-metrics{align-items:stretch!important}
@@ -1818,20 +1831,27 @@ function inboxItems(){
 function switchView(v){
   if(v==="cmms" && !cmmsCanAccess()){alert("شما دسترسی به ماژول تعمیرات و نگهداری ندارید.");return;}
   currentView=v;
+  /* Navigation focus: hide dashboard-only panels so the selected module is immediately visible. */
+  const controlCenter=document.getElementById("mehrsa-control-center");
+  if(controlCenter)controlCenter.style.display="none";
+  const dashboardKpis=document.getElementById("dashboard-kpis");
+  if(dashboardKpis)dashboardKpis.style.display="none";
+  const workspace=document.querySelector(".request-workspace");
+  if(workspace)workspace.classList.toggle("module-focus",v==="work"||v==="cmms");
+  const detailColumn=document.querySelector(".request-detail-column");
+  if(detailColumn)detailColumn.style.display=(v==="work"||v==="cmms")?"none":"";
   document.getElementById("req-list").style.display=(v==="work"||v==="cmms")?"none":"block";
   document.getElementById("work-orders").style.display=v==="work"?"block":"none";
   const cmms=document.getElementById("cmms-v1-view");
   if(cmms)cmms.style.display=v==="cmms"?"block":"none";
-  const workspace=document.querySelector(".request-workspace");
-  const kpis=document.getElementById("dashboard-kpis");
-  /* Keep the shared two-column workspace visible for requests, missions and CMMS.
-     The selected module occupies the list column beside the request-details panel. */
+  /* The module takes the full content width; no stale request-detail column beside it. */
   if(workspace)workspace.style.display="";
-  if(kpis)kpis.style.display=(v==="cmms"||v==="work")?"none":"";
+  if(kpis)kpis.style.display="none";
   if(v==="work") loadWorkOrders();
   if(v==="cmms"){renderCMMSView();cmmsLoadData();}
   document.querySelectorAll(".pipe-step").forEach(el=>{el.classList.toggle("active",el.dataset.view===v);});
   renderList();
+  if(workspace)workspace.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function renderAll(){
   renderControlCenter();
@@ -1842,6 +1862,14 @@ function renderAll(){
 
 function setKpiView(view){
   currentView=view;
+  const controlCenter=document.getElementById("mehrsa-control-center");
+  if(controlCenter)controlCenter.style.display="none";
+  const dashboardKpis=document.getElementById("dashboard-kpis");
+  if(dashboardKpis)dashboardKpis.style.display="none";
+  const workspace=document.querySelector(".request-workspace");
+  if(workspace)workspace.classList.remove("module-focus");
+  const detailColumn=document.querySelector(".request-detail-column");
+  if(detailColumn)detailColumn.style.display="";
   renderList();
   const target=document.getElementById("req-list");
   if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
