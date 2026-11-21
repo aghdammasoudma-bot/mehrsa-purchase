@@ -1114,6 +1114,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
 <div class="content" id="main-content" style="display:none">
   <div id="quick-actions" class="quick-actions" aria-hidden="true" style="display:none"></div>
   <div id="dashboard-kpis"></div>
+  <section id="mehrsa-control-center" class="control-center" aria-live="polite"></section>
   <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div><section id="cmms-v1-view" style="display:none" aria-live="polite"></section></section></div>
 </div>
 
@@ -1778,6 +1779,7 @@ function switchView(v){
   renderList();
 }
 function renderAll(){
+  renderControlCenter();
   renderKPIs();
   renderList();
   const cnt=inboxItems().length;
@@ -4287,6 +4289,61 @@ textarea::placeholder {
   }
 }
 </style>
+
+<style id="mehrsa-control-center-v1">
+.control-center{margin:0 0 18px;padding:18px;border:1px solid #D5E1E7;border-radius:18px;background:linear-gradient(145deg,#fff 0%,#F4F8FA 100%);box-shadow:0 8px 24px rgba(16,36,58,.07)}
+.cc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.cc-title{font-size:17px;font-weight:900;color:#17384A}
+.cc-sub{font-size:11px;color:#627785;margin-top:3px}
+.cc-live{font-size:10px;font-weight:800;color:#176B73;background:#E4F3F1;border:1px solid #BFE1DD;border-radius:30px;padding:5px 9px;white-space:nowrap}
+.cc-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:15px}
+.cc-metric{padding:12px;border-radius:13px;border:1px solid #DFE8EC;background:#fff;min-width:0}
+.cc-metric strong{display:block;font-size:24px;line-height:1.2;color:#17384A;font-variant-numeric:tabular-nums}
+.cc-metric span{display:block;font-size:10px;color:#607482;margin-top:5px;font-weight:700}
+.cc-metric.late{border-right:4px solid #B4232D}.cc-metric.warn{border-right:4px solid #C18416}.cc-metric.urgent{border-right:4px solid #B64A17}.cc-metric.action{border-right:4px solid #176B73}
+.cc-queue-title{font-size:12px;font-weight:900;color:#263E4E;margin:4px 0 8px}
+.cc-list{display:grid;gap:7px}
+.cc-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E1E9ED;border-radius:12px;background:#fff;text-align:right;width:100%;color:#172B3A}
+.cc-item:hover{border-color:#9BBFC2;background:#F8FBFC}
+.cc-item-main{flex:1;min-width:0}
+.cc-item-name{display:block;font-size:12px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-item-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;font-size:10px;color:#627785}
+.cc-severity{font-size:10px;font-weight:900;border-radius:20px;padding:4px 8px;white-space:nowrap}
+.cc-severity.late{background:#FCEBED;color:#A11E2A}.cc-severity.warning{background:#FFF3D6;color:#805409}.cc-severity.ok{background:#E4F5EC;color:#17613A}
+.cc-empty{padding:15px;border-radius:12px;background:#F0F7F5;color:#27634F;font-size:12px;font-weight:700}
+.cc-foot{margin-top:10px;font-size:10px;color:#718391;line-height:1.8}
+@media(max-width:650px){.cc-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.control-center{padding:14px}.cc-title{font-size:15px}.cc-item{padding:9px}}
+</style>
+<script id="mehrsa-control-center-v1-js">
+function renderControlCenter(){
+ const host=document.getElementById("mehrsa-control-center");
+ if(!host)return;
+ const queue=inboxItems().slice();
+ const delay=r=>requestDelayInfo(r);
+ const level=d=>d.level==="late"?"late":d.level==="warning"?"warning":"ok";
+ const late=queue.filter(r=>delay(r).level==="late").length;
+ const warning=queue.filter(r=>delay(r).level==="warning").length;
+ const urgent=queue.filter(r=>String(r.prio||"").includes("فوری")).length;
+ const ordered=queue.sort((a,b)=>{
+  const rank={late:0,warning:1,unknown:2,ok:3};
+  const diff=rank[level(delay(a))]-rank[level(delay(b))];
+  if(diff)return diff;
+  return (String(a.date||"")).localeCompare(String(b.date||""));
+ }).slice(0,6);
+ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ host.innerHTML=`
+  <div class="cc-head"><div><div class="cc-title">مرکز کنترل عملیات فنی</div><div class="cc-sub">نمای متمرکز کارهای نیازمند پیگیری و تصمیم</div></div><span class="cc-live">● وضعیت زنده</span></div>
+  <div class="cc-metrics">
+   <div class="cc-metric action"><strong>${queue.length}</strong><span>نیازمند اقدام در نقش فعلی</span></div>
+   <div class="cc-metric late"><strong>${late}</strong><span>معوق بر اساس شاخص فعلی</span></div>
+   <div class="cc-metric warn"><strong>${warning}</strong><span>نزدیک به مهلت</span></div>
+   <div class="cc-metric urgent"><strong>${urgent}</strong><span>درخواست فوری</span></div>
+  </div>
+  <div class="cc-queue-title">اولویت پیگیری</div>
+  ${ordered.length?`<div class="cc-list">${ordered.map(r=>{const d=delay(r),lv=level(d);return `<button class="cc-item" type="button" onclick="openRequest('${esc(r.id)}')"><span class="cc-severity ${lv}">${lv==="late"?"معوق":lv==="warning"?"نزدیک مهلت":"در مهلت"}</span><span class="cc-item-main"><span class="cc-item-name">${esc(r.title||"بدون عنوان")}</span><span class="cc-item-meta"><span>${esc(r.id)}</span><span>${esc(statusLabel(r.status))}</span><span>${esc(r.by||"—")}</span></span></span><span aria-hidden="true">←</span></button>`}).join("")}</div>`:'<div class="cc-empty">در حال حاضر در نقش شما موردی برای اقدام ثبت نشده است.</div>'}
+  <div class="cc-foot">مبنای هشدارها، زمان آخرین رویداد ثبت‌شده و آستانه‌های تأخیر فعلی سامانه است. این شاخص جایگزین موعد رسمی تأمین نیست.</div>`;
+}
+</script>
 </body>
 </html>
 
