@@ -4417,6 +4417,7 @@ function renderControlCenter(){
  }).slice(0,6);
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  host.innerHTML=`
+  <div class="cc-dashboard-layout"><div class="cc-dashboard-main">
   <div class="cc-head"><div><div class="cc-title">مرکز کنترل عملیات فنی</div><div class="cc-sub">نمای متمرکز کارهای نیازمند پیگیری و تصمیم</div></div><span class="cc-live">● وضعیت زنده</span></div>
   <div class="cc-metrics">
    <div class="cc-metric action"><strong>${queue.length}</strong><span>نیازمند اقدام در نقش فعلی</span></div>
@@ -4426,13 +4427,25 @@ function renderControlCenter(){
   </div>
   <div class="cc-queue-title">اولویت پیگیری</div>
   ${ordered.length?`<div class="cc-list">${ordered.map(r=>{const d=delay(r),lv=level(d);return `<button class="cc-item" type="button" onclick="openRequest('${esc(r.id)}')"><span class="cc-severity ${lv}">${lv==="late"?"معوق":lv==="warning"?"نزدیک مهلت":"در مهلت"}</span><span class="cc-item-main"><span class="cc-item-name">${esc(r.title||"بدون عنوان")}</span><span class="cc-item-meta"><span>${esc(r.id)}</span><span>${esc(statusLabel(r.status))}</span><span>${esc(r.by||"—")}</span></span></span><span aria-hidden="true">←</span></button>`}).join("")}</div>`:'<div class="cc-empty">در حال حاضر در نقش شما موردی برای اقدام ثبت نشده است.</div>'}
-  <div class="cc-foot">مبنای هشدارها، زمان آخرین رویداد ثبت‌شده و آستانه‌های تأخیر فعلی سامانه است. این شاخص جایگزین موعد رسمی تأمین نیست.</div>`;
+  <div class="cc-foot">مبنای هشدارها، زمان آخرین رویداد ثبت‌شده و آستانه‌های تأخیر فعلی سامانه است. این شاخص جایگزین موعد رسمی تأمین نیست.</div>
+  </div><aside class="cc-register-card"><div class="cc-register-icon">＋</div><h3>ثبت درخواست فنی</h3><p>درخواست خرید یا خدمت فنی جدید را ثبت و برای بررسی ارسال کنید.</p><button type="button" onclick="openNewRequest()">ثبت درخواست جدید</button><small>فرم ثبت در پنجره‌ای مستقل باز می‌شود.</small></aside></div>`;
 }
 </script>
 </body>
 </html>
 
 
+<style id="mehrsa-control-center-registration-panel-20261121">
+#mehrsa-control-center .cc-dashboard-layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:14px;align-items:start}
+#mehrsa-control-center .cc-dashboard-main{min-width:0}
+#mehrsa-control-center .cc-register-card{position:sticky;top:14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:20px;border:1px solid rgba(150,185,225,.28);border-radius:18px;background:linear-gradient(155deg,#1b3150,#101d32);box-shadow:0 12px 26px rgba(5,15,30,.16)}
+#mehrsa-control-center .cc-register-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:rgba(110,150,230,.2);font-size:26px;color:#dce8ff}
+#mehrsa-control-center .cc-register-card h3{margin:2px 0 0;font-size:15px;color:#f5f7ff}
+#mehrsa-control-center .cc-register-card p{margin:0;font-size:12px;line-height:1.9;color:#c6d3e8}
+#mehrsa-control-center .cc-register-card button{width:100%;padding:11px 12px;border:0;border-radius:11px;background:linear-gradient(135deg,#567ed8,#6259bc);color:#fff;font-weight:800;cursor:pointer}
+#mehrsa-control-center .cc-register-card small{font-size:10px;line-height:1.7;color:#aebed7}
+@media(max-width:850px){#mehrsa-control-center .cc-dashboard-layout{grid-template-columns:minmax(0,1fr)}#mehrsa-control-center .cc-register-card{position:static;order:-1}}
+</style>
 <style id="mehrsa-control-center-navigation-and-registration-20261121">
 /* Dashboard is a first-class view; registration stays a compact adjacent action. */
 #mehrsa-control-center{scroll-margin-top:18px}
