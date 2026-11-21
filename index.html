@@ -1125,6 +1125,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
     <button type="button" class="top-nav-primary" onclick="openNewRequest()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span> ثبت</button>
     <button type="button" data-view="work" onclick="switchView('work')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg></span> مأموریت</button>
     <button type="button" data-view="done" onclick="switchView('done')"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span> تکمیل</button>
+    <button type="button" data-view="control" onclick="switchView('control')"><span aria-hidden="true">▦</span> مرکز کنترل</button>
     <button type="button" class="nav-logout" onclick="closeProfileMenu();cloudLogout()"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></span> خروج از حساب</button>
       <button type="button" id="cmms-nav-button" data-view="cmms" onclick="switchView(this.dataset.view)" style="display:none"><span aria-hidden="true">🛠</span> تعمیرات و نگهداری</button>
   </nav>
@@ -1142,7 +1143,7 @@ body{overflow-x:hidden!important;line-height:1.55!important}
   <div class="request-workspace"><aside class="request-detail-column no-print"><div class="request-detail-heading"><span>جزئیات درخواست</span><small>با انتخاب هر ردیف، اطلاعات این بخش به‌روزرسانی می‌شود</small></div><div id="request-detail-panel"><div class="detail-empty"><div class="empty-icon">☷</div><strong>درخواستی انتخاب نشده</strong><p>برای مشاهده جزئیات، یک ردیف از جدول را انتخاب کنید.</p></div></div></aside><section class="request-list-column"><div id="req-list"><div style="text-align:center;padding:40px;color:var(--sub)">در حال بارگذاری…</div></div><div id="work-orders" style="display:none"></div><section id="cmms-v1-view" style="display:none" aria-live="polite"></section></section></div>
 </div>
 
-<nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button></nav>
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display:none"><button data-view="inbox" onclick="switchView('inbox')"><span>▣</span><small>صندوق</small></button><button data-view="all" onclick="switchView('all')"><span>▤</span><small>درخواست‌ها</small></button><button class="nav-primary" onclick="openNewRequest()"><span>＋</span><small>ثبت</small></button><button data-view="work" onclick="switchView('work')"><span>⚙</span><small>مأموریت</small></button><button data-view="done" onclick="switchView('done')"><span>✓</span><small>تکمیل</small></button><button data-view="control" onclick="switchView('control')"><span>▦</span><small>مرکز کنترل</small></button></nav>
 
 <!-- DRAWER -->
 <div class="overlay" id="overlay">
@@ -1831,27 +1832,28 @@ function inboxItems(){
 function switchView(v){
   if(v==="cmms" && !cmmsCanAccess()){alert("شما دسترسی به ماژول تعمیرات و نگهداری ندارید.");return;}
   currentView=v;
-  /* Navigation focus: hide dashboard-only panels so the selected module is immediately visible. */
   const controlCenter=document.getElementById("mehrsa-control-center");
-  if(controlCenter)controlCenter.style.display="none";
   const dashboardKpis=document.getElementById("dashboard-kpis");
-  if(dashboardKpis)dashboardKpis.style.display="none";
   const workspace=document.querySelector(".request-workspace");
-  if(workspace)workspace.classList.toggle("module-focus",v==="work"||v==="cmms");
   const detailColumn=document.querySelector(".request-detail-column");
-  if(detailColumn)detailColumn.style.display=(v==="work"||v==="cmms")?"none":"";
-  document.getElementById("req-list").style.display=(v==="work"||v==="cmms")?"none":"block";
-  document.getElementById("work-orders").style.display=v==="work"?"block":"none";
+  const reqList=document.getElementById("req-list");
+  const workOrders=document.getElementById("work-orders");
   const cmms=document.getElementById("cmms-v1-view");
+  const isDashboard=v==="control";
+  const isModule=v==="work"||v==="cmms";
+  if(controlCenter)controlCenter.style.display=isDashboard?"":"none";
+  if(dashboardKpis)dashboardKpis.style.display=isDashboard?"":"none";
+  if(workspace){workspace.style.display=isDashboard?"none":"";workspace.classList.toggle("module-focus",isModule);}
+  if(detailColumn)detailColumn.style.display=isModule?"none":"";
+  if(reqList)reqList.style.display=isModule?"none":"block";
+  if(workOrders)workOrders.style.display=v==="work"?"block":"none";
   if(cmms)cmms.style.display=v==="cmms"?"block":"none";
-  /* The module takes the full content width; no stale request-detail column beside it. */
-  if(workspace)workspace.style.display="";
-  if(kpis)kpis.style.display="none";
-  if(v==="work") loadWorkOrders();
+  if(v==="work")loadWorkOrders();
   if(v==="cmms"){renderCMMSView();cmmsLoadData();}
   document.querySelectorAll(".pipe-step").forEach(el=>{el.classList.toggle("active",el.dataset.view===v);});
-  renderList();
-  if(workspace)workspace.scrollIntoView({behavior:"smooth",block:"start"});
+  if(!isDashboard)renderList();
+  const target=isDashboard?controlCenter:workspace;
+  if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function renderAll(){
   renderControlCenter();
@@ -4431,6 +4433,13 @@ function renderControlCenter(){
 </html>
 
 
+<style id="mehrsa-control-center-navigation-and-registration-20261121">
+/* Dashboard is a first-class view; registration stays a compact adjacent action. */
+#mehrsa-control-center{scroll-margin-top:18px}
+#mehrsa-control-center .cc-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#drawer .drawer{width:min(520px,92vw)!important;max-width:92vw!important}
+@media(max-width:700px){#drawer .drawer{width:100%!important;max-width:100%!important}}
+</style>
 <style id="mehrsa-menu-layout-authoritative-20261118">
 /* Authoritative final layout for the actual profile card inside #management-hero.
    This block intentionally overrides all legacy #topbar-based menu rules above. */
