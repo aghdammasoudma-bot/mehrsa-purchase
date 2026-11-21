@@ -1289,7 +1289,7 @@ window.addEventListener('error',e=>{
 window.addEventListener('unhandledrejection',e=>{
  const el=document.getElementById('auth-msg');if(el)el.textContent='خطای اتصال: '+(e.reason?.message||String(e.reason));
 });
-let cloudUser=null, syncing=false, currentIsAdmin=false, profileRole='', workDetailOpen=false;
+let cloudUser=null, syncing=false, syncInProgress=false, currentIsAdmin=false, profileRole='', workDetailOpen=false;
 function authMessage(t){const el=document.getElementById('auth-msg');if(el)el.textContent=t;}
 async function loadUserProfile(){
   if(!cloudUser) throw new Error('نشست کاربری معتبر نیست.');
@@ -1336,14 +1336,27 @@ async function refreshRequests(){
   if(!cloudUser){requests=[];return;}
   const {data,error}=await cloud.from('pr_requests').select('id,payload').order('id');
   if(error) throw new Error('خطا در دریافت درخواست‌ها: '+error.message);
-  requests=(data||[]).map(x=>x.payload);
-  if(currentRole) renderAll();
+  const nextRequests=(data||[]).map(x=>x.payload);
+  const changed=JSON.stringify(requests)!==JSON.stringify(nextRequests);
+  requests=nextRequests;
+  if(changed&&currentRole) renderAll();
 }
 async function initDB(){
   if(!cloudUser){requests=[];return;}
   await refreshRequests();
-  await loadWorkOrders();
-  if(!syncing){syncing=true;setInterval(async()=>{if(!cloudUser)return;try{await refreshRequests();if(!workDetailOpen)await loadWorkOrders();}catch(e){console.error(e);}},12000);}
+  // Load secondary modules only when the user opens them.
+  if(!syncing){
+    syncing=true;
+    setInterval(async()=>{
+      if(!cloudUser||document.hidden||syncInProgress)return;
+      syncInProgress=true;
+      try{
+        await refreshRequests();
+        if(currentView==="work"&&!workDetailOpen)await loadWorkOrders();
+      }catch(e){console.error(e);}
+      finally{syncInProgress=false;}
+    },45000);
+  }
 }
 async function saveDB(){
   throw new Error('ذخیره مستقیم غیرفعال است؛ از عملیات کنترل‌شده استفاده کنید.');
