@@ -445,7 +445,7 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
 
 .management-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(190px,.8fr);gap:12px;margin:14px auto 16px;max-width:1120px}
 
-.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background-image:url('./mehrsa-banner.png?v=20261121');background-size:cover;background-position:center 50%;isolation:isolate;padding:24px 25px;display:flex;align-items:center}
+.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background-image:url('./mehrsa-banner.jpg?v=20261122');background-size:cover;background-position:center 50%;isolation:isolate;padding:24px 25px;display:flex;align-items:center}
 
 .hero-industrial:before{content:"";position:absolute;inset:0;z-index:-1;background:none}
 
@@ -514,7 +514,7 @@ body{background:#F1F3F6!important;color:#202833!important}
 .content{max-width:1160px!important}
 .management-hero{display:block!important;max-width:1160px!important;margin:18px auto 16px!important;padding:0 14px}
 .hero-industrial{min-height:220px!important;width:100%!important;border:1px solid #D8E1E9!important;border-radius:18px!important;overflow:hidden!important;
- background-image:url('./mehrsa-banner.png?v=20261121')!important;
+ background-image:url('./mehrsa-banner.jpg?v=20261122')!important;
  background-size:cover!important;background-position:center 50%!important;padding:24px 30px!important;box-shadow:0 5px 18px rgba(30,50,70,.08)!important}
 .hero-copy{position:absolute!important;right:34px!important;top:50%!important;transform:translateY(-50%)!important;text-align:right!important;max-width:58%;z-index:3!important}
 .hero-eyebrow{color:#42657F!important}
@@ -3091,7 +3091,7 @@ function printSection(elementId,title){
 <style id="mehrsa-mammut-hero-banner-20261118">
 /* Banner-only restyle: navigation, KPI cards, app logic and data remain untouched */
 #management-hero .hero-industrial{
-  --hero-logo:url("./logo_mehrsa_shimi.png");
+  --hero-logo:url("./mehrsa-banner.jpg");
   display:flex!important;
   flex-direction:column!important;
   align-items:stretch!important;
@@ -4390,7 +4390,7 @@ textarea::placeholder {
 #management-hero .hero-industrial,
 #management-hero.has-profile-nav>.hero-industrial{
   background-color:transparent!important;
-  background-image:url("./mehrsa-banner.png?v=20261121")!important;
+  background-image:url("./mehrsa-banner.jpg?v=20261122")!important;
   background-repeat:no-repeat!important;
   background-position:center center!important;
   background-size:100% 100%!important;
@@ -4462,6 +4462,166 @@ function renderControlCenter(){
   </div><aside class="cc-register-card"><div class="cc-register-icon">＋</div><h3>ثبت درخواست فنی</h3><p>درخواست خرید یا خدمت فنی جدید را ثبت و برای بررسی ارسال کنید.</p><button type="button" onclick="openNewRequest()">ثبت درخواست جدید</button><small>فرم ثبت در پنجره‌ای مستقل باز می‌شود.</small></aside></div>`;
 }
 </script>
+
+<style id="mehrsa-command-center-redesign-20261122">
+:root{
+ --mc-navy:#10243f;--mc-navy-2:#183858;--mc-teal:#168b91;--mc-teal-soft:#e5f4f3;
+ --mc-bg:#f3f6fa;--mc-line:#e1e7ef;--mc-text:#182638;--mc-muted:#68788b;
+}
+html,body{background:var(--mc-bg)!important;color:var(--mc-text)!important}
+body{overflow-x:hidden!important}
+#topbar.top{
+ position:sticky!important;top:0!important;z-index:180!important;
+ margin-left:252px!important;width:calc(100% - 252px)!important;
+ height:68px!important;min-height:68px!important;padding:0 26px!important;
+ background:#fff!important;border-bottom:1px solid var(--mc-line)!important;
+ box-shadow:0 2px 10px rgba(16,36,63,.04)!important;
+}
+#topbar .h1{font-size:17px!important;font-weight:850!important;color:var(--mc-navy)!important}
+#topbar .top-sub{font-size:11px!important;color:var(--mc-muted)!important}
+#management-hero{
+ display:block!important;position:relative!important;
+ margin:14px 0 0 252px!important;width:calc(100% - 252px)!important;
+ max-width:none!important;padding:0 24px!important;box-sizing:border-box!important;
+}
+#management-hero .hero-industrial{
+ height:142px!important;min-height:142px!important;width:100%!important;
+ border:1px solid #dbe5ee!important;border-radius:15px!important;
+ overflow:hidden!important;background:#fff!important;
+ box-shadow:0 5px 18px rgba(16,36,63,.07)!important;
+}
+#management-hero .hero-industrial>img.mehrsa-hero-logo,
+#management-hero .hero-industrial img.mehrsa-hero-logo{
+ content:url("./mehrsa-banner.jpg?v=20261122")!important;
+ display:block!important;position:absolute!important;inset:0!important;
+ width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+ object-fit:cover!important;object-position:center!important;padding:0!important;
+}
+#management-hero .hero-industrial>.hero-copy{display:none!important}
+#management-hero .hero-caption{display:none!important}
+#management-hero .top-profile{position:static!important}
+#management-hero .top-profile-trigger{
+ position:fixed!important;top:12px!important;right:24px!important;z-index:220!important;
+ min-height:42px!important;padding:6px 12px!important;border:1px solid var(--mc-line)!important;
+ border-radius:11px!important;background:#f8fafc!important;color:var(--mc-navy)!important;
+ box-shadow:none!important;
+}
+#management-hero .top-profile-identity strong{color:var(--mc-navy)!important;font-size:12px!important}
+#management-hero .top-profile-identity small{color:var(--mc-muted)!important}
+#management-hero .top-quick-nav{
+ position:fixed!important;left:0!important;top:0!important;bottom:0!important;
+ z-index:210!important;width:252px!important;height:100dvh!important;
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ justify-content:flex-start!important;gap:6px!important;overflow-y:auto!important;
+ padding:158px 13px 22px!important;margin:0!important;border:0!important;border-radius:0!important;
+ background:linear-gradient(180deg,#10243f 0%,#142f4d 100%)!important;
+ box-shadow:8px 0 28px rgba(16,36,63,.13)!important;
+}
+#management-hero .top-quick-nav:before{
+ content:"";position:absolute;top:18px;left:22px;right:22px;height:112px;
+ background:url("./mehrsa-control-logo.jpg?v=20261122") center/contain no-repeat;
+ border-bottom:1px solid rgba(255,255,255,.14);padding-bottom:12px;
+}
+#management-hero .top-quick-nav>button{
+ width:100%!important;min-height:43px!important;height:auto!important;
+ display:flex!important;align-items:center!important;justify-content:flex-start!important;
+ gap:11px!important;padding:10px 13px!important;margin:0!important;
+ border:1px solid transparent!important;border-radius:9px!important;
+ background:transparent!important;color:#d9e5f1!important;
+ font-size:12px!important;font-weight:700!important;text-align:right!important;
+ box-shadow:none!important;white-space:normal!important;
+}
+#management-hero .top-quick-nav>button:hover,
+#management-hero .top-quick-nav>button.active,
+#management-hero .top-quick-nav>button[aria-current="page"]{
+ background:rgba(39,174,176,.17)!important;border-color:rgba(76,203,198,.25)!important;
+ color:#fff!important;
+}
+#management-hero .top-quick-nav>button.top-nav-primary{
+ margin:8px 0!important;background:var(--mc-teal)!important;color:#fff!important;
+ border-color:var(--mc-teal)!important;justify-content:center!important;
+}
+#management-hero .top-quick-nav>button.nav-logout{
+ margin-top:auto!important;color:#ffb9b9!important;border-top:1px solid rgba(255,255,255,.12)!important;
+}
+#management-hero .top-profile-menu{position:fixed!important;top:62px!important;right:22px!important;z-index:230!important}
+#main-content.content{
+ max-width:none!important;width:calc(100% - 252px)!important;
+ margin:0 0 0 252px!important;padding:20px 24px 36px!important;
+}
+#dashboard-kpis{width:100%!important;margin:0 0 16px!important}
+#dashboard-kpis .kpi-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:13px!important}
+#dashboard-kpis .kpi{
+ min-height:104px!important;padding:16px!important;border:1px solid var(--mc-line)!important;
+ border-radius:13px!important;background:#fff!important;
+ box-shadow:0 3px 13px rgba(16,36,63,.045)!important;
+}
+#dashboard-kpis .kpi:before{background:var(--mc-teal)!important}
+#dashboard-kpis .kpi-icon{border-radius:10px!important;background:var(--mc-teal-soft)!important;color:var(--mc-teal)!important}
+#dashboard-kpis .kpi-l{color:var(--mc-muted)!important;font-size:11px!important}
+#dashboard-kpis .kpi-n{color:var(--mc-navy)!important;font-size:28px!important;font-weight:850!important}
+#dashboard-kpis .kpi-hint{color:#8794a4!important}
+#mehrsa-control-center.control-center{
+ padding:19px!important;margin:0 0 18px!important;border:1px solid var(--mc-line)!important;
+ border-radius:15px!important;background:#fff!important;box-shadow:0 3px 14px rgba(16,36,63,.045)!important;
+}
+#mehrsa-control-center .cc-title{color:var(--mc-navy)!important;font-size:17px!important}
+#mehrsa-control-center .cc-live{background:var(--mc-teal-soft)!important;color:#13777b!important;border-color:#c9e8e5!important}
+#mehrsa-control-center .cc-metric{border-radius:11px!important;border-color:var(--mc-line)!important;background:#fbfcfe!important}
+#mehrsa-control-center .cc-item{border-radius:10px!important;border-color:var(--mc-line)!important}
+#mehrsa-control-center .cc-register-card{border-radius:13px!important;background:#f4f8fb!important;border:1px solid var(--mc-line)!important}
+#mehrsa-control-center .cc-register-card button{background:var(--mc-teal)!important;border-radius:8px!important}
+.request-workspace{
+ display:grid!important;grid-template-columns:minmax(270px,.82fr) minmax(0,1.8fr)!important;
+ gap:16px!important;align-items:start!important;
+}
+.request-detail-column,.request-list-column{min-width:0!important}
+.request-detail-column,.request-list-column>#req-list,
+.request-list-column>#work-orders,.request-list-column>#cmms-v1-view{
+ background:#fff!important;border:1px solid var(--mc-line)!important;
+ border-radius:14px!important;box-shadow:0 3px 14px rgba(16,36,63,.04)!important;
+}
+.request-detail-column{padding:15px!important}
+.request-detail-heading{border-bottom:1px solid var(--mc-line)!important;padding-bottom:12px!important}
+.request-detail-heading span{color:var(--mc-navy)!important;font-weight:850!important}
+#req-list{padding:15px!important}
+#cmms-v1-view{padding:16px!important}
+.card,.panel,.management-card,.form-card,.detail-card,.request-card,
+.cmms-card,.cmms-panel,.cmms-section{
+ border-color:var(--mc-line)!important;border-radius:13px!important;
+ box-shadow:0 3px 14px rgba(16,36,63,.045)!important;
+}
+button.btn-primary,.btn-primary{background:var(--mc-teal)!important;border-color:var(--mc-teal)!important}
+input:focus,select:focus,textarea:focus{border-color:var(--mc-teal)!important;box-shadow:0 0 0 3px rgba(22,139,145,.10)!important}
+.mobile-bottom-nav{box-shadow:0 -5px 22px rgba(16,36,63,.12)!important;border-top:1px solid var(--mc-line)!important}
+@media(max-width:1050px){
+ #dashboard-kpis .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .request-workspace{grid-template-columns:minmax(0,1fr)!important}
+ .request-detail-column{order:2!important}
+ .request-list-column{order:1!important}
+}
+@media(max-width:760px){
+ #topbar.top{margin-left:0!important;width:100%!important;padding:0 14px!important}
+ #management-hero{margin:10px 0 0!important;width:100%!important;padding:0 12px!important}
+ #management-hero .hero-industrial{height:88px!important;min-height:88px!important;border-radius:10px!important}
+ #management-hero .top-quick-nav{display:none!important}
+ #management-hero .top-profile-trigger{top:10px!important;right:12px!important}
+ #main-content.content{width:100%!important;margin:0!important;padding:13px 12px 90px!important}
+ #dashboard-kpis .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ #dashboard-kpis .kpi{min-height:82px!important;padding:10px!important}
+ #dashboard-kpis .kpi-n{font-size:23px!important}
+ #mehrsa-control-center .cc-dashboard-layout{grid-template-columns:minmax(0,1fr)!important}
+ .request-workspace{gap:10px!important}
+ .mobile-bottom-nav{display:flex!important}
+}
+@media print{
+ #topbar.top,#management-hero .top-quick-nav,#management-hero .top-profile-trigger,
+ #management-hero .hero-industrial,.mobile-bottom-nav{display:none!important}
+ #main-content.content{width:100%!important;margin:0!important;padding:0!important}
+ body{background:#fff!important}
+}
+</style>
+
 </body>
 </html>
 
