@@ -1920,31 +1920,9 @@ function ensureRequestPrintButton(){
 }
 function requestDelayInfo(r){
  if(["closed","delivered","planner_rejected","admin_rejected","cancelled"].includes(r.status)) return {level:"ok",label:"بسته"};
- const parseStamp=value=>{
-  const raw=String(value||"").trim();
-  const normalized=raw.replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
-  const m=normalized.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})(?:[ T]+(\d{1,2}):(\d{2}))?/);
-  if(m){
-   let y=Number(m[1]),mo=Number(m[2]),day=Number(m[3]),hh=Number(m[4]||0),mm=Number(m[5]||0);
-   if(y>=1300&&y<=1500){
-    y+=1595;
-    let days=-355668+365*y+Math.floor(y/33)*8+Math.floor(((y%33)+3)/4)+day+(mo<7?(mo-1)*31:(mo-7)*30+186);
-    let gy=400*Math.floor(days/146097);days%=146097;
-    if(days>36524){gy+=100*Math.floor(--days/36524);days%=36524;if(days>=365)days++;}
-    gy+=4*Math.floor(days/1461);days%=1461;
-    if(days>365){gy+=Math.floor((days-1)/365);days=(days-1)%365;}
-    let gd=days+1;const leap=(gy%4===0&&gy%100!==0)||gy%400===0;
-    const monthDays=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];let gm=0;
-    while(gm<12&&gd>monthDays[gm]){gd-=monthDays[gm];gm++;}
-    return new Date(gy,gm,gd,hh,mm);
-   }
-  }
-  const d=new Date(normalized.replaceAll("/","-"));
-  return Number.isNaN(d.getTime())?null:d;
- };
- const events=(Array.isArray(r.timeline)?r.timeline:[]).slice().reverse();let last=null;
- for(const t of events){const d=parseStamp(t.ts);if(d){last=d;break;}}
- if(!last&&r.updatedAt)last=parseStamp(r.updatedAt);
+ const events=(Array.isArray(r.timeline)?r.timeline:[]).slice().reverse(); let last=null;
+ for(const t of events){const d=new Date(String(t.ts||"").replaceAll("/","-"));if(!isNaN(d.getTime())){last=d;break;}}
+ if(!last&&r.updatedAt){const d=new Date(r.updatedAt);if(!isNaN(d.getTime()))last=d;}
  if(!last)return {level:"unknown",label:"زمان اقدام نامشخص"};
  const hours=Math.max(0,(Date.now()-last.getTime())/3600000);
  const limit=r.status==="in_transit"?48:(["planner_approved","procurement_inquiry","procurement_ordered"].includes(r.status)?72:24);
@@ -4458,32 +4436,17 @@ function renderControlCenter(){
  if(!host)return;
  const queue=inboxItems().slice();
  const delay=r=>requestDelayInfo(r);
+ const level=d=>d.level==="late"?"late":d.level==="warning"?"warning":"ok";
  const late=queue.filter(r=>delay(r).level==="late").length;
  const warning=queue.filter(r=>delay(r).level==="warning").length;
  const urgent=queue.filter(r=>String(r.prio||"").includes("فوری")).length;
- const rank={late:0,urgent:1,warning:2,unknown:3,ok:4};
- const ordered=queue.slice().sort((a,b)=>{
-  const la=delay(a).level,lb=delay(b).level;
-  const ra=Math.min(rank[la]??4,String(a.prio||"").includes("فوری")?1:4);
-  const rb=Math.min(rank[lb]??4,String(b.prio||"").includes("فوری")?1:4);
-  if(ra!==rb)return ra-rb;
-  return String(a.date||"").localeCompare(String(b.date||""));
+ const ordered=queue.sort((a,b)=>{
+  const rank={late:0,warning:1,unknown:2,ok:3};
+  const diff=rank[level(delay(a))]-rank[level(delay(b))];
+  if(diff)return diff;
+  return (String(a.date||"")).localeCompare(String(b.date||""));
  }).slice(0,6);
- const exceptions=queue.map(r=>({r,d:delay(r),urgent:String(r.prio||"").includes("فوری")})).filter(x=>x.d.level==="late"||x.d.level==="warning"||x.urgent||x.d.level==="unknown").sort((a,b)=>{
-  const score=x=>x.d.level==="late"?0:x.urgent?1:x.d.level==="warning"?2:3;
-  return score(a)-score(b);
- });
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- const exceptionRows=exceptions.slice(0,8).map(({r,d,urgent:isUrgent})=>{
-  const kind=d.level==="late"?"معوق":isUrgent?"فوری":d.level==="warning"?"نزدیک مهلت":"زمان اقدام نامشخص";
-  const tone=d.level==="late"?"#FCE8E8":isUrgent?"#FFF0D8":d.level==="warning"?"#FFF6DB":"#EAF0F6";
-  const ink=d.level==="late"?"#9B2525":isUrgent?"#8A4B08":d.level==="warning"?"#805B00":"#46576B";
-  return `<button type="button" onclick="openRequest('${esc(r.id)}')" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:1px solid #D9E1E9;border-radius:11px;background:#fff;text-align:right;cursor:pointer;margin-top:7px">
-   <span style="flex:0 0 auto;padding:5px 8px;border-radius:7px;background:${tone};color:${ink};font-size:10px;font-weight:850">${kind}</span>
-   <span style="min-width:0;flex:1"><strong style="display:block;color:#17212F;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.title||"بدون عنوان")}</strong><small style="display:block;color:#536276;font-size:10px;margin-top:4px">${esc(r.id)} · ${esc(statusLabel(r.status))} · ${esc(d.label)}</small></span>
-   <span style="color:#526174">←</span>
-  </button>`;
- }).join("");
  host.innerHTML=`
   <div class="cc-dashboard-layout"><div class="cc-dashboard-main">
   <div class="cc-head"><div class="cc-head-brand"><img class="cc-brand-logo" src="./mehrsa-control-logo.jpg" alt="لوگوی مهرسا"><div class="cc-head-copy"><div class="cc-title">مرکز کنترل عملیات فنی</div><div class="cc-sub">نمای متمرکز کارهای نیازمند پیگیری و تصمیم</div></div></div><span class="cc-live">● وضعیت زنده</span></div>
@@ -4493,21 +4456,11 @@ function renderControlCenter(){
    <div class="cc-metric warn"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${warning}</strong><span>نزدیک به مهلت</span></div>
    <div class="cc-metric urgent"><strong style="display:block!important;font-size:34px!important;line-height:1.05!important;font-weight:950!important;color:#102A43!important;-webkit-text-fill-color:#102A43!important;letter-spacing:-.7px!important;font-variant-numeric:tabular-nums!important">${urgent}</strong><span>درخواست فوری</span></div>
   </div>
-  <section style="margin:14px 0 16px;padding:14px;border:1px solid #D5DEE8;border-radius:15px;background:#F5F8FB">
-   <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-    <div><strong style="display:block;color:#17212F;font-size:14px">مدیریت استثناها</strong><small style="display:block;color:#536276;font-size:10px;margin-top:4px">فقط مواردی که نیازمند تصمیم یا پیگیری‌اند</small></div>
-    <span style="padding:5px 9px;border-radius:20px;background:#E4EBF2;color:#33465B;font-size:11px;font-weight:850">${exceptions.length} مورد</span>
-   </div>
-   ${exceptionRows||'<div style="margin-top:10px;padding:13px;border-radius:10px;background:#fff;color:#526174;font-size:11px">در نقش فعلی، استثنای ثبت‌شده‌ای وجود ندارد.</div>'}
-   ${exceptions.length>8?'<div style="margin-top:8px;color:#536276;font-size:10px">۸ مورد اول نمایش داده شده‌اند؛ برای مشاهده همه، فهرست «نیاز به اقدام» را باز کنید.</div>':""}
-   <div style="margin-top:9px;color:#64748B;font-size:10px;line-height:1.8">هشدار معوق و نزدیک مهلت بر پایه زمان آخرین رویداد و آستانه‌های فعلی سامانه محاسبه می‌شود؛ این شاخص، موعد رسمی تأمین نیست.</div>
-  </section>
   <div class="cc-queue-title">اولویت پیگیری</div>
-  ${ordered.length?`<div class="cc-list">${ordered.map(r=>{const d=delay(r),lv=d.level==="late"?"late":d.level==="warning"?"warning":"ok";return `<button class="cc-item" type="button" onclick="openRequest('${esc(r.id)}')"><span class="cc-severity ${lv}">${lv==="late"?"معوق":lv==="warning"?"نزدیک مهلت":"در مهلت"}</span><span class="cc-item-main"><span class="cc-item-name">${esc(r.title||"بدون عنوان")}</span><span class="cc-item-meta"><span>${esc(r.id)}</span><span>${esc(statusLabel(r.status))}</span><span>${esc(r.by||"—")}</span></span></span><span aria-hidden="true">←</span></button>`}).join("")}</div>`:'<div class="cc-empty">در حال حاضر در نقش شما موردی برای اقدام ثبت نشده است.</div>'}
+  ${ordered.length?`<div class="cc-list">${ordered.map(r=>{const d=delay(r),lv=level(d);return `<button class="cc-item" type="button" onclick="openRequest('${esc(r.id)}')"><span class="cc-severity ${lv}">${lv==="late"?"معوق":lv==="warning"?"نزدیک مهلت":"در مهلت"}</span><span class="cc-item-main"><span class="cc-item-name">${esc(r.title||"بدون عنوان")}</span><span class="cc-item-meta"><span>${esc(r.id)}</span><span>${esc(statusLabel(r.status))}</span><span>${esc(r.by||"—")}</span></span></span><span aria-hidden="true">←</span></button>`}).join("")}</div>`:'<div class="cc-empty">در حال حاضر در نقش شما موردی برای اقدام ثبت نشده است.</div>'}
   <div class="cc-foot">مبنای هشدارها، زمان آخرین رویداد ثبت‌شده و آستانه‌های تأخیر فعلی سامانه است. این شاخص جایگزین موعد رسمی تأمین نیست.</div>
   </div><aside class="cc-register-card"><div class="cc-register-icon">＋</div><h3>ثبت درخواست فنی</h3><p>درخواست خرید یا خدمت فنی جدید را ثبت و برای بررسی ارسال کنید.</p><button type="button" onclick="openNewRequest()">ثبت درخواست جدید</button><small>فرم ثبت در پنجره‌ای مستقل باز می‌شود.</small></aside></div>`;
 }
-
 </script>
 </body>
 </html>
