@@ -5301,3 +5301,127 @@ html,body,#main-content{color:var(--app-text)!important}
   -webkit-text-fill-color:#D7E5F2!important;
 }
 </style>
+
+
+<style id="mehrsa-left-sidebar-layout-20261125">
+/* Desktop layout: persistent left navigation, full-width workspace on the right.
+   Existing navigation buttons and view handlers remain unchanged. */
+@media (min-width: 901px){
+  :root{--mehrsa-sidebar-width:258px}
+  html,body{min-height:100%;background:#F2F5F8!important}
+  body{overflow-x:hidden!important}
+  #topbar#topbar{
+    display:flex!important;position:sticky!important;top:0!important;z-index:90!important;
+    box-sizing:border-box!important;width:auto!important;margin:0 0 0 var(--mehrsa-sidebar-width)!important;
+    min-height:76px!important;padding:0 28px!important;align-items:center!important;
+    background:#FFFFFF!important;color:#17324A!important;border-bottom:1px solid #DCE5EC!important;
+    box-shadow:0 2px 10px rgba(18,48,70,.045)!important
+  }
+  #topbar .topbar-head{width:100%!important;display:flex!important;align-items:center!important;justify-content:flex-start!important}
+  #topbar .topbar-brand .h1{font-size:19px!important;font-weight:900!important;color:#17324A!important}
+  #topbar .top-sub{color:#6B7E8C!important;font-size:11px!important}
+  #management-hero.has-profile-nav{
+    display:block!important;direction:rtl!important;box-sizing:border-box!important;
+    width:auto!important;max-width:none!important;margin:0 0 0 var(--mehrsa-sidebar-width)!important;
+    padding:18px 24px 0!important;background:transparent!important
+  }
+  #management-hero.has-profile-nav>.hero-industrial{
+    display:block!important;box-sizing:border-box!important;width:100%!important;
+    min-height:170px!important;height:170px!important;margin:0!important;padding:0!important;
+    border:1px solid #D6E2EA!important;border-radius:15px!important;
+    background-image:url('./mehrsa-banner.png?v=20261125')!important;
+    background-size:cover!important;background-position:center 48%!important;
+    box-shadow:0 5px 18px rgba(22,53,76,.09)!important
+  }
+  #management-hero .hero-caption{display:none!important}
+  #management-hero.has-profile-nav>.top-profile{
+    position:fixed!important;inset:0 auto 0 0!important;z-index:120!important;
+    display:flex!important;box-sizing:border-box!important;flex-direction:column!important;
+    align-items:stretch!important;justify-content:flex-start!important;gap:12px!important;
+    width:var(--mehrsa-sidebar-width)!important;height:100vh!important;min-height:100vh!important;
+    max-height:100vh!important;margin:0!important;padding:16px 12px 18px!important;
+    overflow:hidden!important;border:0!important;border-right:1px solid #17445D!important;
+    border-radius:0!important;background:linear-gradient(180deg,#082B46 0%,#073653 58%,#06263F 100%)!important;
+    box-shadow:5px 0 24px rgba(7,31,49,.16)!important
+  }
+  #management-hero.has-profile-nav>.top-profile:before{
+    content:"";display:block;flex:0 0 112px;width:100%;height:112px;
+    background-image:url('./logo_mehrsa_shimi.png');background-repeat:no-repeat;
+    background-position:center;background-size:contain;
+    border-bottom:1px solid rgba(220,240,248,.22);margin-bottom:3px
+  }
+  #management-hero.has-profile-nav>.top-profile:after{
+    content:"";position:absolute;z-index:0;left:0;right:0;bottom:0;height:205px;
+    background-image:linear-gradient(180deg,#073653 0%,rgba(7,54,83,.56) 35%,rgba(7,38,63,.15) 100%),url('./mehrsa-banner.png?v=20261125');
+    background-repeat:no-repeat;background-size:cover;background-position:center bottom;
+    opacity:.42;pointer-events:none
+  }
+  #management-hero .top-profile-trigger{
+    position:relative!important;z-index:2!important;display:flex!important;align-items:center!important;
+    width:100%!important;min-height:62px!important;padding:8px 9px!important;
+    background:rgba(255,255,255,.07)!important;border:1px solid rgba(220,240,248,.16)!important;
+    border-radius:10px!important;color:#F4FAFD!important
+  }
+  #management-hero .top-profile-avatar{background:#0C7890!important;border-color:#54B9C4!important;color:#fff!important}
+  #management-hero .top-profile-identity strong{color:#FFFFFF!important}
+  #management-hero .top-profile-identity small{color:#B9D2DF!important}
+  #management-hero .top-profile-chevron{color:#D4E8F0!important}
+  #management-hero .top-quick-nav{
+    position:relative!important;z-index:2!important;display:flex!important;flex:1 1 auto!important;
+    flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+    width:100%!important;max-height:none!important;height:auto!important;overflow-y:auto!important;
+    gap:6px!important;padding:8px 0 10px!important;margin:0!important;
+    border:0!important;border-top:1px solid rgba(220,240,248,.18)!important;
+    direction:rtl!important;background:transparent!important
+  }
+  #management-hero .top-quick-nav button{
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:46px!important;
+    padding:9px 11px!important;gap:10px!important;border:1px solid transparent!important;
+    border-radius:9px!important;background:transparent!important;color:#E0EDF4!important;
+    text-align:right!important;font-size:12px!important;font-weight:750!important;
+    box-shadow:none!important;white-space:nowrap!important
+  }
+  #management-hero .top-quick-nav button>span{
+    display:grid!important;place-items:center!important;flex:0 0 29px!important;
+    width:29px!important;height:29px!important;border-radius:8px!important;
+    background:rgba(255,255,255,.09)!important;color:#C5E5EF!important
+  }
+  #management-hero .top-quick-nav button:hover,
+  #management-hero .top-quick-nav button.active,
+  #management-hero .top-quick-nav button.home-nav-button{
+    background:linear-gradient(100deg,#087F9A,#0796A8)!important;
+    border-color:rgba(113,220,225,.35)!important;color:#FFFFFF!important;
+    box-shadow:0 5px 14px rgba(0,15,30,.16)!important
+  }
+  #management-hero .top-quick-nav button.top-nav-primary{
+    background:#EAF8FA!important;border:1px solid #B7E3E8!important;color:#07536C!important;
+    font-weight:900!important
+  }
+  #management-hero .top-quick-nav button.top-nav-primary>span{
+    background:#CDEFF1!important;color:#08758A!important
+  }
+  #management-hero .top-quick-nav button.nav-logout{margin-top:auto!important;color:#F5D8D8!important}
+  #management-hero .top-profile-menu{z-index:5!important}
+  #main-content.content{
+    box-sizing:border-box!important;width:auto!important;max-width:none!important;
+    margin:0 0 0 var(--mehrsa-sidebar-width)!important;padding:16px 24px 34px!important
+  }
+  #main-content #quick-actions{max-width:none!important}
+  #main-content #dashboard-kpis{width:100%!important}
+  #main-content .request-workspace{width:100%!important}
+  #mobile-bottom-nav{display:none!important}
+}
+@media (min-width:701px) and (max-width:900px){
+  #management-hero.has-profile-nav{grid-template-columns:240px minmax(0,1fr)!important;gap:12px!important}
+  #management-hero.has-profile-nav>.top-profile{min-width:0!important}
+  #management-hero .top-quick-nav button{font-size:11px!important;padding:7px!important}
+}
+@media (max-width:700px){
+  #management-hero.has-profile-nav{display:grid!important}
+  #management-hero.has-profile-nav>.top-profile{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important}
+  #management-hero.has-profile-nav>.top-profile:before,
+  #management-hero.has-profile-nav>.top-profile:after{display:none!important}
+  #topbar#topbar{display:none!important}
+}
+</style>
