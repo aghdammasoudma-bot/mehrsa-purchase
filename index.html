@@ -5425,3 +5425,143 @@ html,body,#main-content{color:var(--app-text)!important}
   #topbar#topbar{display:none!important}
 }
 </style>
+
+
+<style id="mehrsa-option2-industrial-column-layout-20261125">
+/* Option 2: industrial, professional dashboard. CSS-only; preserve markup, handlers and data. */
+@media (min-width:901px){
+  :root{--mehrsa-sidebar-width:244px}
+  html,body{background:#F1F5F7!important;color:#193344!important}
+  #topbar#topbar{
+    min-height:68px!important;height:68px!important;
+    padding:0 26px!important;background:#FFFFFF!important;
+    border-bottom:1px solid #D8E4E9!important;
+    box-shadow:0 3px 14px rgba(8,43,62,.055)!important
+  }
+  #topbar .topbar-brand .h1{font-size:20px!important;font-weight:900!important;color:#12384D!important}
+  #topbar .top-sub{font-size:11px!important;color:#69808C!important}
+  #management-hero.has-profile-nav{padding:14px 22px 0!important}
+  #management-hero.has-profile-nav>.hero-industrial{
+    height:126px!important;min-height:126px!important;border-radius:13px!important;
+    border:1px solid #D4E1E7!important;
+    background-image:linear-gradient(90deg,rgba(5,40,61,.10),rgba(5,40,61,.02)),url('./mehrsa-banner.png?v=20261125')!important;
+    background-size:cover!important;background-position:center 48%!important;
+    box-shadow:0 5px 18px rgba(8,43,62,.08)!important
+  }
+  #management-hero.has-profile-nav>.top-profile{
+    width:var(--mehrsa-sidebar-width)!important;
+    background:linear-gradient(180deg,#07334F 0%,#06415A 54%,#062B45 100%)!important;
+    border-right:1px solid #0C5268!important;
+    box-shadow:5px 0 24px rgba(5,35,54,.16)!important;
+    padding:15px 12px 17px!important;gap:10px!important
+  }
+  #management-hero.has-profile-nav>.top-profile:before{
+    flex-basis:94px!important;height:94px!important;margin-bottom:5px!important;
+    background-size:contain!important;border-bottom:1px solid rgba(222,242,248,.2)!important
+  }
+  #management-hero.has-profile-nav>.top-profile:after{opacity:.30!important}
+  #management-hero .top-profile-trigger{
+    min-height:58px!important;background:rgba(255,255,255,.075)!important;
+    border:1px solid rgba(220,240,248,.17)!important;border-radius:10px!important
+  }
+  #management-hero .top-quick-nav{
+    gap:7px!important;padding:10px 0!important;
+    border-top:1px solid rgba(220,240,248,.18)!important
+  }
+  #management-hero .top-quick-nav button{
+    min-height:44px!important;height:44px!important;padding:7px 10px!important;
+    border-radius:9px!important;font-size:12px!important;font-weight:750!important;
+    color:#E6F1F5!important
+  }
+  #management-hero .top-quick-nav button>span{
+    width:29px!important;height:29px!important;flex-basis:29px!important;
+    border-radius:8px!important;background:rgba(255,255,255,.10)!important;color:#BFE5EB!important
+  }
+  #management-hero .top-quick-nav button:hover,
+  #management-hero .top-quick-nav button.active,
+  #management-hero .top-quick-nav button.home-nav-button{
+    background:linear-gradient(100deg,#07829A,#079FB0)!important;
+    border-color:rgba(128,226,230,.35)!important;color:#fff!important
+  }
+  #management-hero .top-quick-nav button.top-nav-primary{
+    background:#E8F7F8!important;border:1px solid #B9E3E7!important;color:#07536A!important;
+    box-shadow:0 4px 12px rgba(0,20,35,.12)!important
+  }
+  #management-hero .top-quick-nav button.top-nav-primary>span{
+    background:#CDECEF!important;color:#08758A!important
+  }
+  #main-content.content{
+    padding:15px 22px 38px!important;
+    background:transparent!important
+  }
+  #dashboard-kpis .kpi-row{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important
+  }
+  #dashboard-kpis .kpi{
+    min-height:88px!important;padding:13px 15px!important;
+    border:1px solid #D8E5E9!important;border-radius:12px!important;
+    background:linear-gradient(145deg,#FFFFFF,#F8FBFC)!important;
+    box-shadow:0 4px 14px rgba(12,52,70,.055)!important
+  }
+  #dashboard-kpis .kpi:before{
+    width:4px!important;background:linear-gradient(180deg,#43B9B2,#087889)!important
+  }
+  #dashboard-kpis .kpi-n{font-size:27px!important;color:#123C50!important;font-weight:900!important}
+  #dashboard-kpis .kpi-l{font-size:11px!important;color:#647D89!important}
+  #mehrsa-control-center{
+    margin:0 0 14px!important;padding:16px!important;
+    border:1px solid #D9E5E9!important;border-radius:13px!important;
+    background:#FFFFFF!important;box-shadow:0 4px 15px rgba(12,52,70,.045)!important
+  }
+  #mehrsa-control-center .cc-head{margin-bottom:12px!important}
+  #mehrsa-control-center .cc-metrics{gap:10px!important}
+  #mehrsa-control-center .cc-metric{
+    border:1px solid #DCE7EA!important;border-radius:11px!important;
+    background:linear-gradient(145deg,#fff,#F7FAFB)!important;padding:13px!important
+  }
+  #mehrsa-control-center .cc-metric strong{font-size:27px!important;color:#123C50!important;font-weight:900!important}
+  .request-workspace{
+    display:grid!important;grid-template-columns:minmax(290px,.76fr) minmax(0,1.72fr)!important;
+    direction:rtl!important;gap:13px!important;align-items:start!important;margin-top:14px!important
+  }
+  .request-detail-column,.request-list-column{
+    border:1px solid #D9E4E9!important;border-radius:13px!important;
+    background:#FFFFFF!important;box-shadow:0 4px 16px rgba(12,52,70,.05)!important;
+    overflow:auto!important
+  }
+  .request-detail-column{
+    position:sticky!important;top:82px!important;max-height:calc(100vh - 98px)!important;padding:15px!important
+  }
+  .request-list-column{padding:14px!important}
+  .request-detail-heading{
+    padding:12px 13px!important;margin:-15px -15px 13px!important;
+    background:linear-gradient(100deg,#08798D,#07546D)!important;
+    color:#FFFFFF!important;border:0!important;border-radius:12px 12px 0 0!important
+  }
+  .request-detail-heading span{color:#FFFFFF!important;font-size:14px!important;font-weight:850!important}
+  .request-detail-heading small{color:#D4EDF0!important}
+  #req-list>.stitle{font-size:13px!important;color:#173D50!important;font-weight:850!important}
+  #req-list .request-table-wrap{border:1px solid #DCE6EB!important;border-radius:9px!important}
+  #req-list .request-table thead th{
+    background:#EAF1F4!important;color:#24495B!important;font-weight:850!important
+  }
+  #req-list .request-table tbody td{color:#263F4D!important}
+  #req-list .request-row:hover td{background:#F0F8F8!important}
+  #req-list .request-row.selected td{background:#E7F4F4!important}
+  #mobile-bottom-nav{display:none!important}
+}
+@media (min-width:701px) and (max-width:900px){
+  #management-hero.has-profile-nav{grid-template-columns:225px minmax(0,1fr)!important}
+  #management-hero.has-profile-nav>.top-profile{background:linear-gradient(180deg,#07334F,#06415A)!important}
+}
+@media(max-width:700px){
+  /* Keep the established mobile navigation and stacked layout unchanged. */
+  #management-hero.has-profile-nav>.top-profile{background:linear-gradient(180deg,#07334F,#06415A)!important}
+}
+@media print{
+  #management-hero.has-profile-nav>.top-profile{display:none!important}
+  #topbar#topbar{display:none!important}
+  #management-hero.has-profile-nav{display:none!important}
+  #main-content.content{margin:0!important;padding:0!important}
+}
+</style>
