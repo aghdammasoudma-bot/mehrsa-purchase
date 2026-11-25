@@ -5306,7 +5306,7 @@ html,body,#main-content{color:var(--app-text)!important}
 <style id="mehrsa-left-sidebar-layout-20261125">
 /* Desktop layout: persistent left navigation, full-width workspace on the right.
    Existing navigation buttons and view handlers remain unchanged. */
-@media (min-width: 701px){
+@media (min-width: 901px){
   :root{--mehrsa-sidebar-width:258px}
   html,body{min-height:100%;background:#F2F5F8!important}
   body{overflow-x:hidden!important}
@@ -5412,7 +5412,11 @@ html,body,#main-content{color:var(--app-text)!important}
   #main-content .request-workspace{width:100%!important}
   #mobile-bottom-nav{display:none!important}
 }
-
+@media (min-width:701px) and (max-width:900px){
+  #management-hero.has-profile-nav{grid-template-columns:240px minmax(0,1fr)!important;gap:12px!important}
+  #management-hero.has-profile-nav>.top-profile{min-width:0!important}
+  #management-hero .top-quick-nav button{font-size:11px!important;padding:7px!important}
+}
 @media (max-width:700px){
   #management-hero.has-profile-nav{display:grid!important}
   #management-hero.has-profile-nav>.top-profile{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important}
