@@ -2511,41 +2511,47 @@ if ('serviceWorker' in navigator) {
 function printSection(elementId,title){
  const source=document.getElementById(elementId);
  if(!source){alert("محتوای قابل چاپ پیدا نشد.");return;}
- const w=window.open("","_blank");
- if(!w){alert("پنجره چاپ مسدود شده است؛ اجازه Pop-up را برای این سایت فعال کنید.");return;}
- const clone=source.cloneNode(true);
- clone.querySelectorAll("button,.actions,.print-toolbar,.no-print").forEach(el=>el.remove());
- const css=`
- *{box-sizing:border-box}
- html,body{width:100%;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;direction:rtl;color:#172B3A;font-size:12px;line-height:1.45}
- body{padding:8mm}
- .head{border-bottom:2px solid #176B73;padding:0 0 7px;margin:0 0 12px}
- h1{font-size:17px!important;line-height:1.4;margin:0 0 3px}
- .head small{font-size:10px}
- .stitle{font-size:13px!important;margin:5px 0!important;padding:0!important}
- #req-list{display:block!important;width:100%!important}
- .request-table-wrap{display:block!important;width:100%!important;overflow:visible!important}
- .request-table{width:100%!important;border-collapse:collapse!important;table-layout:auto!important;font-size:11px!important}
- .request-table th,.request-table td{border:1px solid #b8c6ce!important;padding:6px 5px!important;text-align:right!important;vertical-align:top!important;color:#172B3A!important}
- .request-table th{background:#e8f4f3!important;font-weight:bold!important}
- .request-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
- .request-ops{display:none!important}
- .req-card{display:block!important;width:100%!important;min-height:26mm!important;overflow:hidden!important;border:1px solid #aebdc5!important;border-radius:3px!important;margin:0 0 5px!important;padding:2mm!important;break-inside:avoid!important;page-break-inside:avoid!important;box-shadow:none!important}
- .req-card-title{font-size:12px!important;font-weight:bold!important}
- .req-card-meta{display:flex!important;flex-wrap:wrap!important;gap:3px!important}
- .req-card-meta .b,.req-card-meta .chip,.b,.chip{font-size:10px!important;padding:1px 4px!important}
- button,.actions,.print-toolbar,.no-print,.fab{display:none!important}
- img{max-width:100%!important}
- @page{size:A4 portrait;margin:7mm}
- @media print{html,body{margin:0!important;padding:0!important}}
- `;
- w.document.open();
- w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+String(title).replace(/[<>]/g,'')+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+String(title).replace(/[<>]/g,'')+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main></body></html>');
- w.document.querySelector("main").appendChild(clone);
- w.document.close();
- const doPrint=()=>{if(w.closed||w.__mehrsaPrintStarted)return;w.__mehrsaPrintStarted=true;try{w.focus();w.print();}catch(e){console.error("Print failed:",e);alert("اجرای چاپ ناموفق بود. پنجره چاپ را بررسی کنید.");}};
- w.addEventListener("load",()=>setTimeout(doPrint,350),{once:true});
- setTimeout(doPrint,1200);
+ // Open synchronously inside the click handler to preserve popup permission.
+ const w=window.open("about:blank","_blank");
+ if(!w){alert("مرورگر پنجره چاپ را مسدود کرده است. اجازه Pop-up را برای این سایت فعال کنید و دوباره بزنید.");return;}
+ try{
+  const clone=source.cloneNode(true);
+  clone.querySelectorAll("button,.actions,.print-toolbar,.no-print").forEach(el=>el.remove());
+  const safeTitle=String(title||"گزارش فنی").replace(/[<>]/g,"");
+  const css=`
+   *{box-sizing:border-box}
+   html,body{width:100%;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;direction:rtl;color:#172B3A;font-size:12px;line-height:1.45}
+   body{padding:8mm}
+   .head{border-bottom:2px solid #176B73;padding:0 0 7px;margin:0 0 12px}
+   h1{font-size:17px!important;line-height:1.4;margin:0 0 3px}
+   .head small{font-size:10px}
+   #req-list{display:block!important;width:100%!important}
+   .request-table-wrap{display:block!important;width:100%!important;overflow:visible!important}
+   .request-table{width:100%!important;border-collapse:collapse!important;table-layout:auto!important;font-size:11px!important}
+   .request-table th,.request-table td{border:1px solid #b8c6ce!important;padding:6px 5px!important;text-align:right!important;vertical-align:top!important;color:#172B3A!important}
+   .request-table th{background:#e8f4f3!important;font-weight:bold!important}
+   .request-table tr,.req-card{break-inside:avoid!important;page-break-inside:avoid!important}
+   .request-ops,button,.actions,.print-toolbar,.no-print,.fab{display:none!important}
+   .req-card{display:block!important;width:100%!important;min-height:26mm!important;overflow:hidden!important;border:1px solid #aebdc5!important;border-radius:3px!important;margin:0 0 5px!important;padding:2mm!important;box-shadow:none!important}
+   .req-card-title{font-size:12px!important;font-weight:bold!important}
+   .req-card-meta{display:flex!important;flex-wrap:wrap!important;gap:3px!important}
+   .req-card-meta .b,.req-card-meta .chip,.b,.chip{font-size:10px!important;padding:1px 4px!important}
+   img{max-width:100%!important}
+   @page{size:A4 portrait;margin:7mm}
+   @media print{html,body{margin:0!important;padding:0!important}}
+  `;
+  w.document.open();
+  w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+safeTitle+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+safeTitle+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main></body></html>');
+  w.document.querySelector("main").appendChild(clone);
+  w.document.close();
+  // Immediate invocation avoids browser blocking delayed print calls.
+  w.focus();
+  w.print();
+ }catch(e){
+  console.error("Print failed:",e);
+  try{w.close();}catch(_){}
+  alert("اجرای چاپ ناموفق بود. جزئیات خطا در Console مرورگر ثبت شد.");
+ }
 }
 function addPrintButtons(){
  const req=document.getElementById("req-list"), work=document.getElementById("work-orders");
