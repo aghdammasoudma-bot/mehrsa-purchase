@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://jpzgtbafrpjjbtwqwzlr.supabase.co" crossorigin>
+<link rel="preload" as="image" href="./mehrsa-banner.png?v=20261128" fetchpriority="high">
 <meta name="theme-color" content="#0D2147">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
@@ -445,7 +449,7 @@ html,body{background:#0B1422!important;color:var(--text)!important}body{backgrou
 
 .management-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(190px,.8fr);gap:12px;margin:14px auto 16px;max-width:1120px}
 
-.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background-image:url('./mehrsa-banner.png?v=20261121');background-size:cover;background-position:center 50%;isolation:isolate;padding:24px 25px;display:flex;align-items:center}
+.hero-industrial{position:relative;min-height:190px;overflow:hidden;border-radius:20px;border:1px solid #34516f;background-image:url('./mehrsa-banner.png?v=20261128');background-size:cover;background-position:center 50%;isolation:isolate;padding:24px 25px;display:flex;align-items:center}
 
 .hero-industrial:before{content:"";position:absolute;inset:0;z-index:-1;background:none}
 
@@ -514,7 +518,7 @@ body{background:#F1F3F6!important;color:#202833!important}
 .content{max-width:1160px!important}
 .management-hero{display:block!important;max-width:1160px!important;margin:18px auto 16px!important;padding:0 14px}
 .hero-industrial{min-height:220px!important;width:100%!important;border:1px solid #D8E1E9!important;border-radius:18px!important;overflow:hidden!important;
- background-image:url('./mehrsa-banner.png?v=20261121')!important;
+ background-image:url('./mehrsa-banner.png?v=20261128')!important;
  background-size:cover!important;background-position:center 50%!important;padding:24px 30px!important;box-shadow:0 5px 18px rgba(30,50,70,.08)!important}
 .hero-copy{position:absolute!important;right:34px!important;top:50%!important;transform:translateY(-50%)!important;text-align:right!important;max-width:58%;z-index:3!important}
 .hero-eyebrow{color:#42657F!important}
@@ -2491,8 +2495,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
-      await registration.update();
-    } catch (err) {
+        } catch (err) {
       console.error('Service worker registration/update failed:', err);
     }
   });
@@ -3672,7 +3675,7 @@ textarea::placeholder {
 #management-hero .hero-industrial,
 #management-hero.has-profile-nav>.hero-industrial{
   background-color:transparent!important;
-  background-image:url("./mehrsa-banner.png?v=20261121")!important;
+  background-image:url("./mehrsa-banner.png?v=20261128")!important;
   background-repeat:no-repeat!important;
   background-position:center center!important;
   background-size:100% 100%!important;
@@ -4611,7 +4614,7 @@ html,body,#main-content{color:var(--app-text)!important}
     display:block!important;box-sizing:border-box!important;width:100%!important;
     min-height:170px!important;height:170px!important;margin:0!important;padding:0!important;
     border:1px solid #D6E2EA!important;border-radius:15px!important;
-    background-image:url('./mehrsa-banner.png?v=20261125')!important;
+    background-image:url('./mehrsa-banner.png?v=20261128')!important;
     background-size:cover!important;background-position:center 48%!important;
     box-shadow:0 5px 18px rgba(22,53,76,.09)!important
   }
@@ -4634,7 +4637,7 @@ html,body,#main-content{color:var(--app-text)!important}
   }
   #management-hero.has-profile-nav>.top-profile:after{
     content:"";position:absolute;z-index:0;left:0;right:0;bottom:0;height:205px;
-    background-image:linear-gradient(180deg,#073653 0%,rgba(7,54,83,.56) 35%,rgba(7,38,63,.15) 100%),url('./mehrsa-banner.png?v=20261125');
+    background-image:linear-gradient(180deg,#073653 0%,rgba(7,54,83,.56) 35%,rgba(7,38,63,.15) 100%),url('./mehrsa-banner.png?v=20261128');
     background-repeat:no-repeat;background-size:cover;background-position:center bottom;
     opacity:.42;pointer-events:none
   }
@@ -4726,7 +4729,7 @@ html,body,#main-content{color:var(--app-text)!important}
   #management-hero.has-profile-nav>.hero-industrial{
     height:126px!important;min-height:126px!important;border-radius:13px!important;
     border:1px solid #D4E1E7!important;
-    background-image:linear-gradient(90deg,rgba(5,40,61,.10),rgba(5,40,61,.02)),url('./mehrsa-banner.png?v=20261125')!important;
+    background-image:linear-gradient(90deg,rgba(5,40,61,.10),rgba(5,40,61,.02)),url('./mehrsa-banner.png?v=20261128')!important;
     background-size:cover!important;background-position:center 48%!important;
     box-shadow:0 5px 18px rgba(8,43,62,.08)!important
   }
@@ -4853,7 +4856,7 @@ html,body,#main-content{color:var(--app-text)!important}
  :root{--mehrsa-sidebar-width:248px}
  #management-hero.has-profile-nav{display:block!important;position:relative!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
  #management-hero.has-profile-nav>.top-profile{position:fixed!important;top:0!important;left:0!important;right:auto!important;bottom:0!important;z-index:1200!important;width:var(--mehrsa-sidebar-width)!important;height:100vh!important;max-height:100vh!important;min-height:100vh!important;margin:0!important;padding:18px 13px 24px!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;overflow-y:auto!important;overflow-x:hidden!important;border-radius:0!important;border:0!important;border-right:1px solid #15536A!important;background:linear-gradient(180deg,#062B43 0%,#07445D 56%,#05283F 100%)!important;box-shadow:5px 0 22px rgba(4,31,47,.18)!important}
- #management-hero.has-profile-nav>.hero-industrial{display:block!important;position:relative!important;width:auto!important;height:132px!important;min-height:132px!important;margin:14px 22px 14px calc(var(--mehrsa-sidebar-width) + 22px)!important;border-radius:13px!important;border:1px solid #D5E2E8!important;background-image:linear-gradient(90deg,rgba(5,40,61,.08),rgba(5,40,61,.02)),url('./mehrsa-banner.png?v=20261125')!important;background-size:cover!important;background-position:center 48%!important;box-shadow:0 5px 18px rgba(8,43,62,.08)!important}
+ #management-hero.has-profile-nav>.hero-industrial{display:block!important;position:relative!important;width:auto!important;height:132px!important;min-height:132px!important;margin:14px 22px 14px calc(var(--mehrsa-sidebar-width) + 22px)!important;border-radius:13px!important;border:1px solid #D5E2E8!important;background-image:linear-gradient(90deg,rgba(5,40,61,.08),rgba(5,40,61,.02)),url('./mehrsa-banner.png?v=20261128')!important;background-size:cover!important;background-position:center 48%!important;box-shadow:0 5px 18px rgba(8,43,62,.08)!important}
  #management-hero.has-profile-nav>.hero-caption{display:none!important}
  #main-content.content{width:auto!important;max-width:none!important;margin:0 0 0 var(--mehrsa-sidebar-width)!important;padding:10px 22px 38px!important;box-sizing:border-box!important;background:#F1F5F7!important}
  #topbar.top{margin-left:var(--mehrsa-sidebar-width)!important}
