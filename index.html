@@ -2543,9 +2543,9 @@ function printSection(elementId,title){
  w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+String(title).replace(/[<>]/g,'')+'</title><style>'+css+'</style></head><body><header class="head"><h1>'+String(title).replace(/[<>]/g,'')+'</h1><small>سامانه مدیریت عملیات فنی مهرسا | تاریخ چاپ: '+new Date().toLocaleString("fa-IR")+'</small></header><main></main></body></html>');
  w.document.querySelector("main").appendChild(clone);
  w.document.close();
- const doPrint=()=>{try{w.focus();w.print();}catch(e){console.error("Print failed:",e);alert("اجرای چاپ ناموفق بود. پنجره چاپ را بررسی کنید.");}};
+ const doPrint=()=>{if(w.closed||w.__mehrsaPrintStarted)return;w.__mehrsaPrintStarted=true;try{w.focus();w.print();}catch(e){console.error("Print failed:",e);alert("اجرای چاپ ناموفق بود. پنجره چاپ را بررسی کنید.");}};
  w.addEventListener("load",()=>setTimeout(doPrint,350),{once:true});
- setTimeout(()=>{if(!w.closed && !w.__mehrsaPrintStarted){w.__mehrsaPrintStarted=true;doPrint();}},1200);
+ setTimeout(doPrint,1200);
 }
 function addPrintButtons(){
  const req=document.getElementById("req-list"), work=document.getElementById("work-orders");
